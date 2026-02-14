@@ -1,7 +1,6 @@
-version: '3.8'
-
 services:
   wiki:
+    image: bumworld/git-docs-app:latest
     build: .
     container_name: git-docs-wiki
     ports:
