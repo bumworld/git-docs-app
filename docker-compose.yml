@@ -17,7 +17,7 @@ services:
 
 # Example: Multiple wiki instances on different ports
 #  wiki2:
-#    build: .
+#    image: bumworld/git-docs-app:latest
 #    container_name: git-docs-wiki-2
 #    ports:
 #      - "8081:3000"

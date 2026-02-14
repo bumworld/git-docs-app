@@ -113,6 +113,40 @@ graph TD
 ```
 ````
 
+## Docker Build & Push
+
+소스에서 직접 빌드하고 Docker Hub에 배포하는 방법:
+
+```bash
+# 멀티 플랫폼 빌드 & 푸시 (amd64 + arm64)
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t bumworld/git-docs-app:latest \
+  -t bumworld/git-docs-app:1.0.0 \
+  --push .
+
+# 로컬 빌드만 (현재 플랫폼)
+docker compose build
+```
+
+배포 서버에서는 소스 없이 이미지만 pull해서 사용:
+
+```yaml
+# docker-compose.yml (서버용)
+services:
+  wiki:
+    image: bumworld/git-docs-app:latest
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./source:/app/source
+      - ./conf:/app/conf
+      - ./data:/app/data
+    environment:
+      - ADMIN_EMAIL=your-email@gmail.com
+      - SESSION_SECRET=your-random-secret-key
+    restart: unless-stopped
+```
+
 ## Multiple Instances
 
 Run separate wikis on different ports:
@@ -124,7 +158,7 @@ docker run -p 8080:3000 \
   -v ./repo-a/conf:/app/conf \
   -v ./repo-a/data:/app/data \
   -e ADMIN_EMAIL=admin-a@gmail.com \
-  git-docs-app
+  bumworld/git-docs-app
 
 # Wiki B on port 8081
 docker run -p 8081:3000 \
@@ -132,7 +166,7 @@ docker run -p 8081:3000 \
   -v ./repo-b/conf:/app/conf \
   -v ./repo-b/data:/app/data \
   -e ADMIN_EMAIL=admin-b@gmail.com \
-  git-docs-app
+  bumworld/git-docs-app
 ```
 
 ## Admin Panel
