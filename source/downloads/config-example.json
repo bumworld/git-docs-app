@@ -1,0 +1,8 @@
+{
+  "app_name": "Git Docs",
+  "version": "1.0.0",
+  "settings": {
+    "port": 3000,
+    "debug": false
+  }
+}

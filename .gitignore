@@ -1,9 +1,33 @@
 # Dependencies
-.psci_modules
-.spago
-bower_components
 node_modules
 
-# Generated files
-.psci
-output
+# Build output
+dist
+dist-temp
+dist-old
+
+# Generated content (prebuild copies source/ here)
+src/content/docs/*
+!src/content/docs/.gitkeep
+public/downloads
+
+# Data
+data/*.db
+data/*.db-shm
+data/*.db-journal
+data/*.db-wal
+
+# Config (contains secrets)
+conf/google_auth.json
+
+# System
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Astro
+.astro

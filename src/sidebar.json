@@ -1,0 +1,180 @@
+[
+  {
+    "label": "프로젝트",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "배포",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "docker guide",
+            "slug": "프로젝트/배포/docker-guide"
+          }
+        ]
+      },
+      {
+        "label": "설계",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "상세설계",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "데이터베이스",
+                "collapsed": true,
+                "items": [
+                  {
+                    "label": "스키마",
+                    "slug": "프로젝트/설계/상세설계/데이터베이스/스키마"
+                  }
+                ]
+              },
+              {
+                "label": "API",
+                "collapsed": true,
+                "items": [
+                  {
+                    "label": "인증 API",
+                    "slug": "프로젝트/설계/상세설계/api/인증-api"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "아키텍처",
+            "slug": "프로젝트/설계/아키텍처"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "api",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "v1",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "endpoints",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "users",
+                "slug": "api/v1/endpoints/users"
+              }
+            ]
+          },
+          {
+            "label": "overview",
+            "slug": "api/v1/overview"
+          }
+        ]
+      },
+      {
+        "label": "v2",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "endpoints",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "users",
+                "slug": "api/v2/endpoints/users"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "downloads",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "📎 데이터 백업",
+        "slug": "downloads/데이터-백업"
+      },
+      {
+        "label": "📎 config example",
+        "slug": "downloads/config-example"
+      },
+      {
+        "label": "📎 sample document",
+        "slug": "downloads/sample-document"
+      }
+    ]
+  },
+  {
+    "label": "guides",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "installation",
+        "slug": "guides/installation"
+      },
+      {
+        "label": "Mermaid Diagram Examples",
+        "slug": "guides/mermaid-examples"
+      },
+      {
+        "label": "Large Mermaid Diagrams",
+        "slug": "guides/mermaid-large"
+      },
+      {
+        "label": "quick start",
+        "slug": "guides/quick-start"
+      }
+    ]
+  },
+  {
+    "label": "images",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "🖼 architecture diagram",
+        "slug": "images/architecture-diagram"
+      },
+      {
+        "label": "🖼 dashboard screenshot",
+        "slug": "images/dashboard-screenshot"
+      },
+      {
+        "label": "🖼 system flow",
+        "slug": "images/system-flow"
+      }
+    ]
+  },
+  {
+    "label": "reference",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "config",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "advanced",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "환경변수",
+                "slug": "reference/config/advanced/환경변수"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "html sample",
+    "slug": "html-sample"
+  }
+]

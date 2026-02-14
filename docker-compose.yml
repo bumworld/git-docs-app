@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  wiki:
+    build: .
+    container_name: git-docs-wiki
+    ports:
+      - "${PORT:-8080}:3000"
+    volumes:
+      - ./source:/app/source
+      - ./conf:/app/conf
+      - ./data:/app/data
+    environment:
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - SESSION_SECRET=${SESSION_SECRET:-change-me-in-production}
+      - PORT=3000
+    restart: unless-stopped
+
+# Example: Multiple wiki instances on different ports
+#  wiki2:
+#    build: .
+#    container_name: git-docs-wiki-2
+#    ports:
+#      - "8081:3000"
+#    volumes:
+#      - ./repos/project-b/source:/app/source
+#      - ./repos/project-b/conf:/app/conf
+#      - ./repos/project-b/data:/app/data
+#    environment:
+#      - ADMIN_EMAIL=another-admin@example.com
+#      - SESSION_SECRET=another-secret
+#    restart: unless-stopped

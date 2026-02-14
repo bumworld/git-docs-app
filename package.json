@@ -1,0 +1,35 @@
+{
+  "name": "git-docs-app",
+  "version": "1.0.0",
+  "description": "Self-hosted wiki solution powered by Astro Starlight with Google OAuth authentication",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "build": "node scripts/build.js",
+    "prebuild": "node scripts/prebuild.js",
+    "start": "NODE_ENV=production node server/index.js"
+  },
+  "keywords": [
+    "wiki",
+    "documentation",
+    "astro",
+    "starlight",
+    "google-auth"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@astrojs/starlight": "^0.32.0",
+    "astro": "^5.0.0",
+    "better-sqlite3": "^11.0.0",
+    "better-sqlite3-session-store": "^0.1.0",
+    "chokidar": "^4.0.0",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "fs-extra": "^11.2.0",
+    "gray-matter": "^4.0.3",
+    "mermaid": "^11.12.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "sharp": "^0.33.0"
+  }
+}

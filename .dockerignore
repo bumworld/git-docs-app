@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+data
+dist
+dist-temp
+dist-old
+*.md
+.DS_Store
+.claude

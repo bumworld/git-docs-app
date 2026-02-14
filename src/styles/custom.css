@@ -1,0 +1,121 @@
+/* Auth bar */
+.auth-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.auth-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.auth-name {
+  color: var(--sl-color-text);
+  font-weight: 500;
+}
+
+.auth-btn {
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--sl-color-gray-5);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  transition: background-color 0.15s;
+}
+
+.auth-btn:hover {
+  background-color: var(--sl-color-gray-6);
+}
+
+/* Mobile: show right-group for auth, hide extras */
+@media (max-width: 768px) {
+  .right-group.sl-hidden {
+    display: flex !important;
+  }
+  .right-group > :not(.auth-bar) {
+    display: none !important;
+  }
+  .auth-name {
+    display: none;
+  }
+  .auth-avatar {
+    display: none;
+  }
+  .auth-bar {
+    gap: 0.35rem;
+  }
+  .auth-btn {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+  }
+}
+
+/* iframe content */
+iframe {
+  border-radius: 4px;
+  border: 1px solid var(--sl-color-gray-5) !important;
+}
+
+/* Mermaid diagrams */
+.mermaid-wrapper {
+  margin: 1rem 0;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mermaid-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--sl-color-gray-6);
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+
+.mermaid-tb-btn {
+  background: none;
+  border: 1px solid var(--sl-color-gray-4);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  color: var(--sl-color-text-accent);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  line-height: 1;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mermaid-tb-btn:hover {
+  background: var(--sl-color-gray-5);
+}
+
+.mermaid-viewport {
+  overflow: auto;
+  max-height: 80vh;
+  padding: 1.5rem;
+  background: var(--sl-color-bg);
+}
+
+.mermaid-viewport pre.mermaid {
+  margin: 0;
+  display: inline-block;
+  min-width: min-content;
+}
+
+.mermaid-viewport svg {
+  display: block;
+  max-width: none;
+  height: auto;
+  transition: transform 0.15s ease;
+}

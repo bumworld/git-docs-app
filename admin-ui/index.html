@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Git Docs</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+  <div class="topbar">
+    <h1>Admin Panel</h1>
+    <div class="topbar-links">
+      <a href="/">Wiki</a>
+      <a href="/auth/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="stats" id="stats"></div>
+      <h2 class="section-title">Pending Requests</h2>
+      <div id="pendingList" class="user-list"></div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="tab-users" class="tab-content">
+      <div class="section-bar">
+        <h2 class="section-title" style="margin-bottom:0;">All Users</h2>
+        <button class="btn btn-primary" onclick="triggerBuild()">Rebuild Wiki</button>
+      </div>
+      <div id="usersList" class="user-list"></div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-content">
+      <h2 class="section-title">Site Settings</h2>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label>Site Title</label>
+          <input type="text" name="site_title" id="set_site_title">
+        </div>
+        <div class="form-group">
+          <label>Site Description</label>
+          <input type="text" name="site_description" id="set_site_description">
+        </div>
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" name="contact_email" id="set_contact_email">
+        </div>
+        <div class="form-group">
+          <label>Footer Text</label>
+          <input type="text" name="footer_text" id="set_footer_text">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin/js/admin.js"></script>
+</body>
+</html>
