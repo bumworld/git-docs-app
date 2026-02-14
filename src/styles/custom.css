@@ -1,3 +1,8 @@
+:root {
+  --sl-sidebar-width-table-of-contents: 15rem;
+  --sl-content-width: 90ch;
+}
+
 /* Auth bar */
 .auth-bar {
   display: flex;
@@ -32,6 +37,10 @@
 
 .auth-btn:hover {
   background-color: var(--sl-color-gray-6);
+}
+
+main {
+  justify-self: start;
 }
 
 /* Mobile: show right-group for auth, hide extras */
