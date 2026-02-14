@@ -7,7 +7,11 @@ const router = Router();
 // Dynamically resolve callbackURL based on the incoming request's host/protocol
 router.get('/google', (req, res, next) => {
   const config = loadGoogleConfig();
-  const callbackURL = config ? resolveCallbackURL(config.redirectURIs, req) : '/auth/google/callback';
+  if (!config) {
+    console.error('[Auth] Google OAuth not configured - conf/google_auth.json missing');
+    return res.redirect('/login?error=auth_failed');
+  }
+  const callbackURL = resolveCallbackURL(config.redirectURIs, req);
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     callbackURL,

@@ -22,22 +22,12 @@ export function runPrebuild() {
   if (entries.length === 0 || (entries.length === 1 && IGNORE_FILES.includes(entries[0]))) {
     const welcomeContent = `---
 title: "Welcome"
-sidebar:
-  label: "Welcome"
 ---
 
-# Welcome to Git Docs
-
-Add your markdown files to the \`source/\` directory to get started.
-
-## Getting Started
-
-1. Place \`.md\` files in the \`source/\` folder
-2. Organize with subdirectories for navigation structure
-3. HTML folders with \`index.html\` will be embedded as iframes
-4. Other files will be available as downloads
+# Welcome
 `;
     fs.outputFileSync(path.join(PATHS.DOCS, 'index.md'), welcomeContent, 'utf-8');
+    fs.writeJsonSync(PATHS.SIDEBAR_JSON, [], { spaces: 2 });
     console.log('[Prebuild] Created default welcome page');
     return;
   }

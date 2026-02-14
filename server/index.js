@@ -72,7 +72,10 @@ app.use('/auth', authRoutes);
 // OAuth2 callback (matches redirect_uris like /oauth2/callback from google_auth.json)
 app.get('/oauth2/callback', (req, res, next) => {
   const config = loadGoogleConfig();
-  const callbackURL = config ? resolveCallbackURL(config.redirectURIs, req) : '/oauth2/callback';
+  if (!config) {
+    return res.redirect('/login?error=auth_failed');
+  }
+  const callbackURL = resolveCallbackURL(config.redirectURIs, req);
   passport.authenticate('google', {
     failureRedirect: '/login?error=auth_failed',
     callbackURL,
