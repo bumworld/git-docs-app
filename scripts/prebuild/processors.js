@@ -127,6 +127,11 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
   for (const entry of entries) {
     if (IGNORE_FILES.includes(entry.name)) continue;
 
+    if (entry.isDirectory() && entry.name.toLowerCase() === 'pwa') {
+      console.log('[Prebuild] Ignoring "pwa" directory.');
+      continue;
+    }
+
     const srcPath = path.join(srcDir, entry.name);
     const relPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
 

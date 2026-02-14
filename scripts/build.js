@@ -41,20 +41,12 @@ export function runBuild() {
       env: buildEnv,
     });
 
-    // Step 3: Atomic swap - rename dist-temp to dist
-    console.log('[Build] Swapping dist directories...');
-    if (fs.existsSync(PATHS.DIST_OLD)) {
-      fs.removeSync(PATHS.DIST_OLD);
-    }
-    if (fs.existsSync(PATHS.DIST)) {
-      fs.moveSync(PATHS.DIST, PATHS.DIST_OLD, { overwrite: true });
-    }
-    fs.moveSync(PATHS.DIST_TEMP, PATHS.DIST, { overwrite: true });
-
-    // Clean up old dist
-    if (fs.existsSync(PATHS.DIST_OLD)) {
-      fs.removeSync(PATHS.DIST_OLD);
-    }
+    // Step 3: Sync build output to dist directory
+    console.log('[Build] Syncing build output to dist...');
+    fs.ensureDirSync(PATHS.DIST);
+    fs.emptyDirSync(PATHS.DIST);
+    fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
+    fs.removeSync(PATHS.DIST_TEMP); // Clean up temp dir
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`[Build] Build completed in ${elapsed}s`);
@@ -62,14 +54,12 @@ export function runBuild() {
   } catch (err) {
     console.error('[Build] Build failed:', err.message);
 
-    // Rollback: remove temp dir if it exists
+    // Cleanup: remove temp dir if it exists
     if (fs.existsSync(PATHS.DIST_TEMP)) {
       fs.removeSync(PATHS.DIST_TEMP);
     }
-    // Restore old dist if swap failed
-    if (!fs.existsSync(PATHS.DIST) && fs.existsSync(PATHS.DIST_OLD)) {
-      fs.moveSync(PATHS.DIST_OLD, PATHS.DIST, { overwrite: true });
-    }
+    // Note: The /dist directory might be in an incomplete state if the copy failed.
+    // A failed build won't be deployed.
     return false;
   }
 }
