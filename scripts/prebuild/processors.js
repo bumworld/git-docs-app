@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS, IGNORE_FILES } from '../../config/constants.js';
-import { sanitizeSlug, generateTitle, formatFileSize } from './utils.js';
+import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
 
 export function processMarkdownFile(srcFile, destFile) {
   const content = fs.readFileSync(srcFile, 'utf-8');
@@ -131,20 +131,22 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
     const relPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
 
     if (entry.isDirectory()) {
+      const safeDirName = sanitizeDirName(entry.name);
       if (isHtmlFolder(srcPath)) {
-        const mdFile = path.join(docsSubDir, entry.name + '.md');
+        const mdFile = path.join(docsSubDir, safeDirName + '.md');
         processHtmlFolder(srcPath, mdFile, relPath);
       } else {
-        const nextDocsDir = path.join(docsSubDir, entry.name);
+        const nextDocsDir = path.join(docsSubDir, safeDirName);
         const nextDownloadsDir = path.join(downloadsSubDir, entry.name);
         fs.ensureDirSync(nextDocsDir);
         processDirectory(srcPath, nextDocsDir, nextDownloadsDir, relPath);
       }
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name).toLowerCase();
+      const safeFileName = sanitizeSlug(entry.name) + ext;
 
       if (FILE_EXTENSIONS.MARKDOWN.includes(ext)) {
-        processMarkdownFile(srcPath, path.join(docsSubDir, entry.name));
+        processMarkdownFile(srcPath, path.join(docsSubDir, safeFileName));
       } else if (FILE_EXTENSIONS.IMAGE.includes(ext)) {
         processImageFile(srcPath, relPath);
       } else if (FILE_EXTENSIONS.HTML.includes(ext)) {

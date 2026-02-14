@@ -1,9 +1,27 @@
 import path from 'path';
 
+/**
+ * Sanitize a string for use in URL slugs.
+ * Keeps: alphanumeric, Korean/CJK/Unicode letters, hyphens, underscores, dots
+ * Removes: ()[]{}#&+%@!;,='"`~$^|?*<>:\
+ * Collapses multiple hyphens, trims leading/trailing hyphens
+ */
+function sanitize(str) {
+  return str
+    .replace(/[\s]+/g, '-')
+    .replace(/[()[\]{}#&+%@!;,='"`~$^|?*<>:\\]/g, '')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export function sanitizeSlug(name) {
   const ext = path.extname(name);
   const base = ext ? name.slice(0, -ext.length) : name;
-  return base;
+  return sanitize(base);
+}
+
+export function sanitizeDirName(name) {
+  return sanitize(name);
 }
 
 export function generateTitle(filename) {

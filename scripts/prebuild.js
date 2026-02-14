@@ -18,8 +18,9 @@ export function runPrebuild() {
     console.log('[Prebuild] source/ directory created (empty)');
   }
 
-  const entries = fs.readdirSync(PATHS.SOURCE);
-  if (entries.length === 0 || (entries.length === 1 && IGNORE_FILES.includes(entries[0]))) {
+  const entries = fs.readdirSync(PATHS.SOURCE).filter(e => !IGNORE_FILES.includes(e));
+  console.log(`[Prebuild] source/ has ${entries.length} entries: ${entries.slice(0, 10).join(', ')}${entries.length > 10 ? '...' : ''}`);
+  if (entries.length === 0) {
     const welcomeContent = `---
 title: "Welcome"
 ---

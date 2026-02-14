@@ -141,18 +141,46 @@ app.use('/admin', requireAuth, (req, res, next) => {
 // Downloads (files from source/ that are not markdown/html)
 app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS));
 
+// Building page - shown when a build is in progress or dist is empty
+const BUILDING_HTML = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Building...</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{text-align:center;padding:3rem}
+.spinner{width:48px;height:48px;border:4px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:1.5rem;margin-bottom:0.5rem}
+p{color:#94a3b8;font-size:0.9rem}
+</style>
+<script>setTimeout(()=>location.reload(),3000)</script>
+</head><body><div class="card"><div class="spinner"></div><h1>Building wiki...</h1><p>Page will refresh automatically.</p></div></body></html>`;
+
+function serveBuildingPage(req, res, next) {
+  // Skip API and static asset requests
+  if (req.path.startsWith('/api/') || req.path.startsWith('/_assets/') || req.path.startsWith('/admin')) {
+    return next();
+  }
+  const distEmpty = !fs.existsSync(PATHS.DIST) || fs.readdirSync(PATHS.DIST).length === 0;
+  if (app.locals.buildRunner?.isBuilding() || distEmpty) {
+    return res.send(BUILDING_HTML);
+  }
+  next();
+}
+
 // Wiki content (dist/) - requires authentication
-app.use('/', requireAuth, express.static(PATHS.DIST, {
+app.use('/', requireAuth, serveBuildingPage, express.static(PATHS.DIST, {
   extensions: ['html'],
 }));
 
 // Fallback for SPA-like routes within dist
-app.use('/', requireAuth, (req, res) => {
+app.use('/', requireAuth, serveBuildingPage, (req, res) => {
   const indexPath = path.join(PATHS.DIST, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    res.status(404).send('Page not found. Run a build first.');
+    res.send(BUILDING_HTML);
   }
 });
 
@@ -166,6 +194,7 @@ app.listen(PORT, () => {
 
   // Start file watcher and build runner
   const buildRunner = createBuildRunner();
+  app.locals.buildRunner = buildRunner;
   setBuildRunner(buildRunner);
   setAdminBuildRunner(buildRunner);
   buildRunner.startWatching();
