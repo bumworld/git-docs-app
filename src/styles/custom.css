@@ -64,8 +64,8 @@ main {
     gap: 0.35rem;
   }
   .auth-btn {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.4rem;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
   }
 }
 
