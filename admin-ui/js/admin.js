@@ -15,6 +15,7 @@ document.querySelectorAll('.tab').forEach(function(tab) {
     document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
     tab.classList.add('active');
     document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    window.location.hash = tab.dataset.tab;
     if (tab.dataset.tab === 'builds') {
       loadBuilds();
     }
