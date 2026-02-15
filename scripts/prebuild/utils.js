@@ -2,14 +2,17 @@ import path from 'path';
 
 /**
  * Sanitize a string for use in URL slugs.
- * Keeps: alphanumeric, Korean/CJK/Unicode letters, hyphens, underscores, dots
- * Removes: ()[]{}#&+%@!;,='"`~$^|?*<>:\
+ * Keeps: alphanumeric, Korean/CJK/Unicode letters, hyphens, underscores
+ * Removes: dots, ()[]{}#&+%@!;,='"`~$^|?*<>:\
  * Collapses multiple hyphens, trims leading/trailing hyphens
+ *
+ * Note: Dots are removed to match Starlight docsLoader() slug normalization.
+ * e.g. "libs.versions" → "libsversions", "build.gradle" → "buildgradle"
  */
 function sanitize(str) {
   return str
     .replace(/[\s]+/g, '-')
-    .replace(/[()[\]{}#&+%@!;,='"`~$^|?*<>:\\]/g, '')
+    .replace(/[.()[\]{}#&+%@!;,='"`~$^|?*<>:\\]/g, '')
     .replace(/-{2,}/g, '-')
     .replace(/^-|-$/g, '');
 }
