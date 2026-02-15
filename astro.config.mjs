@@ -36,6 +36,8 @@ export default defineConfig({
         './src/styles/custom.css',
       ],
       head: [
+        { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
+        { tag: 'style', content: 'html[data-theme="dark"]{background:#16181c}html[data-theme="light"]{background:#fff}' },
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/mermaid-init.js' } },
       ],

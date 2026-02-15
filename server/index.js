@@ -29,6 +29,9 @@ setupPassport();
 
 const app = express();
 
+// Trust reverse proxy (nginx, etc.) for correct protocol/IP detection
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -41,6 +44,7 @@ app.use(session({
     maxAge: SESSION.MAX_AGE,
     httpOnly: true,
     sameSite: 'lax',
+    secure: 'auto',
   },
 }));
 
@@ -124,6 +128,21 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
+// Static assets from dist/ - served WITHOUT auth (CSS, JS, fonts, images are not sensitive)
+// This prevents white screen on mobile when session cookie is not sent with subresource requests
+app.use('/_assets', express.static(path.join(PATHS.DIST, '_assets'), {
+  maxAge: '1y',
+  immutable: true,
+}));
+app.use('/favicon.svg', (req, res, next) => {
+  const faviconPath = path.join(PATHS.DIST, 'favicon.svg');
+  if (fs.existsSync(faviconPath)) {
+    return res.sendFile(faviconPath);
+  }
+  next();
+});
+app.use('/pagefind', express.static(path.join(PATHS.DIST, 'pagefind')));
+
 // Build API
 app.use('/api', buildRoutes);
 
@@ -143,19 +162,19 @@ app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS));
 
 // Building page - shown when a build is in progress or dist is empty
 const BUILDING_HTML = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html style="background:#0f172a"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
 <title>Building...</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.card{text-align:center;padding:3rem}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;min-height:100dvh}
 .spinner{width:48px;height:48px;border:4px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 h1{font-size:1.5rem;margin-bottom:0.5rem}
 p{color:#94a3b8;font-size:0.9rem}
 </style>
 <script>setTimeout(()=>location.reload(),3000)</script>
-</head><body><div class="card"><div class="spinner"></div><h1>Building wiki...</h1><p>Page will refresh automatically.</p></div></body></html>`;
+</head><body style="background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center"><div class="card" style="text-align:center;padding:3rem"><div class="spinner"></div><h1>Building wiki...</h1><p>Page will refresh automatically.</p></div></body></html>`;
 
 function serveBuildingPage(req, res, next) {
   // Skip API and static asset requests
