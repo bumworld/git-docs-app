@@ -36,6 +36,7 @@ export default defineConfig({
         './src/styles/custom.css',
       ],
       head: [
+        { tag: 'meta', attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1.0' } },
         { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
         { tag: 'style', content: 'html[data-theme="dark"]{background:#16181c}html[data-theme="light"]{background:#fff}' },
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },

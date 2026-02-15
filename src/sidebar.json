@@ -1,392 +1,180 @@
 [
   {
-    "label": "ai",
+    "label": "프로젝트",
     "collapsed": true,
     "items": [
       {
-        "label": "policy to dev prompt",
-        "slug": "ai/policy_to_dev_prompt"
-      }
-    ]
-  },
-  {
-    "label": "development",
-    "collapsed": true,
-    "items": [
-      {
-        "label": "backend",
+        "label": "배포",
         "collapsed": true,
         "items": [
           {
-            "label": "README",
-            "slug": "development/backend/readme"
-          },
-          {
-            "label": "SPRING BOOT KOTLIN BOILERPLATE",
-            "slug": "development/backend/spring_boot_kotlin_boilerplate"
+            "label": "docker guide",
+            "slug": "프로젝트/배포/docker-guide"
           }
         ]
       },
       {
-        "label": "database",
+        "label": "설계",
         "collapsed": true,
         "items": [
           {
-            "label": "README",
-            "slug": "development/database/readme"
-          }
-        ]
-      },
-      {
-        "label": "deployment",
-        "collapsed": true,
-        "items": [
-          {
-            "label": "README",
-            "slug": "development/deployment/readme"
-          }
-        ]
-      },
-      {
-        "label": "frontend",
-        "collapsed": true,
-        "items": [
-          {
-            "label": "NEXTJS BOILERPLATE",
-            "slug": "development/frontend/nextjs_boilerplate"
-          },
-          {
-            "label": "README",
-            "slug": "development/frontend/readme"
-          }
-        ]
-      },
-      {
-        "label": "templates",
-        "collapsed": true,
-        "items": [
-          {
-            "label": "backend spring kotlin",
+            "label": "상세설계",
             "collapsed": true,
             "items": [
               {
-                "label": "gradle",
+                "label": "데이터베이스",
                 "collapsed": true,
                 "items": [
                   {
-                    "label": "wrapper",
-                    "collapsed": true,
-                    "items": [
-                      {
-                        "label": "📎 gradle wrapper",
-                        "slug": "development/templates/backend-spring-kotlin/gradle/wrapper/gradle-wrapper"
-                      }
-                    ]
-                  },
-                  {
-                    "label": "📎 libs.versions",
-                    "slug": "development/templates/backend-spring-kotlin/gradle/libsversions"
+                    "label": "스키마",
+                    "slug": "프로젝트/설계/상세설계/데이터베이스/스키마"
                   }
                 ]
               },
               {
-                "label": "src",
+                "label": "API",
                 "collapsed": true,
                 "items": [
                   {
-                    "label": "main",
-                    "collapsed": true,
-                    "items": [
-                      {
-                        "label": "kotlin",
-                        "collapsed": true,
-                        "items": [
-                          {
-                            "label": "com",
-                            "collapsed": true,
-                            "items": [
-                              {
-                                "label": "company",
-                                "collapsed": true,
-                                "items": [
-                                  {
-                                    "label": "project",
-                                    "collapsed": true,
-                                    "items": [
-                                      {
-                                        "label": "api",
-                                        "collapsed": true,
-                                        "items": [
-                                          {
-                                            "label": "http",
-                                            "collapsed": true,
-                                            "items": [
-                                              {
-                                                "label": "📎 Health Controller",
-                                                "slug": "development/templates/backend-spring-kotlin/src/main/kotlin/com/company/project/api/http/healthcontroller"
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "label": "common",
-                                        "collapsed": true,
-                                        "items": [
-                                          {
-                                            "label": "persistence",
-                                            "collapsed": true,
-                                            "items": [
-                                              {
-                                                "label": "📎 Base Entity",
-                                                "slug": "development/templates/backend-spring-kotlin/src/main/kotlin/com/company/project/common/persistence/baseentity"
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "label": "📎 Project Application",
-                                        "slug": "development/templates/backend-spring-kotlin/src/main/kotlin/com/company/project/projectapplication"
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "label": "resources",
-                        "collapsed": true,
-                        "items": [
-                          {
-                            "label": "configuration",
-                            "collapsed": true,
-                            "items": [
-                              {
-                                "label": "📎 datasource",
-                                "slug": "development/templates/backend-spring-kotlin/src/main/resources/configuration/datasource"
-                              },
-                              {
-                                "label": "📎 jpa",
-                                "slug": "development/templates/backend-spring-kotlin/src/main/resources/configuration/jpa"
-                              }
-                            ]
-                          },
-                          {
-                            "label": "📎 application",
-                            "slug": "development/templates/backend-spring-kotlin/src/main/resources/application"
-                          }
-                        ]
-                      }
-                    ]
+                    "label": "인증 API",
+                    "slug": "프로젝트/설계/상세설계/api/인증-api"
                   }
                 ]
-              },
-              {
-                "label": "📎 build.gradle",
-                "slug": "development/templates/backend-spring-kotlin/buildgradle"
-              },
-              {
-                "label": "📎 .gitignore",
-                "slug": "development/templates/backend-spring-kotlin/gitignore"
-              },
-              {
-                "label": "📎 gradlew",
-                "slug": "development/templates/backend-spring-kotlin/gradlew"
-              },
-              {
-                "label": "README",
-                "slug": "development/templates/backend-spring-kotlin/readme"
-              },
-              {
-                "label": "📎 settings.gradle",
-                "slug": "development/templates/backend-spring-kotlin/settingsgradle"
               }
             ]
           },
           {
-            "label": "frontend nextjs",
+            "label": "아키텍처",
+            "slug": "프로젝트/설계/아키텍처"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "api",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "v1",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "endpoints",
             "collapsed": true,
             "items": [
               {
-                "label": "src",
-                "collapsed": true,
-                "items": [
-                  {
-                    "label": "app",
-                    "collapsed": true,
-                    "items": [
-                      {
-                        "label": "📎 globals",
-                        "slug": "development/templates/frontend-nextjs/src/app/globals"
-                      },
-                      {
-                        "label": "📎 layout",
-                        "slug": "development/templates/frontend-nextjs/src/app/layout"
-                      },
-                      {
-                        "label": "📎 page",
-                        "slug": "development/templates/frontend-nextjs/src/app/page"
-                      }
-                    ]
-                  },
-                  {
-                    "label": "lib",
-                    "collapsed": true,
-                    "items": [
-                      {
-                        "label": "📎 utils",
-                        "slug": "development/templates/frontend-nextjs/src/lib/utils"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "label": "📎 components",
-                "slug": "development/templates/frontend-nextjs/components"
-              },
-              {
-                "label": "📎 Dockerfile",
-                "slug": "development/templates/frontend-nextjs/dockerfile"
-              },
-              {
-                "label": "📎 Dockerfile Arm",
-                "slug": "development/templates/frontend-nextjs/dockerfilearm"
-              },
-              {
-                "label": "📎 .env",
-                "slug": "development/templates/frontend-nextjs/env"
-              },
-              {
-                "label": "📎 eslint.config",
-                "slug": "development/templates/frontend-nextjs/eslintconfig"
-              },
-              {
-                "label": "📎 .gitignore",
-                "slug": "development/templates/frontend-nextjs/gitignore"
-              },
-              {
-                "label": "📎 next.config",
-                "slug": "development/templates/frontend-nextjs/nextconfig"
-              },
-              {
-                "label": "📎 package",
-                "slug": "development/templates/frontend-nextjs/package"
-              },
-              {
-                "label": "📎 postcss.config",
-                "slug": "development/templates/frontend-nextjs/postcssconfig"
-              },
-              {
-                "label": "📎 .prettierrc",
-                "slug": "development/templates/frontend-nextjs/prettierrc"
-              },
-              {
-                "label": "README",
-                "slug": "development/templates/frontend-nextjs/readme"
-              },
-              {
-                "label": "📎 tailwind.config",
-                "slug": "development/templates/frontend-nextjs/tailwindconfig"
-              },
-              {
-                "label": "📎 tsconfig",
-                "slug": "development/templates/frontend-nextjs/tsconfig"
+                "label": "users",
+                "slug": "api/v1/endpoints/users"
               }
             ]
           },
           {
-            "label": "README",
-            "slug": "development/templates/readme"
+            "label": "overview",
+            "slug": "api/v1/overview"
           }
         ]
       },
       {
-        "label": "approach pros cons",
-        "slug": "development/approach_pros_cons"
+        "label": "v2",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "endpoints",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "users",
+                "slug": "api/v2/endpoints/users"
+              }
+            ]
+          }
+        ]
       }
     ]
   },
   {
-    "label": "policies",
+    "label": "downloads",
     "collapsed": true,
     "items": [
       {
-        "label": "00 project safety",
-        "slug": "policies/00_project_safety"
+        "label": "📎 데이터 백업",
+        "slug": "downloads/데이터-백업"
       },
       {
-        "label": "01 policy template",
-        "slug": "policies/01_policy_template"
+        "label": "📎 config example",
+        "slug": "downloads/config-example"
       },
       {
-        "label": "README",
-        "slug": "policies/readme"
+        "label": "📎 sample document",
+        "slug": "downloads/sample-document"
       }
     ]
   },
   {
-    "label": "PRD",
+    "label": "guides",
     "collapsed": true,
     "items": [
       {
-        "label": "01 인증 회원가입 정책",
-        "slug": "prd/01_인증_회원가입_정책"
+        "label": "installation",
+        "slug": "guides/installation"
       },
       {
-        "label": "02 프로그램 생성 참가 정책",
-        "slug": "prd/02_프로그램_생성_참가_정책"
+        "label": "Mermaid Diagram Examples",
+        "slug": "guides/mermaid-examples"
       },
       {
-        "label": "03 하트 시스템 정책",
-        "slug": "prd/03_하트_시스템_정책"
+        "label": "Large Mermaid Diagrams",
+        "slug": "guides/mermaid-large"
       },
       {
-        "label": "04 회차 진행 정책",
-        "slug": "prd/04_회차_진행_정책"
-      },
-      {
-        "label": "05 투표 매칭 정책",
-        "slug": "prd/05_투표_매칭_정책"
-      },
-      {
-        "label": "06 1대1 상호작용 정책",
-        "slug": "prd/06_1대1_상호작용_정책"
-      },
-      {
-        "label": "07 단체 채팅 정책",
-        "slug": "prd/07_단체_채팅_정책"
-      },
-      {
-        "label": "README",
-        "slug": "prd/readme"
+        "label": "quick start",
+        "slug": "guides/quick-start"
       }
     ]
   },
   {
-    "label": "workflow",
+    "label": "images",
     "collapsed": true,
     "items": [
       {
-        "label": "collaboration flow",
-        "slug": "workflow/collaboration_flow"
+        "label": "🖼 architecture diagram",
+        "slug": "images/architecture-diagram"
+      },
+      {
+        "label": "🖼 dashboard screenshot",
+        "slug": "images/dashboard-screenshot"
+      },
+      {
+        "label": "🖼 system flow",
+        "slug": "images/system-flow"
       }
     ]
   },
   {
-    "label": "guide web",
-    "slug": "guide-web"
+    "label": "reference",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "config",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "advanced",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "환경변수",
+                "slug": "reference/config/advanced/환경변수"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
-    "label": "heartpairing figma ui guide",
-    "slug": "heartpairing_figma_ui_guide"
-  },
-  {
-    "label": "PRD Heart Pairing UX Spec v0.1",
-    "slug": "prd_heartpairing_ux_spec_v01"
+    "label": "html sample",
+    "slug": "html-sample"
   }
 ]

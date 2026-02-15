@@ -43,8 +43,11 @@ main {
   justify-self: start;
 }
 
-/* Mobile: show right-group for auth, hide extras */
+/* Mobile: adjust content width and auth display */
 @media (max-width: 768px) {
+  :root {
+    --sl-content-width: 100%;
+  }
   .right-group.sl-hidden {
     display: flex !important;
   }
