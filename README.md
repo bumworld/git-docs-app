@@ -1,5 +1,7 @@
 # Git Docs App
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Self-hosted wiki solution powered by **Astro Starlight** with Google OAuth authentication.
 
 Drop markdown files into a folder, and instantly get a beautiful, searchable wiki with access control.
@@ -30,7 +32,7 @@ Drop markdown files into a folder, and instantly get a beautiful, searchable wik
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/git-docs-app.git
+git clone https://github.com/bumworld/git-docs-app.git
 cd git-docs-app
 
 # Place your Google OAuth credentials (either way works):
@@ -223,6 +225,10 @@ npm run build
 - **chokidar** - File system watcher
 - **Mermaid** - Diagram rendering
 
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
