@@ -32,7 +32,7 @@ export function createBuildRunner() {
     }
 
     try {
-      const result = runBuild();
+      const result = await runBuild();
       if (buildId) {
         if (result.success) {
           updateBuildSuccess(buildId, result.log, result.durationMs, result.failedFiles);

@@ -1,8 +1,34 @@
-import { execSync } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs-extra';
 import Database from 'better-sqlite3';
 import { runPrebuild } from './prebuild.js';
 import { PATHS } from '../config/constants.js';
+
+function execAsync(command, options = {}) {
+  return new Promise((resolve, reject) => {
+    const [cmd, ...args] = command.split(/\s+/);
+    const child = spawn(cmd, args, { ...options, shell: true });
+    let stdout = '';
+    let stderr = '';
+    if (child.stdout) child.stdout.on('data', (data) => { stdout += data.toString(); });
+    if (child.stderr) child.stderr.on('data', (data) => { stderr += data.toString(); });
+    child.on('close', (code) => {
+      if (code !== 0) {
+        const err = new Error(`Command failed with exit code ${code}`);
+        err.stdout = stdout;
+        err.stderr = stderr;
+        reject(err);
+      } else {
+        resolve(stdout);
+      }
+    });
+    child.on('error', (err) => {
+      err.stdout = stdout;
+      err.stderr = stderr;
+      reject(err);
+    });
+  });
+}
 
 function loadSiteSettings() {
   if (!fs.existsSync(PATHS.DB)) return {};
@@ -34,7 +60,7 @@ function extractFailedFiles(output) {
   return failed;
 }
 
-export function runBuild() {
+export async function runBuild() {
   console.log('[Build] Starting full build pipeline...');
   const startTime = Date.now();
   const logParts = [];
@@ -54,15 +80,13 @@ export function runBuild() {
     console.log(titleMsg);
     logParts.push(titleMsg);
 
-    // Step 3: Run Astro build to temp directory
+    // Step 3: Run Astro build to temp directory (async - does not block event loop)
     console.log('[Build] Running Astro build...');
     logParts.push('[Build] Running Astro build...');
-    const buildOutput = execSync(`npx astro build --outDir "${PATHS.DIST_TEMP}"`, {
+    const stdout = await execAsync(`npx astro build --outDir "${PATHS.DIST_TEMP}"`, {
       cwd: process.cwd(),
-      stdio: 'pipe',
       env: buildEnv,
     });
-    const stdout = buildOutput.toString();
     if (stdout) logParts.push(stdout.trim());
 
     // Step 4: Sync build output to dist directory
@@ -121,6 +145,7 @@ export function runBuild() {
 
 // Run directly if called as script
 if (process.argv[1] && process.argv[1].endsWith('build.js')) {
-  const result = runBuild();
-  process.exit(result.success ? 0 : 1);
+  runBuild().then((result) => {
+    process.exit(result.success ? 0 : 1);
+  });
 }
