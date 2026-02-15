@@ -189,14 +189,21 @@ function serveBuildingPage(req, res, next) {
 }
 
 // Wiki content (dist/) - requires authentication
+// Set no-cache for HTML so browsers always revalidate after new builds
 app.use('/', requireAuth, serveBuildingPage, express.static(PATHS.DIST, {
   extensions: ['html'],
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.set('Cache-Control', 'no-store');
+    }
+  },
 }));
 
 // Fallback for SPA-like routes within dist
 app.use('/', requireAuth, serveBuildingPage, (req, res) => {
   const indexPath = path.join(PATHS.DIST, 'index.html');
   if (fs.existsSync(indexPath)) {
+    res.set('Cache-Control', 'no-store');
     res.sendFile(indexPath);
   } else {
     res.send(BUILDING_HTML);
