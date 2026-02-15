@@ -102,7 +102,7 @@ router.put('/settings', (req, res) => {
   if (updates.site_title !== undefined || updates.site_description !== undefined) {
     if (buildRunner) {
       console.log('[Admin] Settings changed, triggering rebuild...');
-      buildRunner.triggerBuild();
+      buildRunner.triggerBuild('settings', req.user.email);
     }
   }
 

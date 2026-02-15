@@ -20,6 +20,7 @@
     <div class="tabs">
       <button class="tab active" data-tab="dashboard">Dashboard</button>
       <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="builds">Builds</button>
       <button class="tab" data-tab="settings">Settings</button>
     </div>
 
@@ -37,6 +38,35 @@
         <button class="btn btn-primary" onclick="triggerBuild()">Rebuild Wiki</button>
       </div>
       <div id="usersList" class="user-list"></div>
+    </div>
+
+    <!-- Builds Tab -->
+    <div id="tab-builds" class="tab-content">
+      <div class="section-bar">
+        <h2 class="section-title" style="margin-bottom:0;">Build Management</h2>
+        <button class="btn btn-primary" id="buildRunBtn" onclick="triggerBuildFromTab()">Run Build</button>
+      </div>
+      <div id="buildProgress" class="build-progress" style="display:none">
+        <div class="build-progress-bar"></div>
+        <span class="build-progress-text">Building...</span>
+      </div>
+      <div class="stats" id="buildStats"></div>
+      <div class="build-filters">
+        <select id="filterStatus" onchange="loadBuilds()">
+          <option value="">All Status</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+          <option value="running">Running</option>
+        </select>
+        <select id="filterTrigger" onchange="loadBuilds()">
+          <option value="">All Triggers</option>
+          <option value="manual">Manual</option>
+          <option value="watcher">Watcher</option>
+          <option value="settings">Settings</option>
+          <option value="startup">Startup</option>
+        </select>
+      </div>
+      <div id="buildsList" class="build-list"></div>
     </div>
 
     <!-- Settings Tab -->

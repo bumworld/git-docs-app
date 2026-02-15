@@ -7,7 +7,8 @@
     "dev": "node server/index.js",
     "build": "node scripts/build.js",
     "prebuild": "node scripts/prebuild.js",
-    "start": "NODE_ENV=production node server/index.js"
+    "start": "NODE_ENV=production node server/index.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [
     "wiki",

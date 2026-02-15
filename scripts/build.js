@@ -18,54 +18,109 @@ function loadSiteSettings() {
   }
 }
 
+function extractFailedFiles(output) {
+  const failed = [];
+  const lines = output.split('\n');
+  for (const line of lines) {
+    // Match common Astro/Vite build error patterns referencing files
+    const fileMatch = line.match(/(?:error|fail|Error|FAIL).*?[:\s]+((?:\/|\.\/|src\/|source\/).+?\.\w+)/i);
+    if (fileMatch && failed.length < 100) {
+      const filePath = fileMatch[1].trim();
+      if (!failed.includes(filePath)) {
+        failed.push(filePath);
+      }
+    }
+  }
+  return failed;
+}
+
 export function runBuild() {
   console.log('[Build] Starting full build pipeline...');
   const startTime = Date.now();
+  const logParts = [];
 
   try {
     // Step 1: Prebuild - sync source/ to src/content/docs/
+    logParts.push('[Prebuild] Starting prebuild...');
     runPrebuild();
+    logParts.push('[Prebuild] Prebuild completed.');
 
     // Step 2: Read site settings from DB and pass to Astro build
     const settings = loadSiteSettings();
     const buildEnv = { ...process.env };
     if (settings.site_title) buildEnv.SITE_TITLE = settings.site_title;
     if (settings.site_description) buildEnv.SITE_DESCRIPTION = settings.site_description;
-    console.log(`[Build] Site title: "${buildEnv.SITE_TITLE || 'Git Docs'}"`);
+    const titleMsg = `[Build] Site title: "${buildEnv.SITE_TITLE || 'Git Docs'}"`;
+    console.log(titleMsg);
+    logParts.push(titleMsg);
 
     // Step 3: Run Astro build to temp directory
     console.log('[Build] Running Astro build...');
-    execSync(`npx astro build --outDir "${PATHS.DIST_TEMP}"`, {
+    logParts.push('[Build] Running Astro build...');
+    const buildOutput = execSync(`npx astro build --outDir "${PATHS.DIST_TEMP}"`, {
       cwd: process.cwd(),
       stdio: 'pipe',
       env: buildEnv,
     });
+    const stdout = buildOutput.toString();
+    if (stdout) logParts.push(stdout.trim());
 
-    // Step 3: Sync build output to dist directory
+    // Step 4: Sync build output to dist directory
     console.log('[Build] Syncing build output to dist...');
+    logParts.push('[Build] Syncing build output to dist...');
     fs.ensureDirSync(PATHS.DIST);
     fs.emptyDirSync(PATHS.DIST);
     fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
-    fs.removeSync(PATHS.DIST_TEMP); // Clean up temp dir
+    fs.removeSync(PATHS.DIST_TEMP);
 
-    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`[Build] Build completed in ${elapsed}s`);
-    return true;
+    const durationMs = Date.now() - startTime;
+    const elapsed = (durationMs / 1000).toFixed(1);
+    const completeMsg = `[Build] Build completed in ${elapsed}s`;
+    console.log(completeMsg);
+    logParts.push(completeMsg);
+
+    return {
+      success: true,
+      log: logParts.join('\n'),
+      durationMs,
+      failedFiles: [],
+    };
   } catch (err) {
+    const durationMs = Date.now() - startTime;
     console.error('[Build] Build failed:', err.message);
+
+    // Capture stderr/stdout from the error
+    let errorOutput = err.message || '';
+    if (err.stderr) errorOutput += '\n' + err.stderr.toString();
+    if (err.stdout) errorOutput += '\n' + err.stdout.toString();
+    logParts.push('[Build] Build FAILED:');
+    logParts.push(errorOutput.trim());
+
+    const failedFiles = extractFailedFiles(errorOutput);
+    if (failedFiles.length > 0) {
+      logParts.push(`\n[Build] Failed files (${failedFiles.length}${failedFiles.length >= 100 ? '+' : ''}):`);
+      failedFiles.forEach(f => logParts.push(`  - ${f}`));
+      if (failedFiles.length >= 100) {
+        logParts.push('  ... (showing first 100 files, check full error output for more)');
+      }
+    }
 
     // Cleanup: remove temp dir if it exists
     if (fs.existsSync(PATHS.DIST_TEMP)) {
       fs.removeSync(PATHS.DIST_TEMP);
     }
-    // Note: The /dist directory might be in an incomplete state if the copy failed.
-    // A failed build won't be deployed.
-    return false;
+
+    return {
+      success: false,
+      log: logParts.join('\n'),
+      durationMs,
+      failedFiles,
+    };
   }
 }
 
 // Run directly if called as script
 if (process.argv[1] && process.argv[1].endsWith('build.js')) {
-  const success = runBuild();
-  process.exit(success ? 0 : 1);
+  const result = runBuild();
+  process.exit(result.success ? 0 : 1);
 }

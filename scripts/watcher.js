@@ -2,32 +2,58 @@ import { watch } from 'chokidar';
 import path from 'path';
 import { runBuild } from './build.js';
 import { PATHS, BUILD } from '../config/constants.js';
+import {
+  createBuild,
+  updateBuildSuccess,
+  updateBuildFailed,
+  cleanupOldBuilds,
+} from '../server/db.js';
 
 export function createBuildRunner() {
   let building = false;
-  let pendingBuild = false;
+  let pendingBuild = null;
   let debounceTimer = null;
 
-  async function executeBuild() {
+  async function executeBuild(triggerType = 'manual', triggeredBy = 'system') {
     if (building) {
-      pendingBuild = true;
+      pendingBuild = { triggerType: 'watcher', triggeredBy: 'system' };
       console.log('[Watcher] Build already in progress, queuing next build...');
       return;
     }
 
     building = true;
-    console.log('[Watcher] Triggering build...');
+    console.log(`[Watcher] Triggering build (${triggerType} by ${triggeredBy})...`);
+
+    let buildId;
+    try {
+      buildId = createBuild(triggerType, triggeredBy);
+    } catch (err) {
+      console.error('[Watcher] Failed to create build record:', err.message);
+    }
 
     try {
-      runBuild();
+      const result = runBuild();
+      if (buildId) {
+        if (result.success) {
+          updateBuildSuccess(buildId, result.log, result.durationMs, result.failedFiles);
+        } else {
+          updateBuildFailed(buildId, result.log, result.durationMs, result.failedFiles);
+        }
+        // Cleanup old builds
+        try { cleanupOldBuilds(200); } catch (e) { /* ignore */ }
+      }
     } catch (err) {
       console.error('[Watcher] Build error:', err.message);
+      if (buildId) {
+        try { updateBuildFailed(buildId, err.message, 0, []); } catch (e) { /* ignore */ }
+      }
     } finally {
       building = false;
       if (pendingBuild) {
-        pendingBuild = false;
+        const next = pendingBuild;
+        pendingBuild = null;
         console.log('[Watcher] Running queued build...');
-        executeBuild();
+        executeBuild(next.triggerType, next.triggeredBy);
       }
     }
   }
@@ -38,7 +64,7 @@ export function createBuildRunner() {
     }
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
-      executeBuild();
+      executeBuild('watcher', 'system');
     }, BUILD.DEBOUNCE_MS);
   }
 
@@ -52,7 +78,7 @@ export function createBuildRunner() {
         stabilityThreshold: 1000,
         pollInterval: 100,
       },
-      ignored: /(^|[\/\\])\../, // ignore dotfiles
+      ignored: /(^|[\/\\])\../,
     });
 
     watcher.on('add', (filePath) => {
@@ -90,7 +116,7 @@ export function createBuildRunner() {
   }
 
   return {
-    triggerBuild: () => executeBuild(),
+    triggerBuild: (triggerType, triggeredBy) => executeBuild(triggerType || 'manual', triggeredBy || 'system'),
     startWatching,
     isBuilding: () => building,
   };

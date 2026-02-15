@@ -35,9 +35,22 @@ function initializeDatabase() {
       expired DATETIME NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS builds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      status TEXT NOT NULL DEFAULT 'running' CHECK(status IN ('running', 'success', 'failed')),
+      trigger_type TEXT NOT NULL DEFAULT 'manual' CHECK(trigger_type IN ('manual', 'watcher', 'settings', 'startup')),
+      triggered_by TEXT,
+      started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      finished_at DATETIME,
+      duration_ms INTEGER,
+      log TEXT DEFAULT '',
+      failed_files TEXT
+    );
+
     CREATE INDEX IF NOT EXISTS idx_sessions_expired ON sessions(expired);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+    CREATE INDEX IF NOT EXISTS idx_builds_started_at ON builds(started_at);
   `);
 
   const defaultSettings = {
@@ -118,6 +131,84 @@ function getPendingUsers() {
   return db.prepare('SELECT * FROM users WHERE status = ? ORDER BY created_at DESC').all('pending');
 }
 
+// Build queries
+function createBuild(triggerType, triggeredBy) {
+  const result = db.prepare(
+    'INSERT INTO builds (status, trigger_type, triggered_by) VALUES (?, ?, ?)'
+  ).run('running', triggerType, triggeredBy || 'system');
+  return result.lastInsertRowid;
+}
+
+function updateBuildSuccess(id, log, durationMs, failedFiles) {
+  db.prepare(
+    'UPDATE builds SET status = ?, log = ?, duration_ms = ?, failed_files = ?, finished_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).run('success', log || '', durationMs, failedFiles ? JSON.stringify(failedFiles) : null, id);
+}
+
+function updateBuildFailed(id, log, durationMs, failedFiles) {
+  db.prepare(
+    'UPDATE builds SET status = ?, log = ?, duration_ms = ?, failed_files = ?, finished_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).run('failed', log || '', durationMs, failedFiles ? JSON.stringify(failedFiles) : null, id);
+}
+
+function getBuilds(limit = 50, offset = 0, filters = {}) {
+  let where = [];
+  let params = [];
+  if (filters.status) {
+    where.push('status = ?');
+    params.push(filters.status);
+  }
+  if (filters.trigger_type) {
+    where.push('trigger_type = ?');
+    params.push(filters.trigger_type);
+  }
+  const whereClause = where.length > 0 ? 'WHERE ' + where.join(' AND ') : '';
+  const rows = db.prepare(
+    `SELECT id, status, trigger_type, triggered_by, started_at, finished_at, duration_ms, failed_files,
+     SUBSTR(log, 1, 2000) as log_preview
+     FROM builds ${whereClause} ORDER BY started_at DESC LIMIT ? OFFSET ?`
+  ).all(...params, limit, offset);
+  return rows.map(r => ({
+    ...r,
+    failed_files: r.failed_files ? JSON.parse(r.failed_files) : [],
+  }));
+}
+
+function getBuildById(id) {
+  const row = db.prepare('SELECT * FROM builds WHERE id = ?').get(id);
+  if (row && row.failed_files) {
+    row.failed_files = JSON.parse(row.failed_files);
+  } else if (row) {
+    row.failed_files = [];
+  }
+  return row;
+}
+
+function getBuildStats() {
+  const total = db.prepare('SELECT COUNT(*) as count FROM builds').get().count;
+  const success = db.prepare("SELECT COUNT(*) as count FROM builds WHERE status = 'success'").get().count;
+  const failed = db.prepare("SELECT COUNT(*) as count FROM builds WHERE status = 'failed'").get().count;
+  const running = db.prepare("SELECT COUNT(*) as count FROM builds WHERE status = 'running'").get().count;
+  const avgDuration = db.prepare("SELECT AVG(duration_ms) as avg FROM builds WHERE status = 'success' AND duration_ms IS NOT NULL").get().avg;
+  return {
+    total,
+    success,
+    failed,
+    running,
+    avg_duration_ms: avgDuration ? Math.round(avgDuration) : 0,
+  };
+}
+
+function cleanupOldBuilds(keepCount = 200) {
+  const count = db.prepare('SELECT COUNT(*) as count FROM builds').get().count;
+  if (count > keepCount) {
+    db.prepare(
+      `DELETE FROM builds WHERE id NOT IN (SELECT id FROM builds ORDER BY started_at DESC LIMIT ?)`
+    ).run(keepCount);
+    console.log(`[DB] Cleaned up old builds, kept ${keepCount} of ${count}`);
+  }
+}
+
 // Settings queries
 function getSetting(key) {
   const row = db.prepare('SELECT value FROM site_settings WHERE key = ?').get(key);
@@ -167,4 +258,11 @@ export {
   getAllSettings,
   setSetting,
   updateSettings,
+  createBuild,
+  updateBuildSuccess,
+  updateBuildFailed,
+  getBuilds,
+  getBuildById,
+  getBuildStats,
+  cleanupOldBuilds,
 };

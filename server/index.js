@@ -229,6 +229,6 @@ app.listen(PORT, () => {
   const distFiles = fs.existsSync(PATHS.DIST) ? fs.readdirSync(PATHS.DIST) : [];
   if (distFiles.length === 0) {
     console.log('[Server] dist/ is empty, triggering initial build...');
-    buildRunner.triggerBuild();
+    buildRunner.triggerBuild('startup', 'system');
   }
 });
