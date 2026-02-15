@@ -8,6 +8,7 @@ import {
   updateBuildFailed,
   cleanupOldBuilds,
 } from '../server/db.js';
+import { emitBuildStart, emitBuildComplete } from '../server/sse/channels/build.js';
 
 export function createBuildRunner() {
   let building = false;
@@ -31,8 +32,16 @@ export function createBuildRunner() {
       console.error('[Watcher] Failed to create build record:', err.message);
     }
 
+    // SSE: 빌드 시작 이벤트
+    try { emitBuildStart({ buildId, triggerType, triggeredBy }); } catch (e) { /* SSE 실패가 빌드에 영향 없음 */ }
+
+    let buildSuccess = false;
+    let buildDurationMs = 0;
+
     try {
       const result = await runBuild();
+      buildSuccess = result.success;
+      buildDurationMs = result.durationMs;
       if (buildId) {
         if (result.success) {
           updateBuildSuccess(buildId, result.log, result.durationMs, result.failedFiles);
@@ -49,6 +58,10 @@ export function createBuildRunner() {
       }
     } finally {
       building = false;
+
+      // SSE: 빌드 완료 이벤트
+      try { emitBuildComplete({ buildId, success: buildSuccess, triggerType, triggeredBy, durationMs: buildDurationMs }); } catch (e) { /* SSE 실패가 빌드에 영향 없음 */ }
+
       if (pendingBuild) {
         const next = pendingBuild;
         pendingBuild = null;

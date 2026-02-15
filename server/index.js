@@ -9,6 +9,7 @@ import { createSessionStore } from './session-store.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes, { setAdminBuildRunner } from './routes/admin.js';
 import buildRoutes, { setBuildRunner } from './routes/build.js';
+import sseRoutes, { setSSEBuildRunner } from './sse/index.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { createBuildRunner } from '../scripts/watcher.js';
 import { PATHS, SESSION } from '../config/constants.js';
@@ -58,7 +59,7 @@ app.use((req, res, next) => {
     const ms = Date.now() - start;
     const user = req.user ? req.user.email : '-';
     // Skip noisy static asset logs
-    if (req.path.startsWith('/_assets/') || req.path.startsWith('/favicon')) return;
+    if (req.path.startsWith('/_assets/') || req.path.startsWith('/favicon') || req.path.startsWith('/api/sse')) return;
     console.log(`[HTTP] ${req.method} ${req.path} ${res.statusCode} ${ms}ms ${user}`);
   });
   next();
@@ -146,6 +147,9 @@ app.use('/pagefind', express.static(path.join(PATHS.DIST, 'pagefind')));
 // Build API
 app.use('/api', buildRoutes);
 
+// SSE API
+app.use('/api/sse', sseRoutes);
+
 // Admin API
 app.use('/api/admin', adminRoutes);
 
@@ -223,6 +227,7 @@ app.listen(PORT, () => {
   app.locals.buildRunner = buildRunner;
   setBuildRunner(buildRunner);
   setAdminBuildRunner(buildRunner);
+  setSSEBuildRunner(buildRunner);
   buildRunner.startWatching();
 
   // Run initial build if dist is empty

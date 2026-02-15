@@ -27,7 +27,25 @@
     <!-- Dashboard Tab -->
     <div id="tab-dashboard" class="tab-content active">
       <div class="stats" id="stats"></div>
-      <h2 class="section-title">Pending Requests</h2>
+
+      <div class="section-bar">
+        <h2 class="section-title" style="margin-bottom:0;">Online Users</h2>
+        <div class="online-badges">
+          <span class="badge badge-active" id="onlineUserCount" title="Users">0 users</span>
+          <span class="badge badge-running" id="onlineConnCount" title="Total connections">0 connections</span>
+        </div>
+      </div>
+      <div id="onlineUsers" class="user-list" style="margin-bottom:2rem;"></div>
+
+      <div class="section-bar">
+        <h2 class="section-title" style="margin-bottom:0;">Send Message</h2>
+      </div>
+      <div class="message-form">
+        <input type="text" id="adminMessage" placeholder="Enter message to broadcast to all users..." maxlength="500">
+        <button class="btn btn-primary" id="sendMsgBtn" onclick="sendAdminMessage()">Send</button>
+      </div>
+
+      <h2 class="section-title" style="margin-top:2rem;">Pending Requests</h2>
       <div id="pendingList" class="user-list"></div>
     </div>
 
