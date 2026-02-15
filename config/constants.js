@@ -26,6 +26,8 @@ export const FILE_EXTENSIONS = {
 
 export const IGNORE_FILES = ['.DS_Store', 'Thumbs.db', '.gitkeep'];
 
+export const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'cdk.out', '.next', '.nuxt', '__pycache__', '.venv', 'venv', '.cache', 'build'];
+
 export const USER_STATUS = {
   ACTIVE: 'active',
   PENDING: 'pending',

@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
-import { PATHS, FILE_EXTENSIONS, IGNORE_FILES } from '../../config/constants.js';
+import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS } from '../../config/constants.js';
 import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
 
 export function processMarkdownFile(srcFile, destFile) {
@@ -129,6 +129,10 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
 
     if (entry.isDirectory() && entry.name.toLowerCase() === 'pwa') {
       console.log('[Prebuild] Ignoring "pwa" directory.');
+      continue;
+    }
+
+    if (entry.isDirectory() && IGNORE_DIRS.includes(entry.name)) {
       continue;
     }
 
