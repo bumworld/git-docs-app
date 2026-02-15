@@ -75,6 +75,76 @@ iframe {
   border: 1px solid var(--sl-color-gray-5) !important;
 }
 
+/* Video player */
+.video-wrapper {
+  position: relative;
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--sl-color-gray-5);
+  background: #000;
+}
+
+.video-wrapper iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none !important;
+  border-radius: 0;
+}
+
+.video-wrapper video {
+  display: block;
+  width: 100%;
+  max-height: 80vh;
+  background: #000;
+}
+
+.video-source {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--sl-color-gray-6);
+  border-top: 1px solid var(--sl-color-gray-5);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.video-source a {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+}
+
+.video-source a:hover {
+  text-decoration: underline;
+}
+
+.video-copy-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--sl-color-gray-4);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--sl-color-text-accent);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  line-height: 1;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.video-copy-btn:hover {
+  background: var(--sl-color-gray-5);
+}
+
 /* Mermaid diagrams */
 .mermaid-wrapper {
   margin: 1rem 0;

@@ -130,6 +130,10 @@
       {
         "label": "quick start",
         "slug": "guides/quick-start"
+      },
+      {
+        "label": "Video Examples",
+        "slug": "guides/video-examples"
       }
     ]
   },
