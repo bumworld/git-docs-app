@@ -1,5 +1,5 @@
 :root {
-  --sl-sidebar-width-table-of-contents: 15rem;
+  --sl-sidebar-width-table-of-contents: 12rem;  /* 15rem에서 20% 축소 */
   --sl-content-width: 90ch;
 }
 
@@ -43,6 +43,12 @@ main {
   justify-self: start;
 }
 
+/* Mobile viewport fix - prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 /* Mobile: adjust content width and auth display */
 @media (max-width: 768px) {
   :root {
@@ -67,12 +73,79 @@ main {
     font-size: 0.85rem;
     padding: 0.35rem 0.75rem;
   }
+
+  /* Ensure content doesn't exceed viewport */
+  .sl-container {
+    max-width: 100vw;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .sl-markdown-content {
+    max-width: calc(100vw - 2rem);
+    overflow-x: hidden;
+  }
+
+  .sl-markdown-content * {
+    max-width: 100%;
+  }
+
+  /* Pagination buttons - float layout for mobile */
+  .pagination-links {
+    width: 100% !important;
+    padding: 1rem 0.5rem !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: hidden !important;
+  }
+
+  .pagination-links::after {
+    content: "" !important;
+    display: table !important;
+    clear: both !important;
+  }
+
+  .pagination-links a[rel="prev"] {
+    float: left !important;
+    margin: 0 !important;
+  }
+
+  .pagination-links a[rel="next"] {
+    float: right !important;
+    margin: 0 !important;
+  }
 }
 
-/* iframe content */
+/* iframe content - break out of content width constraint */
 iframe {
   border-radius: 4px;
   border: 1px solid var(--sl-color-gray-5) !important;
+}
+
+/* Make HTML iframes wider (break out of content-width constraint) */
+.sl-markdown-content iframe[src*="/downloads/"] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Override content container width for pages with HTML iframes */
+.sl-markdown-content:has(iframe[src*="/downloads/"]) {
+  max-width: none !important;
+}
+
+@media (min-width: 769px) {
+  /* On desktop: fixed width regardless of TOC size */
+  .sl-markdown-content iframe[src*="/downloads/"] {
+    width: 55vw !important;
+    max-width: 55vw !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* On mobile: almost full width */
+  .sl-markdown-content iframe[src*="/downloads/"] {
+    width: calc(100vw - 2rem) !important;
+  }
 }
 
 /* Video player */
@@ -143,6 +216,31 @@ iframe {
 
 .video-copy-btn:hover {
   background: var(--sl-color-gray-5);
+}
+
+/* Responsive tables - mobile scroll */
+.sl-markdown-content table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive code blocks - prevent overflow */
+.sl-markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure expressive-code frames don't overflow */
+.sl-markdown-content .expressive-code {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.sl-markdown-content .expressive-code pre {
+  max-width: 100%;
 }
 
 /* Mermaid diagrams */

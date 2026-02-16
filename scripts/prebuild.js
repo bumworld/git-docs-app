@@ -38,10 +38,11 @@ title: "Welcome"
   // Ensure at least an index page exists
   const indexPath = path.join(PATHS.DOCS, 'index.md');
   if (!fs.existsSync(indexPath)) {
-    const readmeSrc = path.join(PATHS.SOURCE, 'README.md');
-    if (fs.existsSync(readmeSrc)) {
-      fs.copySync(path.join(PATHS.DOCS, 'README.md'), indexPath);
-      fs.removeSync(path.join(PATHS.DOCS, 'README.md'));
+    // Try to use README.md (sanitized as readme.md by processMarkdownFile)
+    const readmeDest = path.join(PATHS.DOCS, 'readme.md');
+    if (fs.existsSync(readmeDest)) {
+      fs.copySync(readmeDest, indexPath);
+      fs.removeSync(readmeDest);
     } else {
       // Auto-generate index with list of top-level folders/files
       const srcEntries = fs.readdirSync(PATHS.SOURCE, { withFileTypes: true });

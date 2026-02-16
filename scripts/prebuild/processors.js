@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS } from '../../config/constants.js';
 import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
+import { getSecurityWarning, shouldWarnFile, IFRAME_SANDBOX } from '../../config/security.js';
 
 export function processMarkdownFile(srcFile, destFile) {
   const content = fs.readFileSync(srcFile, 'utf-8');
@@ -38,9 +39,13 @@ sidebar:
   label: "${title}"
 ---
 
+:::caution[Security Notice]
+This HTML application is displayed in a sandboxed iframe. Scripts may be restricted for security.
+:::
+
 <a href="${downloadPath}index.html" target="_blank" rel="noopener noreferrer">🔗 Open in new window</a>
 
-<iframe src="${downloadPath}index.html" style="width:100%;height:80vh;border:none;"></iframe>
+<iframe src="${downloadPath}index.html" sandbox="${IFRAME_SANDBOX}" style="width:100%;height:80vh;border:none;"></iframe>
 `;
   fs.outputFileSync(destFile, mdContent, 'utf-8');
 }
@@ -59,9 +64,13 @@ sidebar:
   label: "${title}"
 ---
 
+:::caution[Security Notice]
+This HTML file is displayed in a sandboxed iframe. Scripts may be restricted for security.
+:::
+
 <a href="${downloadPath}" target="_blank" rel="noopener noreferrer">🔗 Open in new window</a>
 
-<iframe src="${downloadPath}" style="width:100%;height:80vh;border:none;"></iframe>
+<iframe src="${downloadPath}" sandbox="${IFRAME_SANDBOX}" style="width:100%;height:80vh;border:none;"></iframe>
 `;
   fs.outputFileSync(mdFile, mdContent, 'utf-8');
 }
@@ -102,13 +111,16 @@ export function processAssetFile(srcFile, relativePath) {
   const mdDest = path.join(PATHS.DOCS, dirPath, sanitizeSlug(filename) + '.md');
   const sizeStr = formatFileSize(fs.statSync(srcFile).size);
 
+  // Get security warning if applicable
+  const securityWarning = getSecurityWarning(filename);
+  const warningSection = securityWarning ? `\n:::danger[Security Warning]\n${securityWarning}\n:::\n\n` : '\n';
+
   const mdContent = `---
 title: "${title}"
 sidebar:
   label: "📎 ${title}"
 ---
-
-**File:** ${filename}
+${warningSection}**File:** ${filename}
 **Size:** ${sizeStr}
 **Type:** ${ext || 'unknown'}
 

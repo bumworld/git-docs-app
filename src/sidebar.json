@@ -180,5 +180,9 @@
   {
     "label": "html sample",
     "slug": "html-sample"
+  },
+  {
+    "label": "width test",
+    "slug": "width-test"
   }
 ]

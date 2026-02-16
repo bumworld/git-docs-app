@@ -76,6 +76,7 @@ export async function runBuild() {
     const buildEnv = { ...process.env };
     if (settings.site_title) buildEnv.SITE_TITLE = settings.site_title;
     if (settings.site_description) buildEnv.SITE_DESCRIPTION = settings.site_description;
+    if (settings.site_url) buildEnv.SITE_URL = settings.site_url;
     const titleMsg = `[Build] Site title: "${buildEnv.SITE_TITLE || 'Git Docs'}"`;
     console.log(titleMsg);
     logParts.push(titleMsg);

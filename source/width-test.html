@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; }
+    .container { 
+      width: 100%; 
+      max-width: 1200px; 
+      background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class='container'>
+    <h1>Test HTML Width</h1>
+    <p>This is a wide content test. Window width: <span id='width'></span>px</p>
+    <script>
+      document.getElementById('width').textContent = window.innerWidth;
+      window.addEventListener('resize', () => {
+        document.getElementById('width').textContent = window.innerWidth;
+      });
+    </script>
+  </div>
+</body>
+</html>
