@@ -14,8 +14,18 @@ Drop markdown files into a folder, and instantly get a beautiful, searchable wik
 - **Auto Build**: File changes in `source/` trigger automatic rebuilds
 - **Auto Sidebar**: Navigation sidebar generated from directory structure
 - **Mermaid Diagrams**: Mermaid code blocks rendered as diagrams
+- **Presentation Mode**: Convert markdown to reveal.js presentations
+- **View Source**: View and copy page markdown/HTML source
+- **Copy Content**: Copy rendered page content as rich text
+- **Print PDF**: Print pages to PDF with optimized layouts
+- **Video Player**: Embed videos with source link display and copy
 - **Docker Ready**: Single image, multiple instances via port mapping
 - **Multi-language filenames**: Korean, Japanese, Chinese, and other non-ASCII filenames supported
+
+## Documentation
+
+- 📖 **[Usage Guide (English)](USAGE.md)** - Comprehensive feature guide
+- 📖 **[사용 가이드 (한국어)](USAGE.ko.md)** - 한국어 상세 가이드
 
 ## Quick Start (Docker)
 
@@ -114,6 +124,43 @@ graph TD
     B -->|No| D[Cancel]
 ```
 ````
+
+## Advanced Features
+
+### Presentation Mode
+
+Convert markdown pages to reveal.js presentations. Add frontmatter to your markdown:
+
+```yaml
+---
+title: My Presentation
+presentation: true
+theme: night
+---
+```
+
+Separate slides with `---` and click "🎬 Presentation Mode" button to view.
+
+### View Source & Copy Content
+
+- **View Source**: Click button in sidebar to view/copy markdown or HTML source
+- **Copy Content**: Copy rendered page content as rich text (preserves formatting for Word, email, etc.)
+
+### Print to PDF
+
+Click "Print PDF" button in sidebar to generate PDF with optimized layout.
+
+### Video Embedding
+
+Embed videos with automatic source link display:
+
+```html
+<div class="video-wrapper">
+  <iframe src="https://www.youtube.com/embed/VIDEO_ID"></iframe>
+</div>
+```
+
+See detailed usage guide: [USAGE.md](USAGE.md) | [USAGE.ko.md](USAGE.ko.md)
 
 ## Docker Build & Push
 

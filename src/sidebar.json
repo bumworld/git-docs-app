@@ -94,6 +94,26 @@
     ]
   },
   {
+    "label": "architecture",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "System Design",
+        "slug": "architecture/system-design"
+      }
+    ]
+  },
+  {
+    "label": "backend",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "API Design",
+        "slug": "backend/api-design"
+      }
+    ]
+  },
+  {
     "label": "downloads",
     "collapsed": true,
     "items": [
@@ -108,6 +128,20 @@
       {
         "label": "📎 sample document",
         "slug": "downloads/sample-document"
+      }
+    ]
+  },
+  {
+    "label": "frontend",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "React Best Practices",
+        "slug": "frontend/react-best-practices"
+      },
+      {
+        "label": "Frontend Overview",
+        "slug": "frontend/readme"
       }
     ]
   },
@@ -156,6 +190,26 @@
     ]
   },
   {
+    "label": "infrastructure",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "K8s Deployment",
+        "slug": "infrastructure/kubernetes-deployment"
+      }
+    ]
+  },
+  {
+    "label": "mobile",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "Bridge Interface",
+        "slug": "mobile/bridge-interface"
+      }
+    ]
+  },
+  {
     "label": "reference",
     "collapsed": true,
     "items": [
@@ -176,6 +230,20 @@
         ]
       }
     ]
+  },
+  {
+    "label": "testing",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "E2E Testing",
+        "slug": "testing/e2e-testing"
+      }
+    ]
+  },
+  {
+    "label": "Example Presentation",
+    "slug": "example-presentation"
   },
   {
     "label": "html sample",
