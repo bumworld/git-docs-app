@@ -22,6 +22,7 @@ export const FILE_EXTENSIONS = {
   MARKDOWN: ['.md', '.mdx', '.mdoc'],
   HTML: ['.html', '.htm'],
   IMAGE: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.ico'],
+  TEXT: ['.txt', '.ini', '.conf', '.config', '.properties', '.json', '.sql', '.xml', '.yaml', '.yml', '.toml', '.csv', '.log', '.sh', '.bash', '.zsh', '.env', '.gitignore'],
 };
 
 export const IGNORE_FILES = ['.DS_Store', 'Thumbs.db', '.gitkeep'];

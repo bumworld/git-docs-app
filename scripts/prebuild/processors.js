@@ -115,6 +115,59 @@ export function processAssetFile(srcFile, relativePath) {
   const securityWarning = getSecurityWarning(filename);
   const warningSection = securityWarning ? `\n:::danger[Security Warning]\n${securityWarning}\n:::\n\n` : '\n';
 
+  // Check if it's a text file and read its content
+  let contentSection = '';
+  if (FILE_EXTENSIONS.TEXT.includes(ext)) {
+    try {
+      const fileStats = fs.statSync(srcFile);
+      const fileSizeBytes = fileStats.size;
+      const MAX_SIZE_BYTES = 20 * 1024; // 20KB
+      const PREVIEW_SIZE_BYTES = 5 * 1024; // 5KB
+
+      let fileContent = fs.readFileSync(srcFile, 'utf-8');
+      let isTruncated = false;
+
+      // If file is larger than 20KB, show only first ~5KB
+      if (fileSizeBytes > MAX_SIZE_BYTES) {
+        // Truncate by character count to avoid breaking UTF-8 characters
+        const maxChars = Math.floor(PREVIEW_SIZE_BYTES / 2); // Rough estimate for multi-byte chars
+        if (fileContent.length > maxChars) {
+          fileContent = fileContent.substring(0, maxChars);
+          isTruncated = true;
+        }
+      }
+
+      // Map file extensions to code block language
+      const languageMap = {
+        '.json': 'json',
+        '.sql': 'sql',
+        '.xml': 'xml',
+        '.yaml': 'yaml',
+        '.yml': 'yaml',
+        '.ini': 'ini',
+        '.conf': 'ini',
+        '.config': 'ini',
+        '.properties': 'properties',
+        '.sh': 'bash',
+        '.bash': 'bash',
+        '.zsh': 'bash',
+        '.toml': 'toml',
+        '.csv': 'csv',
+        '.env': 'bash',
+        '.gitignore': 'txt',
+      };
+      const language = languageMap[ext] || 'txt';
+
+      const truncatedNote = isTruncated
+        ? `\n\n... *(파일 내용이 더 있습니다. 전체 내용을 보려면 위의 다운로드 링크를 사용하세요.)*\n`
+        : '';
+
+      contentSection = `\n\`\`\`${language}\n${fileContent}\n\`\`\`${truncatedNote}`;
+    } catch (error) {
+      console.error(`[Prebuild] Failed to read text file ${srcFile}:`, error.message);
+    }
+  }
+
   const mdContent = `---
 title: "${title}"
 sidebar:
@@ -125,7 +178,7 @@ ${warningSection}**File:** ${filename}
 **Type:** ${ext || 'unknown'}
 
 <a href="${downloadPath}" download>📥 Download ${filename}</a>
-`;
+${contentSection}`;
   fs.outputFileSync(mdDest, mdContent, 'utf-8');
 }
 
