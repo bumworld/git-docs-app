@@ -1,0 +1,87 @@
+/* ===== Print Styles - 본문 스타일 완전 보존 ===== */
+@media print {
+  /* 페이지 설정 */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* ===== 숨길 UI 요소 (본문 외) ===== */
+  .header,
+  .sidebar,
+  .sidebar-pane,
+  .right-sidebar,
+  .right-sidebar-container,
+  .pagination-links,
+  .footer,
+  .auth-bar,
+  .toc-print-btn,
+  .toc-print-btn-mobile,
+  button:not(.sl-markdown-content button),
+  nav:not(.sl-markdown-content nav),
+  .mobile-preferences,
+  .social-icons,
+  starlight-theme-select,
+  starlight-menu-button,
+  site-search,
+  .mermaid-toolbar {
+    display: none !important;
+  }
+
+  /* ===== 레이아웃 초기화 ===== */
+  body,
+  .page,
+  .main-frame,
+  .main-pane,
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ===== 본문 영역 - PC 레이아웃 기준 (모바일에서도) ===== */
+  .sl-markdown-content {
+    max-width: 90ch !important;  /* PC 기준 너비 유지 */
+    padding: 1rem !important;
+    margin: 0 auto !important;
+  }
+
+  /* ===== 페이지 브레이크 제어 ===== */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  pre, code, img, table, .mermaid-wrapper, .video-wrapper {
+    page-break-inside: avoid;
+  }
+
+  /* ===== 링크 스타일 - 외부 URL 표시 ===== */
+  .sl-markdown-content a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #666 !important;
+    word-break: break-all;
+  }
+
+  .sl-markdown-content a[href^="#"]::after,
+  .sl-markdown-content a[href^="/"]::after {
+    content: "";
+  }
+
+  /* ===== 비디오 플레이어 대체 ===== */
+  .video-wrapper iframe,
+  .video-wrapper video {
+    display: none !important;
+  }
+
+  .video-wrapper::before {
+    content: "[Video: " attr(data-src) "]";
+    display: block;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    background: #f8f8f8;
+    font-style: italic;
+  }
+}

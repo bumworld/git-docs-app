@@ -299,3 +299,70 @@ iframe {
   height: auto;
   transition: transform 0.15s ease;
 }
+
+/* Print Button in TOC */
+.toc-print-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-text);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.toc-print-btn svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* 모바일 전용 버튼 (헤더 아이콘) */
+.toc-print-btn-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* PC용 TOC 버튼 숨김 */
+  .right-sidebar .toc-print-btn {
+    display: none;
+  }
+
+  /* 모바일 버튼 (On this page summary 안) */
+  .toc-print-btn-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--sl-color-text);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: auto;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+
+  .toc-print-btn-mobile svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toc-print-btn-mobile span {
+    display: none;
+  }
+
+  /* summary는 이미 flex이므로 버튼이 오른쪽에 자동 배치됨 */
+  #starlight__on-this-page--mobile {
+    gap: 0.5rem;
+  }
+}

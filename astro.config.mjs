@@ -38,6 +38,7 @@ export default defineConfig({
       sidebar,
       customCss: [
         './src/styles/custom.css',
+        './src/styles/print.css',
       ],
       head: [
         { tag: 'meta', attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1.0' } },
@@ -46,6 +47,7 @@ export default defineConfig({
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/mermaid-init.js' } },
         { tag: 'script', attrs: { src: '/video-source.js', defer: true } },
+        { tag: 'script', attrs: { src: '/print-button.js', defer: true } },
       ],
       components: {},
       pagination: true,
