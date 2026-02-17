@@ -6,6 +6,9 @@ import {
   updateUserRole,
   deleteUser,
   getPendingUsers,
+  getAllWhitelistedEmails,
+  addWhitelistedEmail,
+  deleteWhitelistedEmail,
   getAllSettings,
   updateSettings,
 } from '../db.js';
@@ -72,6 +75,39 @@ router.delete('/users/:id', (req, res) => {
   const target = findUserById(req.params.id);
   deleteUser(req.params.id);
   console.log(`[Admin] ${req.user.email} deleted user #${req.params.id} (${target?.email || 'unknown'})`);
+  res.json({ success: true });
+});
+
+// Whitelisted Emails
+router.get('/whitelisted-emails', (req, res) => {
+  const emails = getAllWhitelistedEmails();
+  res.json(emails);
+});
+
+router.post('/whitelisted-emails', (req, res) => {
+  const { email, notes } = req.body;
+
+  // Validate email format
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  try {
+    const newEmail = addWhitelistedEmail(email, req.user.email, notes);
+    console.log(`[Admin] ${req.user.email} added whitelisted email: ${email}`);
+    res.json(newEmail);
+  } catch (error) {
+    // Handle duplicate email error
+    if (error.message.includes('UNIQUE constraint failed')) {
+      return res.status(400).json({ error: 'Email already whitelisted' });
+    }
+    res.status(500).json({ error: 'Failed to add email' });
+  }
+});
+
+router.delete('/whitelisted-emails/:id', (req, res) => {
+  deleteWhitelistedEmail(req.params.id);
+  console.log(`[Admin] ${req.user.email} removed whitelisted email #${req.params.id}`);
   res.json({ success: true });
 });
 

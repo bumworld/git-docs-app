@@ -47,10 +47,19 @@ function initializeDatabase() {
       failed_files TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS whitelisted_emails (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      added_by TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      notes TEXT
+    );
+
     CREATE INDEX IF NOT EXISTS idx_sessions_expired ON sessions(expired);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
     CREATE INDEX IF NOT EXISTS idx_builds_started_at ON builds(started_at);
+    CREATE INDEX IF NOT EXISTS idx_whitelisted_emails_email ON whitelisted_emails(email);
   `);
 
   const defaultSettings = {
@@ -103,9 +112,20 @@ function createOrUpdateUser(profile) {
     ).run(profile.name, profile.avatar, profile.email);
     return findUserByEmail(profile.email);
   }
+
+  // Check if email is whitelisted
+  const whitelisted = isEmailWhitelisted(profile.email);
+  const status = whitelisted ? 'active' : 'pending';
+
   db.prepare(
     'INSERT INTO users (email, name, avatar, role, status) VALUES (?, ?, ?, ?, ?)'
-  ).run(profile.email, profile.name, profile.avatar, 'user', 'pending');
+  ).run(profile.email, profile.name, profile.avatar, 'user', status);
+
+  // Log if auto-approved
+  if (whitelisted) {
+    console.log(`[Auth] Auto-approved whitelisted email: ${profile.email}`);
+  }
+
   return findUserByEmail(profile.email);
 }
 
@@ -129,6 +149,27 @@ function deleteUser(id) {
 
 function getPendingUsers() {
   return db.prepare('SELECT * FROM users WHERE status = ? ORDER BY created_at DESC').all('pending');
+}
+
+// Whitelisted emails queries
+function getAllWhitelistedEmails() {
+  return db.prepare('SELECT * FROM whitelisted_emails ORDER BY created_at DESC').all();
+}
+
+function addWhitelistedEmail(email, addedBy, notes) {
+  db.prepare(
+    'INSERT INTO whitelisted_emails (email, added_by, notes) VALUES (?, ?, ?)'
+  ).run(email, addedBy, notes || '');
+  return db.prepare('SELECT * FROM whitelisted_emails WHERE email = ?').get(email);
+}
+
+function deleteWhitelistedEmail(id) {
+  db.prepare('DELETE FROM whitelisted_emails WHERE id = ?').run(id);
+}
+
+function isEmailWhitelisted(email) {
+  const row = db.prepare('SELECT id FROM whitelisted_emails WHERE email = ?').get(email);
+  return !!row;
 }
 
 // Build queries
@@ -254,6 +295,10 @@ export {
   updateUserRole,
   deleteUser,
   getPendingUsers,
+  getAllWhitelistedEmails,
+  addWhitelistedEmail,
+  deleteWhitelistedEmail,
+  isEmailWhitelisted,
   getSetting,
   getAllSettings,
   setSetting,
