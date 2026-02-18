@@ -3,7 +3,7 @@ import session from 'express-session';
 import passport from 'passport';
 import path from 'path';
 import fs from 'fs';
-import { initializeDatabase, seedAdmin, getAllSettings } from './db.js';
+import { initializeDatabase, seedAdmin, getAllSettings, findUserById } from './db.js';
 import { setupPassport, loadGoogleConfig, resolveCallbackURL } from './auth.js';
 import { createSessionStore } from './session-store.js';
 import authRoutes from './routes/auth.js';
@@ -190,6 +190,27 @@ function serveBuildingPage(req, res, next) {
     return res.send(BUILDING_HTML);
   }
   next();
+}
+
+// Test-only login bypass - must be BEFORE the requireAuth middleware
+if (process.env.NODE_ENV === 'test') {
+  app.get('/test-login', (req, res) => {
+    const user = findUserById(1);
+    if (!user) return res.status(500).send('Test user not found (id=1)');
+    req.logIn(user, (err) => {
+      if (err) return res.status(500).send('Test login error: ' + err.message);
+      res.redirect('/');
+    });
+  });
+  app.get('/test-login-user', (req, res) => {
+    const user = findUserById(2);
+    if (!user) return res.status(500).send('Test user not found (id=2)');
+    req.logIn(user, (err) => {
+      if (err) return res.status(500).send('Test login error: ' + err.message);
+      res.redirect('/');
+    });
+  });
+  console.log('[Server] ⚠ TEST_MODE: /test-login endpoint enabled');
 }
 
 // Wiki content (dist/) - requires authentication

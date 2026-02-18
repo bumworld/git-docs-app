@@ -1,6 +1,6 @@
 [
   {
-    "label": "README",
+    "label": "홈",
     "slug": ""
   },
   {
@@ -132,6 +132,10 @@
       {
         "label": "📎 sample document",
         "slug": "downloads/sample-document"
+      },
+      {
+        "label": "test screen",
+        "slug": "downloads/test-screen"
       }
     ]
   },
@@ -153,6 +157,10 @@
     "label": "guides",
     "collapsed": true,
     "items": [
+      {
+        "label": "피그마 대체 기획 가이드",
+        "slug": "guides/figma-alternative-guide"
+      },
       {
         "label": "installation",
         "slug": "guides/installation"
@@ -292,6 +300,22 @@
   {
     "label": "html sample",
     "slug": "html-sample"
+  },
+  {
+    "label": "Mermaid 테스트",
+    "slug": "mermaid-test"
+  },
+  {
+    "label": "프레젠테이션 테스트",
+    "slug": "presentation-test"
+  },
+  {
+    "label": "렌더링 테스트",
+    "slug": "rendering-test"
+  },
+  {
+    "label": "스크린 미리보기 테스트",
+    "slug": "screen-preview-test"
   },
   {
     "label": ".test trigger",

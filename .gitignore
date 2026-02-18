@@ -31,3 +31,7 @@ Thumbs.db
 
 # Astro
 .astro
+
+# Playwright (자동 생성)
+playwright-report
+test-results

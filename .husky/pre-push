@@ -1,0 +1,4 @@
+#!/bin/sh
+# Pre-push hook: run unit + build option tests before pushing
+# E2E tests run in CI (too slow for local hook)
+npm test
