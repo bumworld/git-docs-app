@@ -31,9 +31,6 @@ ENV ADMIN_EMAIL=""
 ENV NODE_ENV=production
 ENV SESSION_SECRET=""
 
-# Volumes for persistent data
-VOLUME ["/app/source", "/app/conf", "/app/data"]
-
 EXPOSE ${PORT}
 
 CMD ["node", "server/index.js"]
