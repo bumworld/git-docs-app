@@ -68,7 +68,7 @@ export async function runBuild() {
   try {
     // Step 1: Prebuild - sync source/ to src/content/docs/
     logParts.push('[Prebuild] Starting prebuild...');
-    runPrebuild();
+    const hasContent = runPrebuild();
     logParts.push('[Prebuild] Prebuild completed.');
 
     // Step 2: Read site settings from DB and pass to Astro build
@@ -91,12 +91,19 @@ export async function runBuild() {
     if (stdout) logParts.push(stdout.trim());
 
     // Step 4: Sync build output to dist directory
-    console.log('[Build] Syncing build output to dist...');
-    logParts.push('[Build] Syncing build output to dist...');
-    fs.ensureDirSync(PATHS.DIST);
-    fs.emptyDirSync(PATHS.DIST);
-    fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
-    fs.removeSync(PATHS.DIST_TEMP);
+    if (!hasContent) {
+      const skipMsg = '[Build] source/ was empty — skipping dist update to preserve existing content';
+      console.log(skipMsg);
+      logParts.push(skipMsg);
+      fs.removeSync(PATHS.DIST_TEMP);
+    } else {
+      console.log('[Build] Syncing build output to dist...');
+      logParts.push('[Build] Syncing build output to dist...');
+      fs.ensureDirSync(PATHS.DIST);
+      fs.emptyDirSync(PATHS.DIST);
+      fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
+      fs.removeSync(PATHS.DIST_TEMP);
+    }
 
     const durationMs = Date.now() - startTime;
     const elapsed = (durationMs / 1000).toFixed(1);

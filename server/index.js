@@ -186,7 +186,7 @@ function serveBuildingPage(req, res, next) {
     return next();
   }
   const distEmpty = !fs.existsSync(PATHS.DIST) || fs.readdirSync(PATHS.DIST).length === 0;
-  if (app.locals.buildRunner?.isBuilding() || distEmpty) {
+  if (distEmpty) {
     return res.send(BUILDING_HTML);
   }
   next();

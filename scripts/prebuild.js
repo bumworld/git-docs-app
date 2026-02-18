@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { PATHS, IGNORE_FILES } from '../config/constants.js';
 import { generateTitle } from './prebuild/utils.js';
-import { processDirectory } from './prebuild/processors.js';
+import { processDirectory, createStats } from './prebuild/processors.js';
 import { generateSidebarConfig } from './prebuild/sidebar.js';
 
 export function runPrebuild() {
@@ -30,10 +30,12 @@ title: "Welcome"
     fs.outputFileSync(path.join(PATHS.DOCS, 'index.md'), welcomeContent, 'utf-8');
     fs.writeJsonSync(PATHS.SIDEBAR_JSON, [], { spaces: 2 });
     console.log('[Prebuild] Created default welcome page');
-    return;
+    console.log('[Prebuild] WARNING: source/ is empty — dist will not be updated to preserve existing content');
+    return false;
   }
 
-  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS);
+  const stats = createStats();
+  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats);
 
   // Ensure at least an index page exists
   const indexPath = path.join(PATHS.DOCS, 'index.md');
@@ -68,7 +70,27 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
   }
 
   generateSidebarConfig();
-  console.log('[Prebuild] Content sync complete');
+
+  // 처리 결과 요약 로그
+  const { byType, largeFiles, longPaths, errors } = stats;
+  console.log(`[Prebuild] 처리 완료 — 총 ${stats.processed}개 파일 (md:${byType.markdown} html:${byType.html} img:${byType.image} asset:${byType.asset} txt-noext:${byType.textNoExt}), 스킵:${stats.skipped}`);
+
+  if (largeFiles.length > 0) {
+    console.warn(`[Prebuild] 대용량 파일 ${largeFiles.length}개 (빌드 속도에 영향 가능):`);
+    largeFiles.forEach(f => console.warn(`[Prebuild]   - ${f.file} (${(f.size / 1024 / 1024).toFixed(1)}MB)`));
+  }
+
+  if (longPaths.length > 0) {
+    console.warn(`[Prebuild] 경로가 긴 파일 ${longPaths.length}개:`);
+    longPaths.forEach(f => console.warn(`[Prebuild]   - ${f} (${f.length}자)`));
+  }
+
+  if (errors.length > 0) {
+    console.error(`[Prebuild] 오류 ${errors.length}개:`);
+    errors.forEach(e => console.error(`[Prebuild]   - ${e.file} → ${e.message}`));
+  }
+
+  return true;
 }
 
 // Run directly if called as script

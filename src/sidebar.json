@@ -250,6 +250,10 @@
     "slug": "html-sample"
   },
   {
+    "label": ".test trigger",
+    "slug": "test_trigger"
+  },
+  {
     "label": "width test",
     "slug": "width-test"
   }
