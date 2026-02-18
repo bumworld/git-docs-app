@@ -72,8 +72,13 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
   generateSidebarConfig();
 
   // 처리 결과 요약 로그
-  const { byType, largeFiles, longPaths, errors } = stats;
+  const { byType, largeFiles, longPaths, errors, collisions } = stats;
   console.log(`[Prebuild] 처리 완료 — 총 ${stats.processed}개 파일 (md:${byType.markdown} html:${byType.html} img:${byType.image} asset:${byType.asset} txt-noext:${byType.textNoExt}), 스킵:${stats.skipped}`);
+
+  if (collisions.length > 0) {
+    console.warn(`[Prebuild] 경로 충돌 ${collisions.length}개 (동일 출력 경로로 인해 건너뜀):`);
+    collisions.forEach(c => console.warn(`[Prebuild]   - ${c.src} → ${c.dest}`));
+  }
 
   if (largeFiles.length > 0) {
     console.warn(`[Prebuild] 대용량 파일 ${largeFiles.length}개 (빌드 속도에 영향 가능):`);

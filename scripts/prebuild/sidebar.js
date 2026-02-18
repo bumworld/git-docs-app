@@ -31,7 +31,7 @@ function scanDir(dir, relDir = '') {
         });
       }
     } else if (entry.isFile() && FILE_EXTENSIONS.MARKDOWN.includes(path.extname(entry.name).toLowerCase())) {
-      if (entry.name === 'index.md' && relDir === '') continue;
+      if (entry.name === 'index.md' && relDir === '') continue; // generateSidebarConfig에서 별도 처리
 
       const rawSlug = relDir
         ? `${relDir}/${sanitizeSlug(entry.name)}`
@@ -56,7 +56,22 @@ function scanDir(dir, relDir = '') {
 }
 
 export function generateSidebarConfig() {
-  const sidebar = scanDir(PATHS.DOCS);
-  fs.outputFileSync(PATHS.SIDEBAR_JSON, JSON.stringify(sidebar, null, 2), 'utf-8');
-  console.log(`[Prebuild] Sidebar config generated (${sidebar.length} top-level items)`);
+  const items = scanDir(PATHS.DOCS);
+
+  // 루트 index.md (README.md에서 변환된)를 사이드바 첫 번째 항목으로 추가
+  // slug ''는 Starlight의 홈 페이지 슬러그
+  const indexPath = path.join(PATHS.DOCS, 'index.md');
+  if (fs.existsSync(indexPath)) {
+    let label = 'README';
+    try {
+      const content = fs.readFileSync(indexPath, 'utf-8');
+      const parsed = matter(content);
+      if (parsed.data.sidebar?.label) label = parsed.data.sidebar.label;
+      else if (parsed.data.title) label = parsed.data.title;
+    } catch { /* use default label */ }
+    items.unshift({ label, slug: '' });
+  }
+
+  fs.outputFileSync(PATHS.SIDEBAR_JSON, JSON.stringify(items, null, 2), 'utf-8');
+  console.log(`[Prebuild] Sidebar config generated (${items.length} top-level items)`);
 }
