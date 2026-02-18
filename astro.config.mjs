@@ -43,6 +43,7 @@ export default defineConfig({
         './src/styles/custom.css',
         './src/styles/print.css',
         './src/styles/view-source.css',
+        './src/styles/screen-preview.css',
       ],
       head: [
         { tag: 'meta', attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1.0' } },
@@ -54,6 +55,7 @@ export default defineConfig({
         { tag: 'script', attrs: { src: '/print-button.js', defer: true } },
         { tag: 'script', attrs: { src: '/view-source-button.js', defer: true } },
         { tag: 'script', attrs: { src: '/copy-content-button.js', defer: true } },
+        { tag: 'script', attrs: { src: '/screen-preview.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/_assets/presentation-mode.js' } },
       ],
       components: {

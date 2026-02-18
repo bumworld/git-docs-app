@@ -1,0 +1,318 @@
+/* ============================================================
+   Screen Preview Button (TOC 사이드바)
+   ============================================================ */
+.toc-screen-preview-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  background: var(--sl-color-accent-low, #1e3a5f);
+  border: 1px solid var(--sl-color-accent, #3b82f6);
+  border-radius: 0.375rem;
+  color: var(--sl-color-white);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.toc-screen-preview-btn:hover {
+  background: var(--sl-color-gray-6);
+  border-color: var(--sl-color-gray-4);
+  color: var(--sl-color-text);
+}
+
+.toc-screen-preview-btn svg {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* ============================================================
+   Status Badge (버튼 내부 및 모달 헤더)
+   ============================================================ */
+.screen-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.screen-status-draft    { background: #374151; color: #d1d5db; }
+.screen-status-review   { background: #78350f; color: #fde68a; }
+.screen-status-confirmed{ background: #1e3a5f; color: #93c5fd; }
+.screen-status-dev      { background: #2e1065; color: #c4b5fd; }
+.screen-status-done     { background: #064e3b; color: #6ee7b7; }
+
+/* ============================================================
+   Screen Preview Modal
+   ============================================================ */
+.screen-preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen-preview-modal-visible {
+  display: flex;
+}
+
+.screen-preview-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.screen-preview-modal-content {
+  position: relative;
+  width: 95%;
+  max-width: 1100px;
+  height: 88vh;
+  max-height: 860px;
+  background: var(--sl-color-bg);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.75rem;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: spModalIn 0.2s ease-out;
+}
+
+@keyframes spModalIn {
+  from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+
+/* ---- Header ---- */
+.screen-preview-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-bg-sidebar);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
+.screen-preview-modal-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--sl-color-text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screen-preview-version {
+  font-size: 0.75rem;
+  color: var(--sl-color-gray-3);
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.screen-preview-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--sl-color-text);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.screen-preview-modal-close:hover { background: var(--sl-color-gray-6); }
+
+/* ---- Toolbar ---- */
+.screen-preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-bg-sidebar);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* Device size toggles */
+.screen-device-group {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--sl-color-gray-7);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.375rem;
+  padding: 0.2rem;
+}
+
+.screen-device-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--sl-color-gray-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.screen-device-btn:hover { background: var(--sl-color-gray-6); color: var(--sl-color-text); }
+.screen-device-btn.active {
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Screen tabs (multiple screens) */
+.screen-tabs {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.screen-tabs::-webkit-scrollbar { display: none; }
+
+.screen-tab-btn {
+  padding: 0.3rem 0.75rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  color: var(--sl-color-gray-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.screen-tab-btn:hover { background: var(--sl-color-gray-6); color: var(--sl-color-text); }
+.screen-tab-btn.active {
+  background: var(--sl-color-accent-low, #1e3a5f);
+  border-color: var(--sl-color-accent, #3b82f6);
+  color: var(--sl-color-white);
+}
+
+/* External links */
+.screen-preview-links {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.screen-preview-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  background: var(--sl-color-gray-6);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.375rem;
+  color: var(--sl-color-text-accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.screen-preview-link-btn:hover {
+  background: var(--sl-color-gray-5);
+  border-color: var(--sl-color-gray-4);
+}
+
+/* ---- Viewport ---- */
+.screen-preview-viewport {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--sl-color-gray-7, #111);
+  position: relative;
+}
+
+.screen-preview-frame-wrap {
+  position: relative;
+  transition: width 0.25s ease;
+  background: #fff;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.screen-preview-frame-wrap.device-mobile  { width: 375px; min-height: 667px; }
+.screen-preview-frame-wrap.device-tablet  { width: 768px; min-height: 1024px; }
+.screen-preview-frame-wrap.device-desktop { width: 100%; max-width: 1280px; min-height: 600px; }
+
+.screen-preview-iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  border: none;
+}
+
+/* Loading state */
+.screen-preview-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sl-color-bg);
+  font-size: 0.875rem;
+  color: var(--sl-color-gray-3);
+}
+
+/* ============================================================
+   Dark mode tweaks
+   ============================================================ */
+html[data-theme='dark'] .screen-preview-modal-overlay {
+  background: rgba(0, 0, 0, 0.88);
+}
+
+/* ============================================================
+   Print / Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .toc-screen-preview-btn { display: none !important; }
+  .screen-preview-modal-content { width: 100%; height: 100%; border-radius: 0; max-height: none; }
+  .screen-preview-toolbar { padding: 0.5rem 0.75rem; }
+  .screen-preview-viewport { padding: 0.75rem; }
+}
+
+@media print {
+  .screen-preview-modal,
+  .toc-screen-preview-btn { display: none !important; }
+}

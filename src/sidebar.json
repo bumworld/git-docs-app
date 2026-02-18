@@ -1,5 +1,9 @@
 [
   {
+    "label": "README",
+    "slug": ""
+  },
+  {
     "label": "프로젝트",
     "collapsed": true,
     "items": [
@@ -32,7 +36,7 @@
                 ]
               },
               {
-                "label": "API",
+                "label": "api",
                 "collapsed": true,
                 "items": [
                   {
@@ -206,6 +210,46 @@
       {
         "label": "Bridge Interface",
         "slug": "mobile/bridge-interface"
+      }
+    ]
+  },
+  {
+    "label": "planning",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "screens",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "home",
+            "slug": "planning/screens/home"
+          },
+          {
+            "label": "login",
+            "slug": "planning/screens/login"
+          },
+          {
+            "label": "product list",
+            "slug": "planning/screens/product-list"
+          }
+        ]
+      },
+      {
+        "label": "기획 문서 가이드",
+        "slug": "planning/00-overview"
+      },
+      {
+        "label": "홈 화면",
+        "slug": "planning/01-home"
+      },
+      {
+        "label": "로그인",
+        "slug": "planning/02-login"
+      },
+      {
+        "label": "상품 목록",
+        "slug": "planning/03-product-list"
       }
     ]
   },
