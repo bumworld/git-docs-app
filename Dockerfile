@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN HUSKY=0 npm ci --omit=dev
 
 # Copy application source
 COPY server/ ./server/
