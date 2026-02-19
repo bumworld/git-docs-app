@@ -6,9 +6,9 @@ services:
     ports:
       - "${PORT:-8080}:3000"
     volumes:
-      - ./source:/app/source
-      - ./conf:/app/conf
-      - ./data:/app/data
+      - ./sample/source:/app/source
+      - ./sample/conf:/app/conf
+      - ./sample/data:/app/data
     environment:
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
       - SESSION_SECRET=${SESSION_SECRET:-change-me-in-production}
@@ -22,9 +22,9 @@ services:
 #    ports:
 #      - "8081:3000"
 #    volumes:
-#      - ./repos/project-b/source:/app/source
-#      - ./repos/project-b/conf:/app/conf
-#      - ./repos/project-b/data:/app/data
+#      - ./repos/project-b/sample/source:/app/source
+#      - ./repos/project-b/sample/conf:/app/conf
+#      - ./repos/project-b/sample/data:/app/data
 #    environment:
 #      - ADMIN_EMAIL=another-admin@example.com
 #      - SESSION_SECRET=another-secret

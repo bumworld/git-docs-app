@@ -5,6 +5,7 @@ data
 dist
 dist-temp
 dist-old
+sample
 *.md
 .DS_Store
 .claude

@@ -11,7 +11,7 @@ Drop markdown files into a folder, and instantly get a beautiful, searchable wik
 - **Markdown → Wiki**: Automatically converts markdown files to a static wiki site
 - **Google OAuth**: Login restricted to approved Google accounts only
 - **Admin Panel**: Manage users, approve access requests, configure site settings
-- **Auto Build**: File changes in `source/` trigger automatic rebuilds
+- **Auto Build**: File changes in `sample/source/` trigger automatic rebuilds
 - **Auto Sidebar**: Navigation sidebar generated from directory structure
 - **Mermaid Diagrams**: Mermaid code blocks rendered as diagrams
 - **Presentation Mode**: Convert markdown to reveal.js presentations
@@ -48,11 +48,11 @@ cd git-docs-app
 # Place your Google OAuth credentials (either way works):
 
 # Option A: Download from Google Console and rename
-mv ~/Downloads/client_secret_*.json conf/google_auth.json
+mv ~/Downloads/client_secret_*.json sample/conf/google_auth.json
 
 # Option B: Copy the example and fill in your credentials
-cp conf/google_auth.example.json conf/google_auth.json
-# Edit conf/google_auth.json with your client_id, client_secret, redirect_uris
+cp sample/conf/google_auth.example.json sample/conf/google_auth.json
+# Edit sample/conf/google_auth.json with your client_id, client_secret, redirect_uris
 ```
 
 ### 3. Run with Docker Compose
@@ -66,10 +66,10 @@ Open `http://localhost:8080` in your browser.
 
 ### 4. Add Content
 
-Place your markdown files in the `source/` directory:
+Place your markdown files in the `sample/source/` directory:
 
 ```
-source/
+sample/source/
 ├── getting-started.md
 ├── guides/
 │   ├── installation.md
@@ -88,10 +88,10 @@ The wiki rebuilds automatically when files change. Sidebar navigation is generat
 
 | Folder | Description | Docker Volume |
 |--------|-------------|---------------|
-| `source/` | Your markdown, HTML, and resource files | Yes |
-| `conf/` | `google_auth.json` (OAuth credentials) | Yes |
-| `data/` | `wiki.db` (SQLite - auto-created) | Yes |
-| `dist/` | Built static HTML (served to users) | No |
+| `sample/source/` | Your markdown, HTML, and resource files | Yes |
+| `sample/conf/` | `google_auth.json` (OAuth credentials) | Yes |
+| `sample/data/` | `wiki.db` (SQLite - auto-created) | Yes |
+| `sample/dist/` | Built static HTML (served to users) | No |
 
 ## Environment Variables
 
@@ -187,9 +187,9 @@ services:
     ports:
       - "8080:3000"
     volumes:
-      - ./source:/app/source
-      - ./conf:/app/conf
-      - ./data:/app/data
+      - ./sample/source:/app/source
+      - ./sample/conf:/app/conf
+      - ./sample/data:/app/data
     environment:
       - ADMIN_EMAIL=your-email@gmail.com
       - SESSION_SECRET=your-random-secret-key
@@ -203,17 +203,17 @@ Run separate wikis on different ports:
 ```bash
 # Wiki A on port 8080
 docker run -p 8080:3000 \
-  -v ./repo-a/source:/app/source \
-  -v ./repo-a/conf:/app/conf \
-  -v ./repo-a/data:/app/data \
+  -v ./repo-a/sample/source:/app/source \
+  -v ./repo-a/sample/conf:/app/conf \
+  -v ./repo-a/sample/data:/app/data \
   -e ADMIN_EMAIL=admin-a@gmail.com \
   bumworld/git-docs-app
 
 # Wiki B on port 8081
 docker run -p 8081:3000 \
-  -v ./repo-b/source:/app/source \
-  -v ./repo-b/conf:/app/conf \
-  -v ./repo-b/data:/app/data \
+  -v ./repo-b/sample/source:/app/source \
+  -v ./repo-b/sample/conf:/app/conf \
+  -v ./repo-b/sample/data:/app/data \
   -e ADMIN_EMAIL=admin-b@gmail.com \
   bumworld/git-docs-app
 ```

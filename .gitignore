@@ -5,6 +5,9 @@ node_modules
 dist
 dist-temp
 dist-old
+sample/dist
+sample/dist-temp
+sample/dist-old
 
 # Generated content (prebuild copies source/ here)
 src/content/docs/*
@@ -16,9 +19,14 @@ data/*.db
 data/*.db-shm
 data/*.db-journal
 data/*.db-wal
+sample/data/*.db
+sample/data/*.db-shm
+sample/data/*.db-journal
+sample/data/*.db-wal
 
 # Config (contains secrets)
 conf/google_auth.json
+sample/conf/google_auth.json
 
 # System
 .DS_Store

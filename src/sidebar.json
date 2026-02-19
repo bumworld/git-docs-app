@@ -4,58 +4,6 @@
     "slug": ""
   },
   {
-    "label": "프로젝트",
-    "collapsed": true,
-    "items": [
-      {
-        "label": "배포",
-        "collapsed": true,
-        "items": [
-          {
-            "label": "docker guide",
-            "slug": "프로젝트/배포/docker-guide"
-          }
-        ]
-      },
-      {
-        "label": "설계",
-        "collapsed": true,
-        "items": [
-          {
-            "label": "상세설계",
-            "collapsed": true,
-            "items": [
-              {
-                "label": "데이터베이스",
-                "collapsed": true,
-                "items": [
-                  {
-                    "label": "스키마",
-                    "slug": "프로젝트/설계/상세설계/데이터베이스/스키마"
-                  }
-                ]
-              },
-              {
-                "label": "api",
-                "collapsed": true,
-                "items": [
-                  {
-                    "label": "인증 API",
-                    "slug": "프로젝트/설계/상세설계/api/인증-api"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "label": "아키텍처",
-            "slug": "프로젝트/설계/아키텍처"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "label": "api",
     "collapsed": true,
     "items": [
@@ -122,10 +70,6 @@
     "collapsed": true,
     "items": [
       {
-        "label": "📎 데이터 백업",
-        "slug": "downloads/데이터-백업"
-      },
-      {
         "label": "📎 config example",
         "slug": "downloads/config-example"
       },
@@ -136,6 +80,10 @@
       {
         "label": "test screen",
         "slug": "downloads/test-screen"
+      },
+      {
+        "label": "📎 데이터 백업",
+        "slug": "downloads/데이터-백업"
       }
     ]
   },
@@ -290,6 +238,58 @@
       {
         "label": "E2E Testing",
         "slug": "testing/e2e-testing"
+      }
+    ]
+  },
+  {
+    "label": "프로젝트",
+    "collapsed": true,
+    "items": [
+      {
+        "label": "배포",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "docker guide",
+            "slug": "프로젝트/배포/docker-guide"
+          }
+        ]
+      },
+      {
+        "label": "설계",
+        "collapsed": true,
+        "items": [
+          {
+            "label": "상세설계",
+            "collapsed": true,
+            "items": [
+              {
+                "label": "api",
+                "collapsed": true,
+                "items": [
+                  {
+                    "label": "인증 API",
+                    "slug": "프로젝트/설계/상세설계/api/인증-api"
+                  }
+                ]
+              },
+              {
+                "label": "데이터베이스",
+                "collapsed": true,
+                "items": [
+                  {
+                    "label": "스키마",
+                    "slug": "프로젝트/설계/상세설계/데이터베이스/스키마"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "아키텍처",
+            "slug": "프로젝트/설계/아키텍처"
+          }
+        ]
       }
     ]
   },

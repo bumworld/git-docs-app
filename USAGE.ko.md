@@ -27,9 +27,9 @@ ADMIN_EMAIL=admin@example.com docker compose up -d
 
 # Docker 직접 실행
 docker run -p 8080:3000 \
-  -v ./source:/app/source \
-  -v ./conf:/app/conf \
-  -v ./data:/app/data \
+  -v ./sample/source:/app/source \
+  -v ./sample/conf:/app/conf \
+  -v ./sample/data:/app/data \
   -e ADMIN_EMAIL=admin@example.com \
   bumworld/git-docs-app
 ```
@@ -38,10 +38,10 @@ docker run -p 8080:3000 \
 
 ### 콘텐츠 추가하기
 
-`source/` 디렉토리에 마크다운 파일을 배치합니다:
+`sample/source/` 디렉토리에 마크다운 파일을 배치합니다:
 
 ```
-source/
+sample/source/
 ├── index.md              # 홈페이지
 ├── getting-started.md    # 기본 페이지
 ├── guides/
@@ -189,7 +189,7 @@ theme: sky
 
 ### 예제 프레젠테이션
 
-전체 예제는 [`source/example-presentation.md`](source/example-presentation.md)를 참고하세요.
+전체 예제는 [`sample/source/example-presentation.md`](sample/source/example-presentation.md)를 참고하세요.
 
 ---
 

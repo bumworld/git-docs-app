@@ -22,63 +22,83 @@ const theme = entry?.data?.theme || 'black';
 )}
 
 {isPresentation && (
-  <script>
-    // Initialize reveal.js for presentation mode
-    import Reveal from 'reveal.js';
-    import 'reveal.js/dist/reveal.css';
+  <script is:inline type="module">
+    // Initialize reveal.js for presentation mode using dynamic imports
+    (async () => {
+      // Dynamically import Reveal and CSS
+      const [{ default: Reveal }] = await Promise.all([
+        import('/node_modules/reveal.js/dist/reveal.esm.js'),
+        import('/node_modules/reveal.js/dist/reveal.css'),
+      ]);
 
-    // Import theme dynamically based on data-theme attribute
-    const slides = document.querySelector('.slides');
-    const theme = slides?.getAttribute('data-theme') || 'black';
+      // Import theme dynamically based on data-theme attribute
+      const slides = document.querySelector('.slides');
+      const theme = slides?.getAttribute('data-theme') || 'black';
 
-    // Load theme CSS
-    import(`reveal.js/dist/theme/${theme}.css`).catch(() => {
-      console.warn(`Failed to load theme: ${theme}, falling back to black`);
-      import('reveal.js/dist/theme/black.css');
-    });
-
-    // Wait for DOM to be ready
-    document.addEventListener('DOMContentLoaded', () => {
-      const deck = new Reveal({
-        embedded: false,
-        hash: true,
-        center: true,
-        transition: 'slide',
-        width: 960,
-        height: 700,
-        margin: 0.1,
-        minScale: 0.2,
-        maxScale: 2.0,
-        controls: true,
-        progress: true,
-        slideNumber: 'c/t',
-        keyboard: true,
-        overview: true,
-        touch: true,
-        loop: false,
-        rtl: false,
-        fragments: true,
-        help: true,
-        showNotes: false,
-        autoPlayMedia: null,
-        preloadIframes: null,
-        mouseWheel: false,
-        hideInactiveCursor: true,
-        hideCursorTime: 5000,
-      });
-
-      deck.initialize();
-
-      // Handle fullscreen toggle
-      window.togglePresentationFullscreen = () => {
-        const elem = document.querySelector('.presentation-wrapper');
-        if (!document.fullscreenElement) {
-          elem?.requestFullscreen();
-        } else {
-          document.exitFullscreen();
-        }
+      // Load theme CSS
+      const loadTheme = async (themeName) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `/node_modules/reveal.js/dist/theme/${themeName}.css`;
+        document.head.appendChild(link);
       };
-    });
+
+      try {
+        await loadTheme(theme);
+      } catch {
+        console.warn(`Failed to load theme: ${theme}, falling back to black`);
+        await loadTheme('black');
+      }
+
+      // Wait for DOM to be ready
+      const initReveal = () => {
+        const deck = new Reveal({
+          embedded: false,
+          hash: true,
+          center: true,
+          transition: 'slide',
+          width: 960,
+          height: 700,
+          margin: 0.1,
+          minScale: 0.2,
+          maxScale: 2.0,
+          controls: true,
+          progress: true,
+          slideNumber: 'c/t',
+          keyboard: true,
+          overview: true,
+          touch: true,
+          loop: false,
+          rtl: false,
+          fragments: true,
+          help: true,
+          showNotes: false,
+          autoPlayMedia: null,
+          preloadIframes: null,
+          mouseWheel: false,
+          hideInactiveCursor: true,
+          hideCursorTime: 5000,
+        });
+
+        deck.initialize();
+
+        // Handle fullscreen toggle
+        window.togglePresentationFullscreen = () => {
+          const elem = document.querySelector('.presentation-wrapper');
+          if (!document.fullscreenElement) {
+            elem?.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+        };
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initReveal);
+      } else {
+        initReveal();
+      }
+    })();
   </script>
 
   <style is:global>

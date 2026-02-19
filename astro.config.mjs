@@ -23,6 +23,11 @@ export default defineConfig({
   build: {
     assets: '_assets',
   },
+  vite: {
+    ssr: {
+      noExternal: ['reveal.js'],
+    },
+  },
   markdown: {
     remarkPlugins: [remarkMermaid, remarkVideo, remarkSlides],
     rehypePlugins: [rehypeExternalLinks],

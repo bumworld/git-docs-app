@@ -300,6 +300,20 @@ iframe {
   transition: transform 0.15s ease;
 }
 
+/* Presentation mode - hide mermaid toolbar buttons */
+.presentation-wrapper .mermaid-toolbar {
+  display: none !important;
+}
+
+/* Presentation mode - adjust mermaid wrapper for no toolbar */
+.presentation-wrapper .mermaid-wrapper {
+  border: none !important;
+}
+
+.presentation-wrapper .mermaid-viewport {
+  padding: 1rem !important;
+}
+
 /* Print Button in TOC */
 .toc-print-btn {
   display: flex;

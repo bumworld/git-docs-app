@@ -1,2 +1,6 @@
 #!/bin/sh
-npm test
+# Run prebuild first to generate src/content/docs/
+USE_SAMPLE_DIR=true npm run prebuild
+
+# Run tests
+USE_SAMPLE_DIR=true npm test

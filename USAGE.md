@@ -27,9 +27,9 @@ ADMIN_EMAIL=admin@example.com docker compose up -d
 
 # Direct Docker run
 docker run -p 8080:3000 \
-  -v ./source:/app/source \
-  -v ./conf:/app/conf \
-  -v ./data:/app/data \
+  -v ./sample/source:/app/source \
+  -v ./sample/conf:/app/conf \
+  -v ./sample/data:/app/data \
   -e ADMIN_EMAIL=admin@example.com \
   bumworld/git-docs-app
 ```
@@ -38,10 +38,10 @@ Access your wiki at `http://localhost:8080`
 
 ### Adding Content
 
-Place markdown files in the `source/` directory:
+Place markdown files in the `sample/source/` directory:
 
 ```
-source/
+sample/source/
 ├── index.md              # Homepage
 ├── getting-started.md    # Basic page
 ├── guides/
@@ -189,7 +189,7 @@ theme: sky
 
 ### Example Presentation
 
-See [`source/example-presentation.md`](source/example-presentation.md) for a complete example.
+See [`sample/source/example-presentation.md`](sample/source/example-presentation.md) for a complete example.
 
 ---
 
