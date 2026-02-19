@@ -12,6 +12,7 @@ sample/dist-old
 # Generated content (prebuild copies source/ here)
 src/content/docs/*
 !src/content/docs/.gitkeep
+src/sidebar.json
 public/downloads
 
 # Data
