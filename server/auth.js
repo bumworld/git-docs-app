@@ -3,11 +3,12 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import fs from 'fs';
 import path from 'path';
 import { findUserById, createOrUpdateUser } from './db.js';
+import { PATHS } from '../config/constants.js';
 
 function loadGoogleConfig() {
-  const confPath = path.resolve(process.cwd(), 'conf', 'google_auth.json');
+  const confPath = PATHS.GOOGLE_AUTH;
   if (!fs.existsSync(confPath)) {
-    console.error('[Auth] conf/google_auth.json not found. Google OAuth will not work.');
+    console.error(`[Auth] ${confPath} not found. Google OAuth will not work.`);
     return null;
   }
   const raw = fs.readFileSync(confPath, 'utf-8');

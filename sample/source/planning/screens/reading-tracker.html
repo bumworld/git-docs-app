@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 책장 - 독서 기록 앱</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a1a; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #2d5a3d 0%, #4a7c59 100%); color: #fff; padding: 1.25rem 1rem; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+  .header h1 { font-size: 1.5rem; font-weight: 700; }
+  .btn-add { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.25); border: none; color: #fff; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .btn-add:hover { background: rgba(255,255,255,0.4); }
+  .header-stats { font-size: 0.875rem; opacity: 0.9; }
+  .header-stats strong { font-weight: 600; }
+
+  /* Main */
+  .container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+  .book-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  @media (min-width: 600px) { .book-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 900px) { .book-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .book-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+  .book-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+  .book-cover { aspect-ratio: 2/3; background: linear-gradient(135deg, #e8f0e9 0%, #d4e5d7 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+  .book-info { padding: 0.875rem; }
+  .book-title { font-size: 0.9375rem; font-weight: 600; line-height: 1.4; margin-bottom: 0.25rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .book-author { font-size: 0.8125rem; color: #6b7280; margin-bottom: 0.5rem; }
+  .book-meta { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; }
+  .book-rating { color: #f59e0b; font-size: 0.875rem; }
+  .book-date { font-size: 0.75rem; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 3rem 1.5rem; }
+  .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+  .empty-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
+  .empty-desc { font-size: 0.875rem; color: #6b7280; margin-bottom: 1.5rem; }
+  .empty-btn { padding: 0.75rem 1.5rem; background: #2d5a3d; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <h1>📚 내 책장</h1>
+    <button class="btn-add" title="읽은 책 추가">+</button>
+  </div>
+  <div class="header-stats">올해 <strong>3권</strong> 읽었어요</div>
+</header>
+
+<div class="container">
+  <div class="book-grid">
+
+    <div class="book-card">
+      <div class="book-cover">📖</div>
+      <div class="book-info">
+        <div class="book-title">클린 코드</div>
+        <div class="book-author">로버트 C. 마틴</div>
+        <div class="book-meta">
+          <span class="book-rating">★★★★★</span>
+          <span class="book-date">2026.02.15</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <div class="book-cover">🏗️</div>
+      <div class="book-info">
+        <div class="book-title">클린 아키텍처</div>
+        <div class="book-author">로버트 C. 마틴</div>
+        <div class="book-meta">
+          <span class="book-rating">★★★★☆</span>
+          <span class="book-date">2026.02.10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <div class="book-cover">🔄</div>
+      <div class="book-info">
+        <div class="book-title">리팩토링 2판</div>
+        <div class="book-author">마틴 파울러</div>
+        <div class="book-meta">
+          <span class="book-rating">★★★★★</span>
+          <span class="book-date">2026.02.01</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-card">
+      <div class="book-cover">💡</div>
+      <div class="book-info">
+        <div class="book-title">실용주의 프로그래머</div>
+        <div class="book-author">앤드류 헌트</div>
+        <div class="book-meta">
+          <span class="book-rating">★★★★★</span>
+          <span class="book-date">2026.01.20</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
