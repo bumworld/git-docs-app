@@ -43,3 +43,9 @@ Thumbs.db
 # Playwright (자동 생성)
 playwright-report
 test-results
+
+# Vercel
+.vercel
+
+# Render
+.render

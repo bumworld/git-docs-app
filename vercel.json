@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "DEV_MODE": "true",
+    "USE_SAMPLE_DIR": "true",
+    "NODE_ENV": "production"
+  }
+}

@@ -27,6 +27,33 @@ Drop markdown files into a folder, and instantly get a beautiful, searchable wik
 - 📖 **[Usage Guide (English)](USAGE.md)** - Comprehensive feature guide
 - 📖 **[사용 가이드 (한국어)](USAGE.ko.md)** - 한국어 상세 가이드
 
+## 🚀 Quick Deploy (Demo)
+
+Want to deploy a **public demo** without authentication?
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/bumworld/git-docs-app)
+
+**Features:**
+- ✅ No authentication required (auto-login as admin)
+- ✅ Uses sample markdown content
+- ✅ **All features work** (rebuild, admin panel, SSE, etc.)
+- ✅ Free hosting on Render.com
+- ✅ Auto-deploy on git push
+- ✅ Persistent SQLite database
+
+👉 **[Render Deployment Guide](RENDER_DEPLOY.md)** - Step-by-step instructions
+
+<details>
+<summary>Alternative: Vercel (static only)</summary>
+
+For static deployment without dynamic features:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/bumworld/git-docs-app&env=DEV_MODE,USE_SAMPLE_DIR&envDescription=Demo%20mode%20configuration&envLink=https://github.com/bumworld/git-docs-app/blob/main/VERCEL_DEPLOY.md)
+
+📖 **[Vercel Deployment Guide](VERCEL_DEPLOY.md)** (requires serverless setup)
+
+</details>
+
 ## Quick Start (Docker)
 
 ### 1. Set up Google OAuth

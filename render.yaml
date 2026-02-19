@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: git-docs-app
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build:local
+    startCommand: npm start
+    envVars:
+      - key: DEV_MODE
+        value: "true"
+      - key: USE_SAMPLE_DIR
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: git-docs-data
+      mountPath: /opt/render/project/src/sample/data
+      sizeGB: 1
