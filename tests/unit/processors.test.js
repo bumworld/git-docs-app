@@ -59,7 +59,7 @@ describe('createStats', () => {
     assert.strictEqual(stats.processed, 0);
     assert.strictEqual(stats.skipped, 0);
     assert.deepStrictEqual(stats.errors, []);
-    assert.deepStrictEqual(stats.byType, { markdown: 0, html: 0, image: 0, asset: 0, textNoExt: 0 });
+    assert.deepStrictEqual(stats.byType, { markdown: 0, html: 0, image: 0, asset: 0, textNoExt: 0, static: 0 });
     assert.deepStrictEqual(stats.largeFiles, []);
     assert.deepStrictEqual(stats.longPaths, []);
     assert.deepStrictEqual(stats.collisions, []);

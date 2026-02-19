@@ -1,4 +1,7 @@
 #!/bin/sh
+# Use Homebrew node (v25) to match the compiled better-sqlite3 native module
+export PATH="/opt/homebrew/bin:$PATH"
+
 # Run prebuild first to generate src/content/docs/
 USE_SAMPLE_DIR=true npm run prebuild
 

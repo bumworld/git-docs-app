@@ -4,8 +4,8 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 
-// Create a temporary database for testing
-const TEST_DB_PATH = path.join(process.cwd(), 'data', 'test-builds.db');
+// Create a unique temporary database for each test run to avoid parallel conflicts
+const TEST_DB_PATH = path.join(process.cwd(), 'data', `test-builds-${process.pid}.db`);
 
 // We need to set up the DB manually since importing db.js would use the real DB
 let db;
