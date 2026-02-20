@@ -108,6 +108,17 @@ export async function runBuild() {
     } else {
       console.log('[Build] Syncing build output to dist...');
       logParts.push('[Build] Syncing build output to dist...');
+
+      // 기존 dist → dist-old 백업 (롤백 지원)
+      if (fs.existsSync(PATHS.DIST) && fs.readdirSync(PATHS.DIST).length > 0) {
+        fs.ensureDirSync(PATHS.DIST_OLD);
+        fs.emptyDirSync(PATHS.DIST_OLD);
+        fs.copySync(PATHS.DIST, PATHS.DIST_OLD);
+        const backupMsg = '[Build] Backed up dist/ to dist-old/';
+        console.log(backupMsg);
+        logParts.push(backupMsg);
+      }
+
       fs.ensureDirSync(PATHS.DIST);
       fs.emptyDirSync(PATHS.DIST);
       fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
@@ -149,6 +160,23 @@ export async function runBuild() {
     // Cleanup: remove temp dir if it exists
     if (fs.existsSync(PATHS.DIST_TEMP)) {
       fs.removeSync(PATHS.DIST_TEMP);
+    }
+
+    // 롤백 시도: dist가 비어있고 dist-old가 있으면 복구
+    // (dist에 내용이 있으면 기존 배포본 유지, 건드리지 않음)
+    const distIsEmpty = !fs.existsSync(PATHS.DIST) || fs.readdirSync(PATHS.DIST).length === 0;
+    if (distIsEmpty && fs.existsSync(PATHS.DIST_OLD) && fs.readdirSync(PATHS.DIST_OLD).length > 0) {
+      try {
+        fs.ensureDirSync(PATHS.DIST);
+        fs.copySync(PATHS.DIST_OLD, PATHS.DIST);
+        const rollbackMsg = '[Build] Rolled back dist/ from dist-old/';
+        console.log(rollbackMsg);
+        logParts.push(rollbackMsg);
+      } catch (rollbackErr) {
+        const rollbackErrMsg = `[Build] Rollback failed: ${rollbackErr.message}`;
+        console.error(rollbackErrMsg);
+        logParts.push(rollbackErrMsg);
+      }
     }
 
     return {
