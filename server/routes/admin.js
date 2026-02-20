@@ -1,94 +1,67 @@
 import { Router } from 'express';
 import {
-  getAllUsers,
-  findUserById,
-  updateUserStatus,
-  updateUserRole,
-  deleteUser,
-  getPendingUsers,
   getAllWhitelistedEmails,
   addWhitelistedEmail,
   deleteWhitelistedEmail,
-  getAllSettings,
-  updateSettings,
 } from '../db.js';
 import { requireAdmin } from '../middleware/requireAuth.js';
+import {
+  listUsers,
+  listPendingUsers,
+  getUserStats,
+  changeUserStatus,
+  changeUserRole,
+  removeUser,
+} from '../services/users.service.js';
+import {
+  getSettings,
+  filterAndUpdateSettings,
+  triggerRebuildIfNeeded,
+  isValidEmail,
+} from '../services/settings.service.js';
 
 const router = Router();
-const INITIAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
 router.use(requireAdmin);
 
-function isInitialAdmin(userId) {
-  if (!INITIAL_ADMIN_EMAIL) return false;
-  const user = findUserById(userId);
-  return user && user.email === INITIAL_ADMIN_EMAIL;
-}
+// ─── Users ────────────────────────────────────────────────────────────────────
 
-// Users - include protected flag for frontend
 router.get('/users', (req, res) => {
-  const users = getAllUsers().map(u => ({
-    ...u,
-    protected: u.email === INITIAL_ADMIN_EMAIL,
-  }));
-  res.json(users);
+  res.json(listUsers());
 });
 
 router.get('/users/pending', (req, res) => {
-  const users = getPendingUsers();
-  res.json(users);
+  res.json(listPendingUsers());
 });
 
 router.put('/users/:id/status', (req, res) => {
-  const { status } = req.body;
-  if (!['active', 'pending', 'blocked'].includes(status)) {
-    return res.status(400).json({ error: 'Invalid status' });
-  }
-  if (isInitialAdmin(req.params.id) && status !== 'active') {
-    return res.status(403).json({ error: 'Cannot block or deactivate the initial admin' });
-  }
-  const user = updateUserStatus(req.params.id, status);
-  console.log(`[Admin] ${req.user.email} changed user #${req.params.id} (${user.email}) status → ${status}`);
-  res.json(user);
+  const result = changeUserStatus(req.params.id, req.body.status, req.user);
+  if (!result.success) return res.status(result.code).json({ error: result.error });
+  res.json(result.user);
 });
 
 router.put('/users/:id/role', (req, res) => {
-  const { role } = req.body;
-  if (!['admin', 'user'].includes(role)) {
-    return res.status(400).json({ error: 'Invalid role' });
-  }
-  if (isInitialAdmin(req.params.id) && role !== 'admin') {
-    return res.status(403).json({ error: 'Cannot remove admin role from the initial admin' });
-  }
-  const user = updateUserRole(req.params.id, role);
-  console.log(`[Admin] ${req.user.email} changed user #${req.params.id} (${user.email}) role → ${role}`);
-  res.json(user);
+  const result = changeUserRole(req.params.id, req.body.role, req.user);
+  if (!result.success) return res.status(result.code).json({ error: result.error });
+  res.json(result.user);
 });
 
 router.delete('/users/:id', (req, res) => {
-  if (parseInt(req.params.id) === req.user.id) {
-    return res.status(400).json({ error: 'Cannot delete yourself' });
-  }
-  if (isInitialAdmin(req.params.id)) {
-    return res.status(403).json({ error: 'Cannot delete the initial admin' });
-  }
-  const target = findUserById(req.params.id);
-  deleteUser(req.params.id);
-  console.log(`[Admin] ${req.user.email} deleted user #${req.params.id} (${target?.email || 'unknown'})`);
+  const result = removeUser(req.params.id, req.user);
+  if (!result.success) return res.status(result.code).json({ error: result.error });
   res.json({ success: true });
 });
 
-// Whitelisted Emails
+// ─── Whitelisted Emails ───────────────────────────────────────────────────────
+
 router.get('/whitelisted-emails', (req, res) => {
-  const emails = getAllWhitelistedEmails();
-  res.json(emails);
+  res.json(getAllWhitelistedEmails());
 });
 
 router.post('/whitelisted-emails', (req, res) => {
   const { email, notes } = req.body;
 
-  // Validate email format
-  if (!email || !email.includes('@')) {
+  if (!isValidEmail(email)) {
     return res.status(400).json({ error: 'Invalid email address' });
   }
 
@@ -97,7 +70,6 @@ router.post('/whitelisted-emails', (req, res) => {
     console.log(`[Admin] ${req.user.email} added whitelisted email: ${email}`);
     res.json(newEmail);
   } catch (error) {
-    // Handle duplicate email error
     if (error.message.includes('UNIQUE constraint failed')) {
       return res.status(400).json({ error: 'Email already whitelisted' });
     }
@@ -111,50 +83,27 @@ router.delete('/whitelisted-emails/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// Settings
+// ─── Settings ─────────────────────────────────────────────────────────────────
+
 router.get('/settings', (req, res) => {
-  const settings = getAllSettings();
-  res.json(settings);
+  res.json(getSettings());
 });
 
-let buildRunner = null;
-function setBuildRunner(runner) { buildRunner = runner; }
+let _buildRunner = null;
+function setBuildRunner(runner) { _buildRunner = runner; }
 
 router.put('/settings', (req, res) => {
-  const allowedKeys = ['site_title', 'site_description', 'contact_email', 'footer_text', 'language'];
-  const updates = {};
-  for (const key of allowedKeys) {
-    if (req.body[key] !== undefined) {
-      updates[key] = String(req.body[key]);
-    }
-  }
-  if (Object.keys(updates).length === 0) {
-    return res.status(400).json({ error: 'No valid settings provided' });
-  }
-  updateSettings(updates);
-  console.log(`[Admin] ${req.user.email} updated settings: ${Object.keys(updates).join(', ')}`);
-
-  // Auto-rebuild if title or description changed (they are baked into static HTML)
-  if (updates.site_title !== undefined || updates.site_description !== undefined) {
-    if (buildRunner) {
-      console.log('[Admin] Settings changed, triggering rebuild...');
-      buildRunner.triggerBuild('settings', req.user.email);
-    }
-  }
-
-  res.json(getAllSettings());
+  const result = filterAndUpdateSettings(req.body);
+  if (!result.success) return res.status(result.code).json({ error: result.error });
+  console.log(`[Admin] ${req.user.email} updated settings: ${Object.keys(result.updates).join(', ')}`);
+  triggerRebuildIfNeeded(result.updates, req.user, _buildRunner);
+  res.json(getSettings());
 });
 
-// Stats
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
 router.get('/stats', (req, res) => {
-  const users = getAllUsers();
-  res.json({
-    total_users: users.length,
-    active_users: users.filter(u => u.status === 'active').length,
-    pending_users: users.filter(u => u.status === 'pending').length,
-    blocked_users: users.filter(u => u.status === 'blocked').length,
-    admin_users: users.filter(u => u.role === 'admin').length,
-  });
+  res.json(getUserStats());
 });
 
 export default router;
