@@ -9,6 +9,7 @@ const TEST_SOURCE = path.join(process.cwd(), 'test-temp-security', 'source');
 const TEST_DOCS = path.join(process.cwd(), 'test-temp-security', 'src', 'content', 'docs');
 const TEST_DOWNLOADS = path.join(process.cwd(), 'test-temp-security', 'public', 'downloads');
 const TEST_SIDEBAR = path.join(process.cwd(), 'test-temp-security', 'src', 'sidebar.json');
+const TEST_CACHE = path.join(process.cwd(), 'test-temp-security', 'data', 'prebuild-cache.json');
 
 const ORIGINAL_PATHS = { ...PATHS };
 
@@ -17,6 +18,7 @@ before(() => {
   PATHS.DOCS = TEST_DOCS;
   PATHS.DOWNLOADS = TEST_DOWNLOADS;
   PATHS.SIDEBAR_JSON = TEST_SIDEBAR;
+  PATHS.PREBUILD_CACHE = TEST_CACHE;
 
   fs.ensureDirSync(TEST_SOURCE);
 });

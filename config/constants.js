@@ -31,6 +31,7 @@ export const PATHS = {
   CONF: resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'),
   GOOGLE_AUTH: path.resolve(resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'), 'google_auth.json'),
   SIDEBAR_JSON: path.resolve(ROOT, 'src', 'sidebar.json'),
+  PREBUILD_CACHE: path.resolve(resolvePath(CUSTOM_DATA, 'sample/data', 'data'), 'prebuild-cache.json'),
 };
 
 export const FILE_EXTENSIONS = {

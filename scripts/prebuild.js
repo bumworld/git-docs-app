@@ -4,13 +4,27 @@ import { PATHS, IGNORE_FILES } from '../config/constants.js';
 import { generateTitle } from './prebuild/utils.js';
 import { processDirectory, createStats } from './prebuild/processors.js';
 import { generateSidebarConfig } from './prebuild/sidebar.js';
+import { loadCache, saveCache } from './prebuild/cache.js';
 
 export function runPrebuild() {
   console.log('[Prebuild] Starting content sync from source/ to src/content/docs/');
 
-  // Clean target directories
-  fs.emptyDirSync(PATHS.DOCS);
-  fs.emptyDirSync(PATHS.DOWNLOADS);
+  // 증분 빌드: 캐시 로드 (없으면 전체 처리)
+  const cache = loadCache(PATHS.PREBUILD_CACHE);
+  const cacheCtx = { cache: cache.files, newEntries: {} };
+  const isFirstRun = Object.keys(cache.files).length === 0;
+  if (!isFirstRun) {
+    console.log(`[Prebuild] 증분 빌드 모드 — 캐시 ${Object.keys(cache.files).length}개 항목 로드`);
+  }
+
+  // 첫 실행 시에만 전체 초기화 (이후는 diff 방식)
+  if (isFirstRun) {
+    fs.emptyDirSync(PATHS.DOCS);
+    fs.emptyDirSync(PATHS.DOWNLOADS);
+  } else {
+    fs.ensureDirSync(PATHS.DOCS);
+    fs.ensureDirSync(PATHS.DOWNLOADS);
+  }
 
   // Check if source directory exists and has content
   if (!fs.existsSync(PATHS.SOURCE)) {
@@ -35,7 +49,23 @@ title: "Welcome"
   }
 
   const stats = createStats();
-  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats);
+  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats, cacheCtx);
+
+  // 삭제된 소스 파일에 대응하는 dest 파일 제거
+  let deletedCount = 0;
+  for (const [relPath, entry] of Object.entries(cache.files)) {
+    if (!cacheCtx.newEntries[relPath]) {
+      for (const destFile of entry.destFiles || []) {
+        try {
+          fs.removeSync(destFile);
+        } catch { /* ignore */ }
+      }
+      deletedCount++;
+    }
+  }
+
+  // 캐시 저장
+  saveCache(PATHS.PREBUILD_CACHE, cacheCtx.newEntries);
 
   // Ensure at least an index page exists
   const indexPath = path.join(PATHS.DOCS, 'index.md');
@@ -73,7 +103,7 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
 
   // 처리 결과 요약 로그
   const { byType, largeFiles, longPaths, errors, collisions } = stats;
-  console.log(`[Prebuild] 처리 완료 — 총 ${stats.processed}개 파일 (md:${byType.markdown} html:${byType.html} img:${byType.image} asset:${byType.asset} txt-noext:${byType.textNoExt} static:${byType.static}), 스킵:${stats.skipped}`);
+  console.log(`[Prebuild] 처리 완료 — 처리:${stats.processed} 스킵:${stats.skipped} 삭제:${deletedCount} (md:${byType.markdown} html:${byType.html} img:${byType.image} asset:${byType.asset} txt-noext:${byType.textNoExt} static:${byType.static})`);
 
   if (collisions.length > 0) {
     console.warn(`[Prebuild] 경로 충돌 ${collisions.length}개 (동일 출력 경로로 인해 건너뜀):`);

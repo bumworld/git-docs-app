@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS } from '../../config/constants.js';
 import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
 import { getSecurityWarning, IFRAME_SANDBOX } from '../../config/security.js';
+import { getFileStat } from './cache.js';
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
@@ -154,16 +155,18 @@ export function processMarkdownFile(srcFile, destFile, stats) {
       fs.outputFileSync(destFile, frontmatter + content, 'utf-8');
     }
     if (stats) { stats.processed++; stats.byType.markdown++; }
+    return [destFile];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcFile, message: err.message });
     console.error(`[Prebuild] Error processing ${srcFile}: ${err.message}`);
+    return [];
   }
 }
 
 export function processHtmlFolder(srcDir, destFile, relativePath, stats) {
   try {
     const indexFile = path.join(srcDir, 'index.html');
-    if (!fs.existsSync(indexFile)) return;
+    if (!fs.existsSync(indexFile)) return [];
 
     const title = generateTitle(path.basename(srcDir));
     const downloadPath = `/downloads/${relativePath}/`;
@@ -186,9 +189,11 @@ This HTML application is displayed in a sandboxed iframe. Scripts may be restric
 `;
     fs.outputFileSync(destFile, mdContent, 'utf-8');
     if (stats) { stats.processed++; stats.byType.html++; }
+    return [destFile];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcDir, message: err.message });
     console.error(`[Prebuild] 파일 처리 실패, 건너뜀: ${srcDir} → ${err.message}`);
+    return [];
   }
 }
 
@@ -197,8 +202,9 @@ export function processHtmlFile(srcFile, docsSubDir, downloadsSubDir, relPath, s
     const entry = path.basename(srcFile);
     const title = generateTitle(entry);
     const downloadPath = `/downloads/${relPath}`;
+    const downloadDest = path.join(downloadsSubDir, entry);
 
-    fs.copySync(srcFile, path.join(downloadsSubDir, entry), { overwrite: true });
+    fs.copySync(srcFile, downloadDest, { overwrite: true });
 
     const mdFile = path.join(docsSubDir, sanitizeSlug(entry).toLowerCase() + '.md');
     const mdContent = `---
@@ -217,9 +223,11 @@ This HTML file is displayed in a sandboxed iframe. Scripts may be restricted for
 `;
     fs.outputFileSync(mdFile, mdContent, 'utf-8');
     if (stats) { stats.processed++; stats.byType.html++; }
+    return [mdFile, downloadDest];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcFile, message: err.message });
     console.error(`[Prebuild] 파일 처리 실패, 건너뜀: ${srcFile} → ${err.message}`);
+    return [];
   }
 }
 
@@ -228,8 +236,9 @@ export function processImageFile(srcFile, relativePath, stats) {
     const filename = path.basename(srcFile);
     const title = generateTitle(filename);
     const downloadPath = `/downloads/${relativePath}`;
+    const downloadDest = path.join(PATHS.DOWNLOADS, relativePath);
 
-    fs.copySync(srcFile, path.join(PATHS.DOWNLOADS, relativePath), { overwrite: true });
+    fs.copySync(srcFile, downloadDest, { overwrite: true });
 
     const dirPath = path.dirname(relativePath);
     const mdDest = path.join(PATHS.DOCS, dirPath, sanitizeSlug(filename).toLowerCase() + '.md');
@@ -247,9 +256,11 @@ sidebar:
 `;
     fs.outputFileSync(mdDest, mdContent, 'utf-8');
     if (stats) { stats.processed++; stats.byType.image++; }
+    return [mdDest, downloadDest];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcFile, message: err.message });
     console.error(`[Prebuild] 파일 처리 실패, 건너뜀: ${srcFile} → ${err.message}`);
+    return [];
   }
 }
 
@@ -259,8 +270,9 @@ export function processAssetFile(srcFile, relativePath, stats) {
     const title = generateTitle(filename);
     const ext = path.extname(filename).toLowerCase();
     const downloadPath = `/downloads/${relativePath}`;
+    const downloadDest = path.join(PATHS.DOWNLOADS, relativePath);
 
-    fs.copySync(srcFile, path.join(PATHS.DOWNLOADS, relativePath), { overwrite: true });
+    fs.copySync(srcFile, downloadDest, { overwrite: true });
 
     const dirPath = path.dirname(relativePath);
     const mdDest = path.join(PATHS.DOCS, dirPath, sanitizeSlug(filename).toLowerCase() + '.md');
@@ -291,9 +303,11 @@ ${warningSection}**File:** ${filename}
 ${contentSection}`;
     fs.outputFileSync(mdDest, mdContent, 'utf-8');
     if (stats) { stats.processed++; stats.byType.asset++; }
+    return [mdDest, downloadDest];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcFile, message: err.message });
     console.error(`[Prebuild] 파일 처리 실패, 건너뜀: ${srcFile} → ${err.message}`);
+    return [];
   }
 }
 
@@ -329,9 +343,11 @@ ${content}
 `;
     fs.outputFileSync(destFile, mdContent, 'utf-8');
     if (stats) { stats.processed++; stats.byType.asset++; }
+    return [destFile];
   } catch (err) {
     if (stats) stats.errors.push({ file: srcFile, message: err.message });
     console.error(`[Prebuild] Error processing ${srcFile}: ${err.message}`);
+    return [];
   }
 }
 
@@ -345,9 +361,10 @@ export function processStaticContents(srcDir, destDir, relPath, stats) {
   } catch (err) {
     if (stats) stats.errors.push({ file: srcDir, message: err.message });
     console.error(`[Prebuild] _static 디렉토리 읽기 실패: ${srcDir} → ${err.message}`);
-    return;
+    return [];
   }
 
+  const destFiles = [];
   for (const entry of entries) {
     if (IGNORE_FILES.includes(entry.name)) continue;
     const entrySrc = path.join(srcDir, entry.name);
@@ -355,6 +372,7 @@ export function processStaticContents(srcDir, destDir, relPath, stats) {
     const entryRelPath = relPath ? `${relPath}/${entry.name}` : entry.name;
     try {
       fs.copySync(entrySrc, entryDest, { overwrite: true });
+      destFiles.push(entryDest);
       if (stats) { stats.processed++; stats.byType.static++; }
       console.log(`[Prebuild] _static 복사: ${entryRelPath} → ${entryDest}`);
     } catch (err) {
@@ -362,11 +380,12 @@ export function processStaticContents(srcDir, destDir, relPath, stats) {
       console.error(`[Prebuild] _static 복사 실패: ${entryRelPath} → ${err.message}`);
     }
   }
+  return destFiles;
 }
 
 // ─── Directory traversal ──────────────────────────────────────────────────────
 
-export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePath = '', stats = null) {
+export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePath = '', stats = null, cacheCtx = null) {
   let entries;
   try {
     entries = fs.readdirSync(srcDir, { withFileTypes: true });
@@ -396,7 +415,10 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
     if (entry.isDirectory()) {
       // _static 디렉토리: docs 페이지 없이 downloads에만 복사
       if (entry.name === '_static') {
-        processStaticContents(srcPath, downloadsSubDir, relPath, stats);
+        const destFiles = processStaticContents(srcPath, downloadsSubDir, relPath, stats);
+        if (cacheCtx) {
+          cacheCtx.newEntries[relPath] = { mtime: 0, size: 0, destFiles };
+        }
         continue;
       }
 
@@ -404,7 +426,10 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
       if (isHtmlFolder(srcPath)) {
         const mdFile = path.join(docsSubDir, safeDirName + '.md');
         if (registerPath(mdFile, relPath, '폴더', stats)) {
-          processHtmlFolder(srcPath, mdFile, relPath, stats);
+          const destFiles = processHtmlFolder(srcPath, mdFile, relPath, stats);
+          if (cacheCtx) {
+            cacheCtx.newEntries[relPath] = { mtime: 0, size: 0, destFiles };
+          }
         }
       } else {
         const nextDocsDir = path.join(docsSubDir, safeDirName);
@@ -416,15 +441,32 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
           if (stats) stats.collisions.push({ src: `${relPath}/index.md`, dest: conflictPath });
         }
         fs.ensureDirSync(nextDocsDir);
-        processDirectory(srcPath, nextDocsDir, nextDownloadsDir, relPath, stats);
+        processDirectory(srcPath, nextDocsDir, nextDownloadsDir, relPath, stats, cacheCtx);
       }
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name).toLowerCase();
       const safeFileName = sanitizeSlug(entry.name).toLowerCase() + ext;
 
+      // 증분 빌드: mtime + size 기반 캐시 체크 (일반 파일만)
+      const fileStat = cacheCtx ? getFileStat(srcPath) : null;
+      if (cacheCtx && fileStat) {
+        const cached = cacheCtx.cache[relPath];
+        if (
+          cached &&
+          cached.mtime === fileStat.mtime &&
+          cached.size === fileStat.size &&
+          (cached.destFiles || []).length > 0 &&
+          (cached.destFiles || []).every(f => fs.existsSync(f))
+        ) {
+          cacheCtx.newEntries[relPath] = cached;
+          if (stats) stats.skipped++;
+          continue;
+        }
+      }
+
       // 대용량 파일 감지 (1MB 이상)
       try {
-        const fileSize = fs.statSync(srcPath).size;
+        const fileSize = fileStat ? fileStat.size : fs.statSync(srcPath).size;
         if (stats && fileSize > 1024 * 1024) stats.largeFiles.push({ file: relPath, size: fileSize });
       } catch { /* ignore */ }
 
@@ -432,27 +474,32 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
       if (stats && relPath.length > 200) stats.longPaths.push(relPath);
 
       try {
+        let destFiles = [];
         if (FILE_EXTENSIONS.MARKDOWN.includes(ext)) {
           const destPath = path.join(docsSubDir, safeFileName);
           if (registerPath(destPath, relPath, '파일', stats)) {
-            processMarkdownFile(srcPath, destPath, stats);
+            destFiles = processMarkdownFile(srcPath, destPath, stats);
           }
         } else if (FILE_EXTENSIONS.IMAGE.includes(ext)) {
-          processImageFile(srcPath, relPath, stats);
+          destFiles = processImageFile(srcPath, relPath, stats);
         } else if (FILE_EXTENSIONS.HTML.includes(ext)) {
-          processHtmlFile(srcPath, docsSubDir, downloadsSubDir, relPath, stats);
+          destFiles = processHtmlFile(srcPath, docsSubDir, downloadsSubDir, relPath, stats);
         } else if (isNoExtension(ext) && isLikelyText(srcPath)) {
           const destPath = path.join(docsSubDir, sanitizeSlug(entry.name).toLowerCase() + '.md');
           if (stats) stats.byType.textNoExt++;
           if (registerPath(destPath, relPath, '파일', stats)) {
             if (isLikelyMarkdown(srcPath)) {
-              processMarkdownFile(srcPath, destPath, stats);
+              destFiles = processMarkdownFile(srcPath, destPath, stats);
             } else {
-              processTextNoExtFile(srcPath, destPath, stats);
+              destFiles = processTextNoExtFile(srcPath, destPath, stats);
             }
           }
         } else {
-          processAssetFile(srcPath, relPath, stats);
+          destFiles = processAssetFile(srcPath, relPath, stats);
+        }
+
+        if (cacheCtx && fileStat) {
+          cacheCtx.newEntries[relPath] = { ...fileStat, destFiles };
         }
       } catch (err) {
         if (stats) stats.errors.push({ file: relPath, message: err.message });

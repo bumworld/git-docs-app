@@ -49,7 +49,7 @@ export function createBuildRunner() {
           updateBuildFailed(buildId, result.log, result.durationMs, result.failedFiles);
         }
         // Cleanup old builds
-        try { cleanupOldBuilds(200); } catch (e) { /* ignore */ }
+        try { cleanupOldBuilds(); } catch (e) { /* ignore */ }
       }
     } catch (err) {
       console.error('[Watcher] Build error:', err.message);

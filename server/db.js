@@ -240,13 +240,27 @@ function getBuildStats() {
   };
 }
 
-function cleanupOldBuilds(keepCount = 200) {
+function cleanupOldBuilds({ keepFull = 100, keepMeta = 200 } = {}) {
+  // 101~200번째 빌드: 로그만 잘라내기 (메타데이터 보존)
+  const archived = db.prepare(`
+    UPDATE builds
+    SET log = '[log archived]'
+    WHERE id NOT IN (SELECT id FROM builds ORDER BY started_at DESC LIMIT ?)
+      AND id IN (SELECT id FROM builds ORDER BY started_at DESC LIMIT ?)
+      AND log != '[log archived]'
+      AND log != ''
+  `).run(keepFull, keepMeta);
+  if (archived.changes > 0) {
+    console.log(`[DB] Archived logs for ${archived.changes} old build(s)`);
+  }
+
+  // 200건 초과: 완전 삭제
   const count = db.prepare('SELECT COUNT(*) as count FROM builds').get().count;
-  if (count > keepCount) {
+  if (count > keepMeta) {
     db.prepare(
       `DELETE FROM builds WHERE id NOT IN (SELECT id FROM builds ORDER BY started_at DESC LIMIT ?)`
-    ).run(keepCount);
-    console.log(`[DB] Cleaned up old builds, kept ${keepCount} of ${count}`);
+    ).run(keepMeta);
+    console.log(`[DB] Deleted old builds, kept ${keepMeta} of ${count}`);
   }
 }
 

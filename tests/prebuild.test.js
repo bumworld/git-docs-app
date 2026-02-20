@@ -9,6 +9,7 @@ import { sanitizeSlug, generateTitle } from '../scripts/prebuild/utils.js';
 const TEST_SOURCE = path.join(process.cwd(), 'test-temp', 'source');
 const TEST_DOCS = path.join(process.cwd(), 'test-temp', 'src', 'content', 'docs');
 const TEST_SIDEBAR = path.join(process.cwd(), 'test-temp', 'src', 'sidebar.json');
+const TEST_CACHE = path.join(process.cwd(), 'test-temp', 'data', 'prebuild-cache.json');
 
 // Mock PATHS for testing
 import { PATHS } from '../config/constants.js';
@@ -20,6 +21,7 @@ before(() => {
   PATHS.DOCS = TEST_DOCS;
   PATHS.DOWNLOADS = path.join(process.cwd(), 'test-temp', 'public', 'downloads');
   PATHS.SIDEBAR_JSON = TEST_SIDEBAR;
+  PATHS.PREBUILD_CACHE = TEST_CACHE;
 
   fs.ensureDirSync(TEST_SOURCE);
 });

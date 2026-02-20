@@ -16,6 +16,7 @@ const TEST_SOURCE = path.join(TMP, 'source');
 const TEST_DOCS = path.join(TMP, 'src', 'content', 'docs');
 const TEST_DOWNLOADS = path.join(TMP, 'public', 'downloads');
 const TEST_SIDEBAR = path.join(TMP, 'src', 'sidebar.json');
+const TEST_CACHE = path.join(TMP, 'data', 'prebuild-cache.json');
 
 const ORIGINAL_PATHS = { ...PATHS };
 
@@ -24,6 +25,7 @@ before(() => {
   PATHS.DOCS = TEST_DOCS;
   PATHS.DOWNLOADS = TEST_DOWNLOADS;
   PATHS.SIDEBAR_JSON = TEST_SIDEBAR;
+  PATHS.PREBUILD_CACHE = TEST_CACHE;
   fs.ensureDirSync(TEST_SOURCE);
   fs.ensureDirSync(TEST_DOCS);
   fs.ensureDirSync(TEST_DOWNLOADS);
@@ -38,6 +40,7 @@ beforeEach(() => {
   fs.emptyDirSync(TEST_SOURCE);
   fs.emptyDirSync(TEST_DOCS);
   fs.emptyDirSync(TEST_DOWNLOADS);
+  fs.removeSync(TEST_CACHE);
 });
 
 // sidebar 구조 순회 헬퍼

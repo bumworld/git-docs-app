@@ -18,6 +18,7 @@ const TEST_DOCS = path.join(TMP, 'src', 'content', 'docs');
 const TEST_DOWNLOADS = path.join(TMP, 'public', 'downloads');
 const TEST_SIDEBAR = path.join(TMP, 'src', 'sidebar.json');
 const TEST_DB = path.join(TMP, 'wiki.db');
+const TEST_CACHE = path.join(TMP, 'data', 'prebuild-cache.json');
 
 const ORIGINAL_PATHS = { ...PATHS };
 const ORIGINAL_ENV = { ...process.env };
@@ -28,6 +29,7 @@ before(() => {
   PATHS.DOWNLOADS = TEST_DOWNLOADS;
   PATHS.SIDEBAR_JSON = TEST_SIDEBAR;
   PATHS.DB = TEST_DB;
+  PATHS.PREBUILD_CACHE = TEST_CACHE;
 
   fs.ensureDirSync(TEST_SOURCE);
   fs.ensureDirSync(TEST_DOCS);
@@ -48,6 +50,7 @@ after(() => {
 beforeEach(() => {
   fs.emptyDirSync(TEST_SOURCE);
   fs.emptyDirSync(TEST_DOCS);
+  fs.removeSync(TEST_CACHE);
   if (fs.existsSync(TEST_SIDEBAR)) fs.removeSync(TEST_SIDEBAR);
   delete process.env.SITE_TITLE;
   delete process.env.SITE_URL;
