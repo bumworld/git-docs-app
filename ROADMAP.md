@@ -14,24 +14,15 @@
 
 ---
 
-## Phase 1 — Processor 확장성 ✦ 다음 단계
+## Phase 1 — Processor 확장성
 
 **목표:** 새 파일 타입이나 디렉토리 규칙을 추가할 때 `processors.js` 핵심 코드를 수정하지 않아도 되는 구조
 
-### 1-1. Processor 플러그인 레지스트리
-- `processDirectory`의 if/else 파일타입 분기를 등록 기반 핸들러 맵으로 교체
-- 각 핸들러는 `{ match(ext, stats), process(srcFile, ctx) }` 인터페이스
-- 기본 핸들러(markdown, html, image, asset, textNoExt)를 레지스트리에 등록
-- `config/constants.js`에 FILE_EXTENSIONS가 이미 있으므로 자연스럽게 연결됨
-
-```js
-// 목표 인터페이스 예시
-registry.register({
-  name: 'markdown',
-  match: (ext) => FILE_EXTENSIONS.MARKDOWN.includes(ext),
-  process: processMarkdownFile,
-});
-```
+### ✅ 1-1. Processor 플러그인 레지스트리
+- `processDirectory`의 if/else 파일타입 분기를 등록 기반 핸들러 맵으로 교체 완료
+- 각 핸들러는 `{ name, match(ext, srcPath, entry), process(srcFile, relPath, ctx) }` 인터페이스
+- 기본 핸들러(markdown, html, image, asset, textNoExt)를 레지스트리에 등록 완료
+- `scripts/prebuild/registry.js` 신규 생성, `FILE_EXTENSIONS` 상수와 자연스럽게 연결됨
 
 ### ✅ 1-2. `_prefix` 디렉토리 규칙 시스템 일반화
 - ~~현재: `_static` 하드코딩~~
@@ -56,13 +47,17 @@ registry.register({
 - ~~변경되지 않은 파일은 재처리 건너뜀~~
 - mtime 기반 캐시 구현 완료 (`data/prebuild-cache.json`)
 
-### 2-2. 빌드 스테이지 훅
-- prebuild → astro build → sync 각 단계에 pre/post 훅 삽입 가능
+### ✅ 2-2. 빌드 스테이지 훅
+- `scripts/build-hooks.js` 신규 생성
+- pre-prebuild / post-prebuild / pre-astro / post-astro / pre-sync / post-sync / on-error 단계
+- 훅 실패 시 빌드를 멈추지 않고 warn만 (안전한 확장)
 - 예: 빌드 전 외부 데이터 fetch, 빌드 후 CDN 퍼지
 
-### 2-3. 빌드 오류 복구 전략 명확화
-- 현재: 실패 시 `dist-old/`에서 복구
-- 개선: 롤백 조건 명시, 부분 성공 처리, 재시도 정책
+### ✅ 2-3. 빌드 오류 복구 전략 명확화
+- 빌드 성공 시 dist → dist-old 백업 후 교체 (롤백 지원)
+- 빌드 실패 + dist 비어있음 → dist-old에서 자동 롤백
+- 빌드 실패 + dist 내용 있음 → 기존 배포본 유지
+- 부분 성공(failedFiles 존재)은 빌드 완료로 처리 (현재 동작 유지)
 
 ---
 
@@ -70,11 +65,11 @@ registry.register({
 
 **목표:** 라우터 파일이 커질수록 유지보수 가능하게
 
-### 3-1. 서비스 레이어 분리
-- 현재: 라우터 핸들러 안에 비즈니스 로직 혼재
-- 목표: `server/services/` 디렉토리로 로직 분리
-  - `users.service.js`, `builds.service.js`, `settings.service.js`
-- 라우터는 요청/응답만, 서비스는 DB + 비즈니스 로직만
+### ✅ 3-1. 서비스 레이어 분리
+- `server/services/users.service.js` 신규 생성 (사용자 검증/변경/삭제 비즈니스 로직)
+- `server/services/settings.service.js` 신규 생성 (설정 필터링/검증/빌드 트리거)
+- `server/routes/admin.js` 슬림화 — 라우터는 요청/응답만, 서비스는 DB + 비즈니스 로직만
+- `builds.service.js`는 이미 `watcher.js`에 잘 분리되어 있어 생략
 
 ### ✅ 3-2. 설정값 타입 강화
 - ~~현재: 상태/역할이 문자열 상수로 관리~~
