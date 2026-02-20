@@ -6,6 +6,7 @@ import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './
 import { getSecurityWarning, IFRAME_SANDBOX } from '../../config/security.js';
 import { getFileStat } from './cache.js';
 import { shouldIgnore } from './config.js';
+import { register, dispatch } from './registry.js';
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
@@ -24,17 +25,17 @@ export function createStats() {
 
 // ─── Detection helpers ────────────────────────────────────────────────────────
 
-function isHtmlFolder(dirPath) {
+export function isHtmlFolder(dirPath) {
   return fs.existsSync(path.join(dirPath, 'index.html'));
 }
 
 // 진짜 확장자인지 확인: 영숫자만, 공백 없음, 10자 이하
-function isNoExtension(ext) {
+export function isNoExtension(ext) {
   if (ext === '') return true;
   return !/^(\.[a-zA-Z0-9]{1,10})$/.test(ext);
 }
 
-function isLikelyText(filePath) {
+export function isLikelyText(filePath) {
   try {
     const SAMPLE_BYTES = 512;
     const buf = Buffer.alloc(SAMPLE_BYTES);
@@ -59,7 +60,7 @@ function isLikelyText(filePath) {
 }
 
 // MDX 파서가 깨지는 ${...}, {블록} 패턴이 있으면 마크다운이 아닌 것으로 판단
-function isLikelyMarkdown(filePath) {
+export function isLikelyMarkdown(filePath) {
   try {
     const SAMPLE_BYTES = 1024;
     const buf = Buffer.alloc(SAMPLE_BYTES);
@@ -92,7 +93,7 @@ function isLikelyMarkdown(filePath) {
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
 // destPath 가 이미 사용 중이면 충돌을 기록하고 false 반환, 아니면 등록 후 true 반환
-function registerPath(destPath, relPath, label, stats) {
+export function registerPath(destPath, relPath, label, stats) {
   if (stats?.usedPaths?.has(destPath)) {
     console.warn(`[Prebuild] 경로 충돌 (${label} 건너뜀): ${relPath} → ${destPath} 이미 사용됨`);
     if (stats) { stats.skipped++; stats.collisions.push({ src: relPath, dest: destPath }); }
@@ -500,27 +501,9 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
 
       try {
         let destFiles = [];
-        if (FILE_EXTENSIONS.MARKDOWN.includes(ext)) {
-          const destPath = path.join(docsSubDir, safeFileName);
-          if (registerPath(destPath, relPath, '파일', stats)) {
-            destFiles = processMarkdownFile(srcPath, destPath, stats);
-          }
-        } else if (FILE_EXTENSIONS.IMAGE.includes(ext)) {
-          destFiles = processImageFile(srcPath, relPath, stats);
-        } else if (FILE_EXTENSIONS.HTML.includes(ext)) {
-          destFiles = processHtmlFile(srcPath, docsSubDir, downloadsSubDir, relPath, stats);
-        } else if (isNoExtension(ext) && isLikelyText(srcPath)) {
-          const destPath = path.join(docsSubDir, sanitizeSlug(entry.name).toLowerCase() + '.md');
-          if (stats) stats.byType.textNoExt++;
-          if (registerPath(destPath, relPath, '파일', stats)) {
-            if (isLikelyMarkdown(srcPath)) {
-              destFiles = processMarkdownFile(srcPath, destPath, stats);
-            } else {
-              destFiles = processTextNoExtFile(srcPath, destPath, stats);
-            }
-          }
-        } else {
-          destFiles = processAssetFile(srcPath, relPath, stats);
+        {
+          const ctx = { docsSubDir, downloadsSubDir, stats, safeFileName, entry };
+          destFiles = dispatch(ext, srcPath, relPath, ctx);
         }
 
         if (cacheCtx && fileStat) {
@@ -533,3 +516,54 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
     }
   }
 }
+
+// ─── Default handler registration ────────────────────────────────────────────
+// processDirectory()의 dispatch()가 사용할 기본 핸들러 등록.
+// 등록 순서 = 매칭 우선순위 (먼저 등록한 핸들러가 우선).
+// asset은 fallback으로 항상 마지막에 등록.
+
+register({
+  name: 'markdown',
+  match: (ext) => FILE_EXTENSIONS.MARKDOWN.includes(ext),
+  process: (srcPath, relPath, ctx) => {
+    const destPath = path.join(ctx.docsSubDir, ctx.safeFileName);
+    if (registerPath(destPath, relPath, '파일', ctx.stats)) {
+      return processMarkdownFile(srcPath, destPath, ctx.stats);
+    }
+    return [];
+  },
+});
+
+register({
+  name: 'image',
+  match: (ext) => FILE_EXTENSIONS.IMAGE.includes(ext),
+  process: (srcPath, relPath, ctx) => processImageFile(srcPath, relPath, ctx.stats),
+});
+
+register({
+  name: 'html',
+  match: (ext) => FILE_EXTENSIONS.HTML.includes(ext),
+  process: (srcPath, relPath, ctx) =>
+    processHtmlFile(srcPath, ctx.docsSubDir, ctx.downloadsSubDir, relPath, ctx.stats),
+});
+
+register({
+  name: 'textNoExt',
+  match: (ext, srcPath) => isNoExtension(ext) && isLikelyText(srcPath),
+  process: (srcPath, relPath, ctx) => {
+    const destPath = path.join(ctx.docsSubDir, sanitizeSlug(ctx.entry.name).toLowerCase() + '.md');
+    if (ctx.stats) ctx.stats.byType.textNoExt++;
+    if (registerPath(destPath, relPath, '파일', ctx.stats)) {
+      return isLikelyMarkdown(srcPath)
+        ? processMarkdownFile(srcPath, destPath, ctx.stats)
+        : processTextNoExtFile(srcPath, destPath, ctx.stats);
+    }
+    return [];
+  },
+});
+
+register({
+  name: 'asset',
+  match: () => true,  // fallback: 위 핸들러에서 매칭되지 않은 모든 파일
+  process: (srcPath, relPath, ctx) => processAssetFile(srcPath, relPath, ctx.stats),
+});
