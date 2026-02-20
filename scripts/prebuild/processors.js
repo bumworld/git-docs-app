@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
-import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS } from '../../config/constants.js';
+import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS, DIR_CONVENTIONS } from '../../config/constants.js';
 import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
 import { getSecurityWarning, IFRAME_SANDBOX } from '../../config/security.js';
 import { getFileStat } from './cache.js';
@@ -351,16 +351,15 @@ ${content}
   }
 }
 
-// _static 디렉토리: docs 페이지 생성 없이 downloads 경로에만 파일을 복사한다.
-// _static/ 이름 자체는 URL에 포함되지 않고 그 안의 구조가 유지된다.
-// 예) source/_static/data/foo.json → /downloads/data/foo.json
-export function processStaticContents(srcDir, destDir, relPath, stats) {
+// __static / __raw 디렉토리: docs 페이지 생성 없이 downloads 경로에만 파일을 복사한다.
+// label 파라미터는 로그 메시지 구분용 (__static 또는 __raw).
+export function processStaticContents(srcDir, destDir, relPath, stats, label = '__static') {
   let entries;
   try {
     entries = fs.readdirSync(srcDir, { withFileTypes: true });
   } catch (err) {
     if (stats) stats.errors.push({ file: srcDir, message: err.message });
-    console.error(`[Prebuild] _static 디렉토리 읽기 실패: ${srcDir} → ${err.message}`);
+    console.error(`[Prebuild] ${label} 디렉토리 읽기 실패: ${srcDir} → ${err.message}`);
     return [];
   }
 
@@ -374,10 +373,10 @@ export function processStaticContents(srcDir, destDir, relPath, stats) {
       fs.copySync(entrySrc, entryDest, { overwrite: true });
       destFiles.push(entryDest);
       if (stats) { stats.processed++; stats.byType.static++; }
-      console.log(`[Prebuild] _static 복사: ${entryRelPath} → ${entryDest}`);
+      console.log(`[Prebuild] ${label} 복사: ${entryRelPath} → ${entryDest}`);
     } catch (err) {
       if (stats) stats.errors.push({ file: entryRelPath, message: err.message });
-      console.error(`[Prebuild] _static 복사 실패: ${entryRelPath} → ${err.message}`);
+      console.error(`[Prebuild] ${label} 복사 실패: ${entryRelPath} → ${err.message}`);
     }
   }
   return destFiles;
@@ -413,9 +412,27 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
     const relPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
 
     if (entry.isDirectory()) {
-      // _static 디렉토리: docs 페이지 없이 downloads에만 복사
-      if (entry.name === '_static') {
-        const destFiles = processStaticContents(srcPath, downloadsSubDir, relPath, stats);
+      // __ignore: 완전 무시 (docs도 downloads도 생성 안 함)
+      if (entry.name === DIR_CONVENTIONS.IGNORE) {
+        if (stats) stats.skipped++;
+        continue;
+      }
+
+      // __static: downloads에만 복사, 폴더명 URL 제외
+      // 예) source/__static/data/foo.json → /downloads/data/foo.json
+      if (entry.name === DIR_CONVENTIONS.STATIC) {
+        const destFiles = processStaticContents(srcPath, downloadsSubDir, relPath, stats, DIR_CONVENTIONS.STATIC);
+        if (cacheCtx) {
+          cacheCtx.newEntries[relPath] = { mtime: 0, size: 0, destFiles };
+        }
+        continue;
+      }
+
+      // __raw: downloads에만 복사, 폴더명 URL 포함
+      // 예) source/__raw/assets/img.png → /downloads/__raw/assets/img.png
+      if (entry.name === DIR_CONVENTIONS.RAW) {
+        const nextDownloadsDir = path.join(downloadsSubDir, entry.name);
+        const destFiles = processStaticContents(srcPath, nextDownloadsDir, relPath, stats, DIR_CONVENTIONS.RAW);
         if (cacheCtx) {
           cacheCtx.newEntries[relPath] = { mtime: 0, size: 0, destFiles };
         }

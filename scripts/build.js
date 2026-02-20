@@ -1,4 +1,6 @@
 import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import Database from 'better-sqlite3';
 import { runPrebuild } from './prebuild.js';
@@ -84,8 +86,10 @@ export async function runBuild() {
     // Step 3: Run Astro build to temp directory (async - does not block event loop)
     console.log('[Build] Running Astro build...');
     logParts.push('[Build] Running Astro build...');
-    const stdout = await execAsync(`npx astro build --outDir "${PATHS.DIST_TEMP}"`, {
-      cwd: process.cwd(),
+    const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const astroBin = path.join(APP_ROOT, 'node_modules', '.bin', 'astro');
+    const stdout = await execAsync(`"${astroBin}" build --outDir "${PATHS.DIST_TEMP}"`, {
+      cwd: APP_ROOT,
       env: buildEnv,
     });
     if (stdout) logParts.push(stdout.trim());

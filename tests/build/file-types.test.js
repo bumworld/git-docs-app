@@ -315,3 +315,58 @@ describe('무시 파일 및 디렉토리', () => {
     assert.ok(!docsDirs.includes('node_modules'));
   });
 });
+
+// ─── __prefix 디렉토리 규칙 ────────────────────────────────────
+describe('__ignore 디렉토리', () => {
+  it('__ignore/ 안의 파일은 docs도 downloads도 생성 안 됨', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, '__ignore', 'draft.md'), '# Draft\n\nWIP.');
+    fs.outputFileSync(path.join(TEST_SOURCE, '__ignore', 'secret.json'), '{"key":"value"}');
+    fs.outputFileSync(path.join(TEST_SOURCE, 'public.md'), '# Public\n\nContent.');
+    runPrebuild();
+
+    // docs에 __ignore 내용이 생성되면 안 됨
+    assert.ok(!fs.existsSync(path.join(TEST_DOCS, 'draft.md')));
+    assert.ok(!fs.existsSync(path.join(TEST_DOCS, 'secret.json.md')));
+
+    // downloads에도 복사되면 안 됨
+    assert.ok(!fs.existsSync(path.join(TEST_DOWNLOADS, '__ignore')));
+    assert.ok(!fs.existsSync(path.join(TEST_DOWNLOADS, 'draft.md')));
+
+    // 일반 파일은 정상 처리
+    assert.ok(fs.existsSync(path.join(TEST_DOCS, 'public.md')));
+  });
+});
+
+describe('__static 디렉토리', () => {
+  it('__static/ 안의 파일은 docs 없이 downloads에만 복사 (폴더명 URL 제외)', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, '__static', 'data', 'config.json'), '{"key":"value"}');
+    fs.outputFileSync(path.join(TEST_SOURCE, '__static', 'readme.txt'), 'static text');
+    runPrebuild();
+
+    // docs 페이지 생성 안 됨
+    assert.ok(!fs.existsSync(path.join(TEST_DOCS, '__static')));
+    assert.ok(!fs.existsSync(path.join(TEST_DOCS, 'config.json.md')));
+
+    // downloads에는 __static 폴더명 없이 그 안의 구조만 복사
+    assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, 'data', 'config.json')));
+    assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, 'readme.txt')));
+
+    // __static 폴더 자체는 downloads에 없어야 함
+    assert.ok(!fs.existsSync(path.join(TEST_DOWNLOADS, '__static')));
+  });
+});
+
+describe('__raw 디렉토리', () => {
+  it('__raw/ 안의 파일은 docs 없이 downloads/__raw/ 아래에 복사 (폴더명 URL 포함)', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, '__raw', 'assets', 'img.png'), 'fake png');
+    fs.outputFileSync(path.join(TEST_SOURCE, '__raw', 'style.css'), 'body {}');
+    runPrebuild();
+
+    // docs 페이지 생성 안 됨
+    assert.ok(!fs.existsSync(path.join(TEST_DOCS, '__raw')));
+
+    // downloads/__raw/ 하위에 폴더명 포함하여 복사
+    assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, '__raw', 'assets', 'img.png')));
+    assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, '__raw', 'style.css')));
+  });
+});

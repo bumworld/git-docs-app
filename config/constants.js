@@ -1,6 +1,10 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const ROOT = process.cwd();
+// 어느 디렉토리에서 실행해도 앱 루트를 올바르게 찾기 위해
+// process.cwd() 대신 파일 위치 기반으로 계산
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
 
 // Priority 1: Custom paths from environment variables (absolute paths)
 const CUSTOM_SOURCE = process.env.SOURCE_DIR;
@@ -42,6 +46,12 @@ export const FILE_EXTENSIONS = {
 };
 
 export const IGNORE_FILES = ['.DS_Store', 'Thumbs.db', '.gitkeep'];
+
+export const DIR_CONVENTIONS = {
+  IGNORE: '__ignore',   // 완전 무시 (docs도 downloads도 생성 안 함)
+  STATIC: '__static',   // downloads에만 복사 (폴더명 URL 제외)
+  RAW: '__raw',         // downloads에만 복사 (폴더명 URL 포함)
+};
 
 export const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'cdk.out', '.next', '.nuxt', '__pycache__', '.venv', 'venv', '.cache', 'build'];
 

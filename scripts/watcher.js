@@ -82,7 +82,7 @@ export function createBuildRunner() {
   }
 
   function startWatching() {
-    console.log(`[Watcher] Watching source/ for changes...`);
+    console.log(`[Watcher] Watching for changes: ${PATHS.SOURCE}`);
 
     const watcher = watch(PATHS.SOURCE, {
       ignoreInitial: true,
