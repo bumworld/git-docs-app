@@ -54,6 +54,8 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'viewport', content: 'width=device-width, initial-scale=1.0' } },
         { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
         { tag: 'style', content: 'html[data-theme="dark"]{background:#16181c}html[data-theme="light"]{background:#fff}' },
+        // FOUC 방지: 페이지 로드 전 사이드바 접힘 상태 복원 (PC only)
+        { tag: 'script', content: "(function(){try{if(localStorage.getItem('sl-sidebar-collapsed')==='1'&&window.matchMedia('(min-width:50rem)').matches){document.documentElement.classList.add('sidebar-collapsed')}}catch(e){}})();" },
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/mermaid-init.js' } },
         { tag: 'script', attrs: { src: '/video-source.js', defer: true } },
@@ -61,6 +63,7 @@ export default defineConfig({
         { tag: 'script', attrs: { src: '/view-source-button.js', defer: true } },
         { tag: 'script', attrs: { src: '/copy-content-button.js', defer: true } },
         { tag: 'script', attrs: { src: '/screen-preview.js', defer: true } },
+        { tag: 'script', attrs: { src: '/sidebar-toggle.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/_assets/presentation-mode.js' } },
       ],
       components: {
