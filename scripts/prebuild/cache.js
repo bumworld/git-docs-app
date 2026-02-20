@@ -9,9 +9,9 @@ export function loadCache(cachePath) {
   }
 }
 
-export function saveCache(cachePath, files) {
+export function saveCache(cachePath, files, sourceDir) {
   try {
-    fs.outputJsonSync(cachePath, { files }, { spaces: 2 });
+    fs.outputJsonSync(cachePath, { sourceDir, files }, { spaces: 2 });
   } catch (err) {
     console.warn('[Prebuild] 캐시 저장 실패:', err.message);
   }

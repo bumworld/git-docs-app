@@ -10,15 +10,28 @@ import { loadGitdocsConfig } from './prebuild/config.js';
 export function runPrebuild() {
   console.log('[Prebuild] Starting content sync from source/ to src/content/docs/');
 
+  // 마지막 빌드 소스 추적 — 소스가 바뀌면 src/content/docs 전체 초기화
+  // (서로 다른 캐시 파일을 사용하는 샘플↔외부 전환도 감지)
+  const LAST_SOURCE_FILE = path.resolve(PATHS.ROOT, 'data', 'last-source.json');
+  let lastSource = null;
+  try { lastSource = fs.readJsonSync(LAST_SOURCE_FILE).source; } catch { /* 없으면 무시 */ }
+  const sourceSwitched = lastSource && lastSource !== PATHS.SOURCE;
+
   // 증분 빌드: 캐시 로드 (없으면 전체 처리)
   const cache = loadCache(PATHS.PREBUILD_CACHE);
+  // 소스 디렉토리가 바뀌면 캐시 무효화 → 전체 재빌드
+  const sourceChanged = sourceSwitched || (cache.sourceDir && cache.sourceDir !== PATHS.SOURCE);
+  if (sourceChanged) {
+    console.log(`[Prebuild] 소스 경로 변경 감지 — 전체 재빌드 시작 (${lastSource || cache.sourceDir} → ${PATHS.SOURCE})`);
+    cache.files = {};
+  }
   const cacheCtx = { cache: cache.files, newEntries: {} };
   const isFirstRun = Object.keys(cache.files).length === 0;
   if (!isFirstRun) {
     console.log(`[Prebuild] 증분 빌드 모드 — 캐시 ${Object.keys(cache.files).length}개 항목 로드`);
   }
 
-  // 첫 실행 시에만 전체 초기화 (이후는 diff 방식)
+  // 첫 실행 시 또는 소스 변경 시 전체 초기화
   if (isFirstRun) {
     fs.emptyDirSync(PATHS.DOCS);
     fs.emptyDirSync(PATHS.DOWNLOADS);
@@ -68,8 +81,11 @@ title: "Welcome"
     }
   }
 
-  // 캐시 저장
-  saveCache(PATHS.PREBUILD_CACHE, cacheCtx.newEntries);
+  // 캐시 저장 (소스 경로 포함)
+  saveCache(PATHS.PREBUILD_CACHE, cacheCtx.newEntries, PATHS.SOURCE);
+
+  // 마지막 빌드 소스 경로 기록
+  try { fs.outputJsonSync(LAST_SOURCE_FILE, { source: PATHS.SOURCE }); } catch { /* ignore */ }
 
   // Ensure at least an index page exists
   const indexPath = path.join(PATHS.DOCS, 'index.md');
