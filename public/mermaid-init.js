@@ -5,8 +5,13 @@ const isDark = document.documentElement.dataset.theme === 'dark'
   || window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 // Save original source before mermaid replaces it
-document.querySelectorAll('pre.mermaid').forEach(function(el) {
-  el.setAttribute('data-original', el.textContent);
+document.querySelectorAll('.mermaid-wrapper').forEach(function(wrapper) {
+  var pre = wrapper.querySelector('pre.mermaid');
+  if (pre) {
+    var source = pre.textContent;
+    pre.setAttribute('data-original', source);
+    wrapper.setAttribute('data-mermaid-source', source);
+  }
 });
 
 mermaid.initialize({

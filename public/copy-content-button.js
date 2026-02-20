@@ -45,6 +45,17 @@
         clonedContent.querySelectorAll(selector).forEach(el => el.remove());
       });
 
+      // Replace mermaid diagrams with original source code to avoid SVG rendering issues
+      clonedContent.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+        const source = wrapper.getAttribute('data-mermaid-source')
+          || wrapper.querySelector('[data-original]')?.getAttribute('data-original')
+          || '';
+        const replacement = document.createElement('pre');
+        replacement.style.cssText = 'background: #f3f4f6; padding: 1em; border-radius: 6px; overflow-x: auto; font-family: monospace;';
+        replacement.textContent = '```mermaid\n' + source + '\n```';
+        wrapper.replaceWith(replacement);
+      });
+
       // Get the HTML content
       const htmlContent = clonedContent.innerHTML;
 
