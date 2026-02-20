@@ -359,16 +359,9 @@ iframe {
     border-left: 1px solid var(--sl-color-hairline-shade);
   }
 
-  /* 사이드바 패널: transition 중 내용 잘림 + 내부 스크롤 처리 */
+  /* 사이드바 패널: transition 중 가로 내용 잘림만 처리 (세로 스크롤은 기본값 유지) */
   #starlight__sidebar {
-    overflow: hidden !important;
-  }
-
-  /* 내부 컨텐츠에서 세로 스크롤 (메뉴가 많을 때) */
-  #starlight__sidebar .sidebar-content {
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 100%;
+    overflow-x: hidden !important;
   }
 
   /* 사이드바 패널 transition (sidebar-animate 활성화 후에만) */
