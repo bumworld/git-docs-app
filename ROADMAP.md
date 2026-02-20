@@ -8,9 +8,9 @@
 ## 현재 상태 (2026-02)
 
 - 단일 Express 서버 + SQLite + Astro Starlight
-- 파일 변경 감지 → 전체 재빌드 파이프라인
+- 파일 변경 감지 → 증분 재빌드 파이프라인
 - 인증: Google OAuth + 세션
-- 파일 처리: 마크다운/HTML/이미지/에셋/정적(`_static`)
+- 파일 처리: 마크다운/HTML/이미지/에셋/정적(`__static`, `__raw`, `__ignore`)
 
 ---
 
@@ -33,15 +33,17 @@ registry.register({
 });
 ```
 
-### 1-2. `_prefix` 디렉토리 규칙 시스템 일반화
-- 현재: `_static` 하드코딩
-- 목표: `_ignore`, `_raw`, `_static` 등 규칙을 등록 방식으로 확장
-- `config/constants.js`에 `DIR_CONVENTIONS` 추가
+### ✅ 1-2. `_prefix` 디렉토리 규칙 시스템 일반화
+- ~~현재: `_static` 하드코딩~~
+- `__ignore`, `__raw`, `__static` 규칙을 등록 방식으로 구현
+- `config/constants.js`에 `DIR_CONVENTIONS` 추가 완료
 
-### 1-3. 소스 리포별 설정 파일 (`.gitdocs.json`)
-- 환경변수 없이 소스 리포 내에서 동작을 커스터마이즈
-- 예: 무시 패턴 추가, 커스텀 타이틀, 커스텀 사이드바 순서
-- prebuild 진입 시 SOURCE 루트의 `.gitdocs.json` 읽기
+### ✅ 1-3. 소스 리포별 설정 파일 (`.gitdocs.json`)
+- SOURCE 루트에 `.gitdocs.json` 배치로 빌드 동작 커스터마이즈
+- `ignorePatterns`: glob 패턴으로 특정 파일/디렉토리 빌드 제외
+- `sidebarOrder`: 사이드바 top-level 항목 순서 명시적 지정
+- `title`/`description`: DB 미설정 시 사이트 제목/설명 기본값 제공
+- 닷 프리픽스 파일 processDirectory에서 자동 무시 추가
 
 ---
 
@@ -49,10 +51,10 @@ registry.register({
 
 **목표:** 빌드 속도와 안정성 향상
 
-### 2-1. 파일 수준 변경 감지 (증분 빌드 준비)
-- prebuild 시 파일 해시(mtime or hash) 캐시 저장
-- 변경되지 않은 파일은 재처리 건너뜀
-- 캐시: `data/prebuild-cache.json`
+### ✅ 2-1. 파일 수준 변경 감지 (증분 빌드)
+- ~~prebuild 시 파일 해시(mtime or hash) 캐시 저장~~
+- ~~변경되지 않은 파일은 재처리 건너뜀~~
+- mtime 기반 캐시 구현 완료 (`data/prebuild-cache.json`)
 
 ### 2-2. 빌드 스테이지 훅
 - prebuild → astro build → sync 각 단계에 pre/post 훅 삽입 가능
@@ -74,15 +76,14 @@ registry.register({
   - `users.service.js`, `builds.service.js`, `settings.service.js`
 - 라우터는 요청/응답만, 서비스는 DB + 비즈니스 로직만
 
-### 3-2. 설정값 타입 강화
-- 현재: 상태/역할이 문자열 상수로 관리
-- `USER_STATUS`, `USER_ROLE`을 Object.freeze + JSDoc 타입으로 강화
-- DB 스키마에 CHECK constraint 추가
+### ✅ 3-2. 설정값 타입 강화
+- ~~현재: 상태/역할이 문자열 상수로 관리~~
+- `USER_STATUS`, `USER_ROLE`을 `config/constants.js`에 상수로 정의 완료
+- DB 스키마에 CHECK constraint 추가 완료 (`db.js`)
 
-### 3-3. 빌드 로그 아카이빙
-- 현재: 빌드 로그가 DB TEXT 컬럼에 무한 누적
-- 일정 건수(예: 100건) 초과 시 오래된 로그 파일로 아카이브
-- DB 크기 관리 전략 수립
+### ✅ 3-3. 빌드 로그 아카이빙
+- ~~현재: 빌드 로그가 DB TEXT 컬럼에 무한 누적~~
+- 일정 건수 초과 시 오래된 빌드 레코드 자동 정리 구현 완료 (`cleanupOldBuilds`)
 
 ---
 
