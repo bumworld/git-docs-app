@@ -6,6 +6,7 @@ import Database from 'better-sqlite3';
 import { runPrebuild } from './prebuild.js';
 import { PATHS } from '../config/constants.js';
 import { loadGitdocsConfig } from './prebuild/config.js';
+import { runHooks } from './build-hooks.js';
 
 function execAsync(command, options = {}) {
   return new Promise((resolve, reject) => {
@@ -68,11 +69,16 @@ export async function runBuild() {
   const startTime = Date.now();
   const logParts = [];
 
+  // 훅에 공유되는 컨텍스트 (단계 진행에 따라 채워짐)
+  const ctx = { startTime, paths: PATHS, env: {}, settings: {} };
+
   try {
     // Step 1: Prebuild - sync source/ to src/content/docs/
+    await runHooks('pre-prebuild', ctx);
     logParts.push('[Prebuild] Starting prebuild...');
     const hasContent = runPrebuild();
     logParts.push('[Prebuild] Prebuild completed.');
+    await runHooks('post-prebuild', { ...ctx, hasContent });
 
     // Step 2: Read site settings from DB and pass to Astro build
     const settings = loadSiteSettings();
@@ -87,8 +93,11 @@ export async function runBuild() {
     const titleMsg = `[Build] Site title: "${buildEnv.SITE_TITLE || 'Git Docs'}"`;
     console.log(titleMsg);
     logParts.push(titleMsg);
+    ctx.settings = settings;
+    ctx.env = buildEnv;
 
     // Step 3: Run Astro build to temp directory (async - does not block event loop)
+    await runHooks('pre-astro', ctx);
     console.log('[Build] Running Astro build...');
     logParts.push('[Build] Running Astro build...');
     const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -98,8 +107,10 @@ export async function runBuild() {
       env: buildEnv,
     });
     if (stdout) logParts.push(stdout.trim());
+    await runHooks('post-astro', { ...ctx, stdout });
 
     // Step 4: Sync build output to dist directory
+    await runHooks('pre-sync', { ...ctx, hasContent });
     if (!hasContent) {
       const skipMsg = '[Build] source/ was empty — skipping dist update to preserve existing content';
       console.log(skipMsg);
@@ -124,6 +135,7 @@ export async function runBuild() {
       fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
       fs.removeSync(PATHS.DIST_TEMP);
     }
+    await runHooks('post-sync', { ...ctx, hasContent });
 
     const durationMs = Date.now() - startTime;
     const elapsed = (durationMs / 1000).toFixed(1);
@@ -156,6 +168,9 @@ export async function runBuild() {
         logParts.push('  ... (showing first 100 files, check full error output for more)');
       }
     }
+
+    // on-error 훅 실행
+    await runHooks('on-error', { ...ctx, error: err });
 
     // Cleanup: remove temp dir if it exists
     if (fs.existsSync(PATHS.DIST_TEMP)) {
