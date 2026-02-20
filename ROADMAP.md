@@ -8,9 +8,16 @@
 ## 현재 상태 (2026-02)
 
 - 단일 Express 서버 + SQLite + Astro Starlight
-- 파일 변경 감지 → 증분 재빌드 파이프라인
+- 파일 변경 감지 → 증분 재빌드 파이프라인 (mtime 캐시)
 - 인증: Google OAuth + 세션
 - 파일 처리: 마크다운/HTML/이미지/에셋/정적(`__static`, `__raw`, `__ignore`)
+- 소스 리포별 설정 파일 (`.gitdocs.json`) 지원
+- Processor 플러그인 레지스트리 (`scripts/prebuild/registry.js`)
+- 빌드 스테이지 훅 시스템 (`scripts/build-hooks.js`)
+- 빌드 실패 시 `dist-old` 자동 롤백
+- 서비스 레이어 분리 (`server/services/`)
+
+**Phase 1~3 완료. 다음 단계: Phase 4 (장기)**
 
 ---
 
