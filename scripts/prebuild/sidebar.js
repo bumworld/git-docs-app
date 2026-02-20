@@ -55,8 +55,26 @@ function scanDir(dir, relDir = '') {
   return items;
 }
 
-export function generateSidebarConfig() {
-  const items = scanDir(PATHS.DOCS);
+export function generateSidebarConfig(gitdocsConfig = {}) {
+  let items = scanDir(PATHS.DOCS);
+
+  // sidebarOrder 적용: 지정된 순서대로 top-level 항목 재정렬, 나머지는 뒤에 유지
+  if (gitdocsConfig.sidebarOrder && gitdocsConfig.sidebarOrder.length > 0) {
+    const labelToKey = (label) => label.toLowerCase().replace(/\s+/g, '-');
+    const order = gitdocsConfig.sidebarOrder;
+    const remaining = [...items];
+    const ordered = [];
+
+    for (const key of order) {
+      const idx = remaining.findIndex(item =>
+        item.slug !== undefined
+          ? item.slug === key || item.slug.endsWith('/' + key)
+          : labelToKey(item.label) === key
+      );
+      if (idx !== -1) ordered.push(remaining.splice(idx, 1)[0]);
+    }
+    items = [...ordered, ...remaining];
+  }
 
   // 루트 index.md (README.md에서 변환된)를 사이드바 첫 번째 항목으로 추가
   // slug ''는 Starlight의 홈 페이지 슬러그

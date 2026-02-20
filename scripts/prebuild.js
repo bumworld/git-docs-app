@@ -5,6 +5,7 @@ import { generateTitle } from './prebuild/utils.js';
 import { processDirectory, createStats } from './prebuild/processors.js';
 import { generateSidebarConfig } from './prebuild/sidebar.js';
 import { loadCache, saveCache } from './prebuild/cache.js';
+import { loadGitdocsConfig } from './prebuild/config.js';
 
 export function runPrebuild() {
   console.log('[Prebuild] Starting content sync from source/ to src/content/docs/');
@@ -32,6 +33,9 @@ export function runPrebuild() {
     console.log('[Prebuild] source/ directory created (empty)');
   }
 
+  // .gitdocs.json 로드 (없으면 빈 객체)
+  const gitdocsConfig = loadGitdocsConfig(PATHS.SOURCE);
+
   const entries = fs.readdirSync(PATHS.SOURCE).filter(e => !IGNORE_FILES.includes(e));
   console.log(`[Prebuild] source/ has ${entries.length} entries: ${entries.slice(0, 10).join(', ')}${entries.length > 10 ? '...' : ''}`);
   if (entries.length === 0) {
@@ -49,7 +53,7 @@ title: "Welcome"
   }
 
   const stats = createStats();
-  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats, cacheCtx);
+  processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats, cacheCtx, gitdocsConfig);
 
   // 삭제된 소스 파일에 대응하는 dest 파일 제거
   let deletedCount = 0;
@@ -99,7 +103,7 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
     }
   }
 
-  generateSidebarConfig();
+  generateSidebarConfig(gitdocsConfig);
 
   // 처리 결과 요약 로그
   const { byType, largeFiles, longPaths, errors, collisions } = stats;

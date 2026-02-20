@@ -5,6 +5,7 @@ import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS, DIR_CONVENTIONS } fr
 import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
 import { getSecurityWarning, IFRAME_SANDBOX } from '../../config/security.js';
 import { getFileStat } from './cache.js';
+import { shouldIgnore } from './config.js';
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
@@ -384,7 +385,7 @@ export function processStaticContents(srcDir, destDir, relPath, stats, label = '
 
 // ─── Directory traversal ──────────────────────────────────────────────────────
 
-export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePath = '', stats = null, cacheCtx = null) {
+export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePath = '', stats = null, cacheCtx = null, gitdocsConfig = {}) {
   let entries;
   try {
     entries = fs.readdirSync(srcDir, { withFileTypes: true });
@@ -396,6 +397,7 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
 
   for (const entry of entries) {
     if (IGNORE_FILES.includes(entry.name)) continue;
+    if (entry.name.startsWith('.')) continue; // 닷 프리픽스 파일/디렉토리 무시 (.gitdocs.json 등)
 
     if (entry.isDirectory() && entry.name.toLowerCase() === 'pwa') {
       console.log('[Prebuild] Ignoring "pwa" directory.');
@@ -410,6 +412,12 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
 
     const srcPath = path.join(srcDir, entry.name);
     const relPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+
+    // .gitdocs.json ignorePatterns 체크
+    if (shouldIgnore(relPath, gitdocsConfig.ignorePatterns)) {
+      if (stats) stats.skipped++;
+      continue;
+    }
 
     if (entry.isDirectory()) {
       // __ignore: 완전 무시 (docs도 downloads도 생성 안 함)
@@ -458,7 +466,7 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
           if (stats) stats.collisions.push({ src: `${relPath}/index.md`, dest: conflictPath });
         }
         fs.ensureDirSync(nextDocsDir);
-        processDirectory(srcPath, nextDocsDir, nextDownloadsDir, relPath, stats, cacheCtx);
+        processDirectory(srcPath, nextDocsDir, nextDownloadsDir, relPath, stats, cacheCtx, gitdocsConfig);
       }
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name).toLowerCase();

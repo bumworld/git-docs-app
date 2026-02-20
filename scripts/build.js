@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import Database from 'better-sqlite3';
 import { runPrebuild } from './prebuild.js';
 import { PATHS } from '../config/constants.js';
+import { loadGitdocsConfig } from './prebuild/config.js';
 
 function execAsync(command, options = {}) {
   return new Promise((resolve, reject) => {
@@ -75,6 +76,10 @@ export async function runBuild() {
 
     // Step 2: Read site settings from DB and pass to Astro build
     const settings = loadSiteSettings();
+    // .gitdocs.json title/description으로 DB에 없는 값 채우기 (DB 설정이 우선)
+    const gitdocsConfig = loadGitdocsConfig(PATHS.SOURCE);
+    if (!settings.site_title && gitdocsConfig.title) settings.site_title = gitdocsConfig.title;
+    if (!settings.site_description && gitdocsConfig.description) settings.site_description = gitdocsConfig.description;
     const buildEnv = { ...process.env };
     if (settings.site_title) buildEnv.SITE_TITLE = settings.site_title;
     if (settings.site_description) buildEnv.SITE_DESCRIPTION = settings.site_description;
