@@ -1,33 +1,8 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
-  min-height: 100vh;
-}
-.topbar {
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
-  padding: 0.875rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.topbar h1 { font-size: 1.125rem; color: #f8fafc; }
-.topbar-links { display: flex; gap: 1rem; align-items: center; }
-.topbar-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s;
-}
-.topbar-links a:hover { color: #e2e8f0; }
+/* ============================================================
+   Admin UI — admin 전용 스타일 (base.css 필요)
+   ============================================================ */
 
-.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
-
+/* ── Tabs ── */
 .tabs {
   display: flex;
   gap: 0;
@@ -50,7 +25,7 @@ body {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Stats */
+/* ── Stats ── */
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -67,7 +42,7 @@ body {
 .stat-value { font-size: 2rem; font-weight: 700; color: #f8fafc; }
 .stat-label { font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
 
-/* User card list */
+/* ── User cards ── */
 .user-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .user-card {
@@ -99,33 +74,6 @@ body {
 }
 .user-badges { display: flex; gap: 0.375rem; flex-shrink: 0; }
 
-.badge {
-  display: inline-block;
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.badge-active { background: #064e3b; color: #6ee7b7; }
-.badge-pending { background: #78350f; color: #fcd34d; }
-.badge-blocked { background: #7f1d1d; color: #fca5a5; }
-.badge-admin { background: #312e81; color: #a5b4fc; }
-.badge-user { background: #1e293b; color: #64748b; border: 1px solid #334155; }
-.badge-protected { background: #164e63; color: #67e8f9; }
-
-/* Build status badges */
-.badge-success { background: #064e3b; color: #6ee7b7; }
-.badge-failed { background: #7f1d1d; color: #fca5a5; }
-.badge-running { background: #1e3a5f; color: #93c5fd; }
-
-/* Build trigger type badges */
-.badge-trigger-manual { background: #312e81; color: #a5b4fc; }
-.badge-trigger-watcher { background: #164e63; color: #67e8f9; }
-.badge-trigger-settings { background: #78350f; color: #fcd34d; }
-.badge-trigger-startup { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
-
 .user-card-actions {
   display: flex;
   gap: 0.5rem;
@@ -135,32 +83,7 @@ body {
   border-top: 1px solid #252f3f;
 }
 
-.btn {
-  padding: 0.35rem 0.7rem;
-  border: 1px solid #475569;
-  border-radius: 6px;
-  background: transparent;
-  color: #e2e8f0;
-  cursor: pointer;
-  font-size: 0.78rem;
-  transition: all 0.15s;
-  white-space: nowrap;
-  text-decoration: none;
-  display: inline-block;
-}
-.btn:hover { background: #334155; }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn:disabled:hover { background: transparent; }
-.btn-approve { border-color: #059669; color: #6ee7b7; }
-.btn-approve:hover:not(:disabled) { background: #064e3b; }
-.btn-block { border-color: #dc2626; color: #fca5a5; }
-.btn-block:hover:not(:disabled) { background: #7f1d1d; }
-.btn-danger { border-color: #dc2626; color: #fca5a5; }
-.btn-danger:hover:not(:disabled) { background: #7f1d1d; }
-.btn-primary { border-color: #3b82f6; color: #93c5fd; }
-.btn-primary:hover:not(:disabled) { background: #1e3a5f; }
-
-/* Settings form */
+/* ── Settings form ── */
 .form-group { margin-bottom: 1.25rem; }
 .form-group label {
   display: block; font-size: 0.8rem; color: #94a3b8;
@@ -176,21 +99,14 @@ body {
 }
 .form-actions { margin-top: 1.5rem; }
 
-.toast {
-  position: fixed; bottom: 1.5rem; right: 1.5rem;
-  padding: 0.75rem 1.5rem; border-radius: 8px;
-  font-size: 0.875rem; z-index: 100; transition: opacity 0.3s;
-}
-.toast-success { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
-.toast-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
-
+/* ── Section helpers ── */
 .section-title { font-size: 1.125rem; margin-bottom: 1rem; color: #f8fafc; }
 .section-bar {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;
 }
 .empty-msg { text-align: center; color: #64748b; padding: 2rem 0; }
 
-/* Build Progress Bar */
+/* ── Build progress ── */
 .build-progress {
   display: flex;
   align-items: center;
@@ -212,8 +128,7 @@ body {
 .build-progress-bar::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   height: 100%;
   width: 40%;
   background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
@@ -221,7 +136,7 @@ body {
   animation: progressSlide 1.5s ease-in-out infinite;
 }
 @keyframes progressSlide {
-  0% { left: -40%; }
+  0%   { left: -40%; }
   100% { left: 100%; }
 }
 .build-progress-text {
@@ -231,7 +146,7 @@ body {
   white-space: nowrap;
 }
 
-/* Build Filters */
+/* ── Build filters ── */
 .build-filters {
   display: flex;
   gap: 0.75rem;
@@ -246,12 +161,9 @@ body {
   font-size: 0.8rem;
   cursor: pointer;
 }
-.build-filters select:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
+.build-filters select:focus { outline: none; border-color: #3b82f6; }
 
-/* Build Card */
+/* ── Build cards ── */
 .build-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .build-card {
@@ -273,12 +185,7 @@ body {
   gap: 0.375rem;
   flex-wrap: wrap;
 }
-.build-id {
-  font-weight: 700;
-  color: #f8fafc;
-  font-size: 0.9rem;
-  margin-right: 0.25rem;
-}
+.build-id { font-weight: 700; color: #f8fafc; font-size: 0.9rem; margin-right: 0.25rem; }
 .build-card-meta {
   display: flex;
   gap: 0.75rem;
@@ -291,7 +198,7 @@ body {
   border: 1px solid #252f3f;
   border-radius: 6px;
   padding: 0.625rem 0.875rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
   font-size: 0.72rem;
   line-height: 1.5;
   color: #94a3b8;
@@ -310,28 +217,16 @@ body {
   border-top: 1px solid #252f3f;
 }
 
-/* Build Detail Page */
-.build-detail-page { }
+/* ── Build detail ── */
 .build-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
-.build-detail-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.build-detail-id {
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: #f8fafc;
-}
-.build-detail-actions {
-  display: flex;
-  gap: 0.5rem;
-}
+.build-detail-meta { display: flex; align-items: center; gap: 0.5rem; }
+.build-detail-id { font-weight: 700; font-size: 1.25rem; color: #f8fafc; }
+.build-detail-actions { display: flex; gap: 0.5rem; }
 .build-detail-info {
   background: #1e293b;
   border: 1px solid #334155;
@@ -347,19 +242,14 @@ body {
   font-size: 0.875rem;
 }
 .build-info-row:last-child { border-bottom: none; }
-.build-info-label {
-  color: #94a3b8;
-  font-weight: 500;
-}
-.build-detail-section {
-  margin-bottom: 1.5rem;
-}
+.build-info-label { color: #94a3b8; font-weight: 500; }
+.build-detail-section { margin-bottom: 1.5rem; }
 .build-log-full {
   background: #0f172a;
   border: 1px solid #252f3f;
   border-radius: 8px;
   padding: 1rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
   font-size: 0.78rem;
   line-height: 1.6;
   color: #cbd5e1;
@@ -377,17 +267,15 @@ body {
 }
 .failed-file-item {
   padding: 0.375rem 0.75rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-family: 'SF Mono', 'Fira Code', Menlo, Consolas, monospace;
   font-size: 0.78rem;
   color: #fca5a5;
   border-bottom: 1px solid #252f3f;
 }
 .failed-file-item:last-child { border-bottom: none; }
 
-/* Online badges */
+/* ── Online / SSE ── */
 .online-badges { display: flex; gap: 0.5rem; }
-
-/* Online user indicator dot */
 .online-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: #22c55e; display: inline-block;
@@ -395,17 +283,17 @@ body {
   box-shadow: 0 0 4px #22c55e80;
   transition: background 0.3s, box-shadow 0.3s;
 }
-.online-dot.offline {
-  background: #475569;
-  box-shadow: none;
-}
+.online-dot.offline { background: #475569; box-shadow: none; }
 
-/* Message form */
-.message-form {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
+.sse-status {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-right: 0.5rem;
 }
+.sse-status.connected    { background: #22c55e; box-shadow: 0 0 4px #22c55e80; }
+.sse-status.disconnected { background: #ef4444; box-shadow: 0 0 4px #ef444480; }
+
+/* ── Message / DM forms ── */
+.message-form { display: flex; gap: 0.75rem; align-items: center; }
 .message-form input {
   flex: 1;
   padding: 0.625rem 0.875rem;
@@ -416,12 +304,8 @@ body {
   font-size: 0.9rem;
   font-family: inherit;
 }
-.message-form input:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
+.message-form input:focus { outline: none; border-color: #3b82f6; }
 
-/* DM form (inline in user card) */
 .dm-form {
   display: flex;
   gap: 0.5rem;
@@ -440,26 +324,9 @@ body {
   font-size: 0.8rem;
   font-family: inherit;
 }
-.dm-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
+.dm-input:focus { outline: none; border-color: #3b82f6; }
 
-/* SSE connection indicator */
-.sse-status {
-  width: 8px; height: 8px; border-radius: 50%;
-  display: inline-block; margin-right: 0.5rem;
-}
-.sse-status.connected { background: #22c55e; box-shadow: 0 0 4px #22c55e80; }
-.sse-status.disconnected { background: #ef4444; box-shadow: 0 0 4px #ef444480; }
-
-/* Admin message toast (wider) */
-.toast-admin {
-  background: #312e81; color: #a5b4fc; border: 1px solid #4338ca;
-  max-width: 400px;
-}
-
-/* Whitelist Section */
+/* ── Whitelist ── */
 .add-email-form {
   background: #1e293b;
   border: 1px solid #334155;
@@ -467,13 +334,7 @@ body {
   padding: 1rem;
   margin-bottom: 1.5rem;
 }
-
-.whitelist-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
+.whitelist-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .whitelist-card {
   background: #1e293b;
   border: 1px solid #334155;
@@ -484,49 +345,27 @@ body {
   align-items: flex-start;
   gap: 1rem;
 }
-
-.whitelist-card-content {
-  flex: 1;
-  min-width: 0;
-}
-
+.whitelist-card-content { flex: 1; min-width: 0; }
 .whitelist-email {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #f8fafc;
-  margin-bottom: 0.375rem;
-  word-break: break-all;
+  font-size: 0.95rem; font-weight: 600; color: #f8fafc;
+  margin-bottom: 0.375rem; word-break: break-all;
 }
-
 .whitelist-meta {
-  display: flex;
-  gap: 1rem;
-  color: #94a3b8;
-  font-size: 0.78rem;
-  flex-wrap: wrap;
+  display: flex; gap: 1rem; color: #94a3b8;
+  font-size: 0.78rem; flex-wrap: wrap;
 }
-
 .whitelist-notes {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
+  margin-top: 0.5rem; padding-top: 0.5rem;
   border-top: 1px solid #252f3f;
-  color: #cbd5e1;
-  font-size: 0.85rem;
-  font-style: italic;
+  color: #cbd5e1; font-size: 0.85rem; font-style: italic;
 }
-
 .whitelist-info {
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  background: #1e293b; border: 1px solid #334155;
+  border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 640px) {
-  .container { padding: 1rem; }
-  .topbar { padding: 0.75rem 1rem; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .user-card-top { gap: 0.5rem; }
   .btn { font-size: 0.73rem; padding: 0.3rem 0.55rem; }

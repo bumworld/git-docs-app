@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(function(data) {
       if (!data.authenticated) return;
       var u = data.user;
-      var btnHtml = '<a href="/auth/logout" class="auth-btn">Logout</a>';
+      var btnHtml = '<a href="/my" data-astro-reload class="auth-btn">My</a>'
+        + '<a href="/auth/logout" class="auth-btn">Logout</a>';
       if (u.role === 'admin') btnHtml += '<a href="/admin" data-astro-reload class="auth-btn auth-btn-admin">Admin</a>';
       var nameHtml = '<span class="auth-name">' + esc(u.name || u.email) + '</span>';
       if (u.avatar) nameHtml = '<img src="' + esc(u.avatar) + '" alt="" class="auth-avatar"/>' + nameHtml;

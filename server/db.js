@@ -55,11 +55,31 @@ function initializeDatabase() {
       notes TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS user_bookmarks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      page_path TEXT NOT NULL,
+      page_title TEXT NOT NULL DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, page_path)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      page_path TEXT NOT NULL,
+      page_title TEXT NOT NULL DEFAULT '',
+      viewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, page_path)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_sessions_expired ON sessions(expired);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
     CREATE INDEX IF NOT EXISTS idx_builds_started_at ON builds(started_at);
     CREATE INDEX IF NOT EXISTS idx_whitelisted_emails_email ON whitelisted_emails(email);
+    CREATE INDEX IF NOT EXISTS idx_user_bookmarks_user ON user_bookmarks(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_history_user ON user_history(user_id, viewed_at);
   `);
 
   const defaultSettings = {
@@ -297,6 +317,68 @@ function updateSettings(settingsObj) {
   batch(Object.entries(settingsObj));
 }
 
+// Dev user seeding (DEV_MODE 전용)
+function seedDevUser() {
+  db.prepare(
+    'INSERT OR IGNORE INTO users (email, name, role, status) VALUES (?, ?, ?, ?)'
+  ).run('dev@localhost', 'Dev User', 'admin', 'active');
+}
+
+// Bookmark queries
+function getBookmarks(userId) {
+  return db.prepare(
+    'SELECT * FROM user_bookmarks WHERE user_id = ? ORDER BY created_at DESC LIMIT 200'
+  ).all(userId);
+}
+
+function addBookmark(userId, path, title) {
+  db.prepare(
+    'INSERT OR IGNORE INTO user_bookmarks (user_id, page_path, page_title) VALUES (?, ?, ?)'
+  ).run(userId, path, title);
+}
+
+function removeBookmark(userId, path) {
+  db.prepare(
+    'DELETE FROM user_bookmarks WHERE user_id = ? AND page_path = ?'
+  ).run(userId, path);
+}
+
+// History queries
+function getHistory(userId, limit = 20) {
+  return db.prepare(
+    'SELECT * FROM user_history WHERE user_id = ? ORDER BY viewed_at DESC LIMIT ?'
+  ).all(userId, limit);
+}
+
+function upsertHistory(userId, path, title) {
+  db.prepare(`
+    INSERT INTO user_history (user_id, page_path, page_title, viewed_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(user_id, page_path) DO UPDATE SET
+      page_title = excluded.page_title,
+      viewed_at = CURRENT_TIMESTAMP
+  `).run(userId, path, title);
+
+  // 최대 20개 유지
+  db.prepare(`
+    DELETE FROM user_history
+    WHERE user_id = ?
+      AND id NOT IN (
+        SELECT id FROM user_history WHERE user_id = ? ORDER BY viewed_at DESC LIMIT 20
+      )
+  `).run(userId, userId);
+}
+
+function removeHistory(userId, path) {
+  db.prepare(
+    'DELETE FROM user_history WHERE user_id = ? AND page_path = ?'
+  ).run(userId, path);
+}
+
+function clearHistory(userId) {
+  db.prepare('DELETE FROM user_history WHERE user_id = ?').run(userId);
+}
+
 export {
   db,
   initializeDatabase,
@@ -324,4 +406,12 @@ export {
   getBuildById,
   getBuildStats,
   cleanupOldBuilds,
+  seedDevUser,
+  getBookmarks,
+  addBookmark,
+  removeBookmark,
+  getHistory,
+  upsertHistory,
+  removeHistory,
+  clearHistory,
 };

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko" style="background:#0f172a">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>내 페이지 — Git Docs</title>
+  <link rel="stylesheet" href="/ui-assets/base.css">
+  <style>
+    /* ── 헤더 커스텀 ── */
+    .topbar { gap: 1rem; }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .back-link:hover { color: #e2e8f0; }
+
+    /* ── 레이아웃 ── */
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── 프로필 ── */
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #334155;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .profile-avatar-placeholder {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .profile-info { min-width: 0; }
+    .profile-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-email {
+      font-size: 0.8125rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-role { margin-top: 0.4rem; }
+
+    /* ── 섹션 공통 ── */
+    .section { margin-bottom: 2rem; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #334155;
+      color: #94a3b8;
+      padding: 0.1rem 0.45rem;
+      border-radius: 99px;
+    }
+
+    .section-action {
+      margin-left: auto;
+      font-size: 0.8125rem;
+      color: #64748b;
+      background: none;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .section-action:hover { background: #334155; color: #e2e8f0; }
+
+    /* ── 카드 목록 ── */
+    .card-list {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid #1e3a5f22;
+      transition: background 0.1s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover { background: #263148; }
+
+    .item-icon {
+      font-size: 0.875rem;
+      flex-shrink: 0;
+      width: 1.25rem;
+      text-align: center;
+    }
+
+    .item-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-path {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-time {
+      font-size: 0.75rem;
+      color: #64748b;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .item-remove {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: #475569;
+      cursor: pointer;
+      padding: 0.3rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      line-height: 1;
+      transition: color 0.15s, background 0.15s;
+    }
+    .item-remove:hover { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+
+    /* ── 빈 상태 ── */
+    .empty-state {
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: #475569;
+      font-size: 0.875rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+    /* ── 모바일 ── */
+    @media (max-width: 600px) {
+      .topbar { padding: 0.75rem 1rem; }
+      .page { padding: 1.25rem 1rem 3rem; }
+      .profile { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 헤더 -->
+  <div class="topbar">
+    <a href="/" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      위키로 돌아가기
+    </a>
+    <span class="topbar-title">내 페이지</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem">
+      <a href="/auth/logout" class="btn">로그아웃</a>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- 프로필 -->
+    <div class="profile" id="profile" style="display:none">
+      <div class="profile-avatar-placeholder" id="avatar-placeholder">👤</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">—</div>
+        <div class="profile-email" id="profile-email">—</div>
+        <span class="badge badge-user profile-role" id="profile-role">user</span>
+      </div>
+    </div>
+
+    <!-- 북마크 -->
+    <div class="section">
+      <div class="section-header">
+        <span style="font-size:1rem">⭐</span>
+        <span class="section-title">북마크</span>
+        <span class="section-count" id="bm-count">0</span>
+      </div>
+      <div id="bm-container"><div class="empty-state"><div class="empty-icon">⭐</div>북마크가 없습니다.</div></div>
+    </div>
+
+    <!-- 최근 본 페이지 -->
+    <div class="section">
+      <div class="section-header">
+        <span style="font-size:1rem">🕐</span>
+        <span class="section-title">최근 본 페이지</span>
+        <span class="section-count" id="his-count">0</span>
+        <button class="section-action" id="clear-history-btn">전체 삭제</button>
+      </div>
+      <div id="his-container"><div class="empty-state"><div class="empty-icon">🕐</div>방문 기록이 없습니다.</div></div>
+    </div>
+
+  </div>
+
+  <script>
+    function esc(s) { var d = document.createElement('div'); d.textContent = String(s||''); return d.innerHTML; }
+
+    function relTime(str) {
+      var diff = Date.now() - new Date(str + (str.endsWith('Z') ? '' : 'Z')).getTime();
+      var s = Math.floor(diff / 1000);
+      if (s < 60) return '방금';
+      var m = Math.floor(s / 60); if (m < 60) return m + '분 전';
+      var h = Math.floor(m / 60); if (h < 24) return h + '시간 전';
+      var d = Math.floor(h / 24); if (d < 7) return d + '일 전';
+      return Math.floor(d / 7) + '주 전';
+    }
+
+    function apiFetch(url, opts) {
+      return fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts))
+        .then(function(r) { return r.ok ? r.json() : null; });
+    }
+
+    // ── 북마크 렌더 ──
+    var bookmarks = [];
+
+    function renderBookmarks() {
+      var c = document.getElementById('bm-container');
+      document.getElementById('bm-count').textContent = bookmarks.length;
+      if (bookmarks.length === 0) {
+        c.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div>북마크가 없습니다.</div>';
+        return;
+      }
+      c.innerHTML = '<div class="card-list">' + bookmarks.map(function(b) {
+        return '<div class="list-item" data-path="' + esc(b.page_path) + '">'
+          + '<span class="item-icon">⭐</span>'
+          + '<div class="item-body">'
+          + '<a href="' + esc(b.page_path) + '" class="item-title" style="display:block;text-decoration:none;color:inherit">'
+          + esc(b.page_title || b.page_path) + '</a>'
+          + '<div class="item-path">' + esc(b.page_path) + '</div>'
+          + '</div>'
+          + '<button class="item-remove bm-remove-btn" data-path="' + esc(b.page_path) + '" title="북마크 해제">✕</button>'
+          + '</div>';
+      }).join('') + '</div>';
+
+      c.querySelectorAll('.bm-remove-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var p = btn.getAttribute('data-path');
+          apiFetch('/api/me/bookmarks', { method: 'DELETE', body: JSON.stringify({ path: p }) })
+            .then(function() {
+              bookmarks = bookmarks.filter(function(b) { return b.page_path !== p; });
+              renderBookmarks();
+            });
+        });
+      });
+    }
+
+    // ── 히스토리 렌더 ──
+    var historyList = [];
+
+    function renderHistory() {
+      var c = document.getElementById('his-container');
+      document.getElementById('his-count').textContent = historyList.length;
+      if (historyList.length === 0) {
+        c.innerHTML = '<div class="empty-state"><div class="empty-icon">🕐</div>방문 기록이 없습니다.</div>';
+        return;
+      }
+      c.innerHTML = '<div class="card-list">' + historyList.map(function(h) {
+        return '<div class="list-item" data-path="' + esc(h.page_path) + '">'
+          + '<span class="item-icon" style="color:#64748b">🕐</span>'
+          + '<div class="item-body">'
+          + '<a href="' + esc(h.page_path) + '" class="item-title" style="display:block;text-decoration:none;color:inherit">'
+          + esc(h.page_title || h.page_path) + '</a>'
+          + '<div class="item-path">' + esc(h.page_path) + '</div>'
+          + '</div>'
+          + '<span class="item-time">' + esc(relTime(h.viewed_at)) + '</span>'
+          + '<button class="item-remove his-remove-btn" data-path="' + esc(h.page_path) + '" title="기록 삭제">✕</button>'
+          + '</div>';
+      }).join('') + '</div>';
+
+      c.querySelectorAll('.his-remove-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var p = btn.getAttribute('data-path');
+          apiFetch('/api/me/history', { method: 'DELETE', body: JSON.stringify({ path: p }) })
+            .then(function() {
+              historyList = historyList.filter(function(h) { return h.page_path !== p; });
+              renderHistory();
+            });
+        });
+      });
+    }
+
+    // ── 히스토리 전체 삭제 ──
+    document.getElementById('clear-history-btn').addEventListener('click', function() {
+      if (!confirm('방문 기록을 모두 삭제할까요?')) return;
+      apiFetch('/api/me/history', { method: 'DELETE' }).then(function() {
+        historyList = [];
+        renderHistory();
+      });
+    });
+
+    // ── 초기 로드 ──
+    // 1단계: 인증 확인
+    fetch('/auth/me')
+      .then(function(r) { return r.json(); })
+      .then(function(auth) {
+        if (!auth || !auth.authenticated) {
+          window.location.href = '/login';
+          return;
+        }
+
+        // 프로필 렌더
+        var u = auth.user;
+        document.getElementById('profile').style.display = 'flex';
+        document.getElementById('profile-name').textContent = u.name || u.email;
+        document.getElementById('profile-email').textContent = u.email;
+        var roleEl = document.getElementById('profile-role');
+        roleEl.textContent = u.role === 'admin' ? 'Admin' : 'Member';
+        roleEl.className = 'badge profile-role ' + (u.role === 'admin' ? 'badge-admin' : 'badge-user');
+        if (u.avatar) {
+          var img = document.createElement('img');
+          img.src = u.avatar; img.alt = ''; img.className = 'profile-avatar';
+          img.onerror = function() { img.style.display = 'none'; };
+          document.getElementById('avatar-placeholder').replaceWith(img);
+        }
+
+        // 사이트 제목 반영
+        fetch('/api/settings').then(function(r) { return r.json(); }).then(function(s) {
+          if (s.site_title) document.title = '내 페이지 — ' + s.site_title;
+        }).catch(function(){});
+
+        // 2단계: 데이터 로딩 (실패해도 로그인 redirect 안 함)
+        Promise.all([
+          apiFetch('/api/me/bookmarks'),
+          apiFetch('/api/me/history'),
+        ]).then(function(results) {
+          bookmarks = (results[0] && results[0].bookmarks) || [];
+          renderBookmarks();
+          historyList = (results[1] && results[1].history) || [];
+          renderHistory();
+        }).catch(function() {
+          // API 오류 시 빈 상태 유지 (로그인 redirect 안 함)
+          renderBookmarks();
+          renderHistory();
+        });
+      })
+      .catch(function() {
+        window.location.href = '/login';
+      });
+  </script>
+</body>
+</html>

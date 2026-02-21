@@ -1,0 +1,110 @@
+/* ============================================================
+   Base UI — 다크테마 공통 스타일
+   admin-ui / user-ui 공유. requireAuth(인증 필요, admin 불필요)
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: 0.875rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar h1, .topbar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+.topbar-links { display: flex; gap: 1rem; align-items: center; }
+.topbar-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+}
+.topbar-links a:hover { color: #e2e8f0; }
+
+/* ── Layout ── */
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge-active    { background: #064e3b; color: #6ee7b7; }
+.badge-pending   { background: #78350f; color: #fcd34d; }
+.badge-blocked   { background: #7f1d1d; color: #fca5a5; }
+.badge-admin     { background: #312e81; color: #a5b4fc; }
+.badge-user      { background: #1e293b; color: #64748b; border: 1px solid #334155; }
+.badge-protected { background: #164e63; color: #67e8f9; }
+.badge-success   { background: #064e3b; color: #6ee7b7; }
+.badge-failed    { background: #7f1d1d; color: #fca5a5; }
+.badge-running   { background: #1e3a5f; color: #93c5fd; }
+.badge-trigger-manual   { background: #312e81; color: #a5b4fc; }
+.badge-trigger-watcher  { background: #164e63; color: #67e8f9; }
+.badge-trigger-settings { background: #78350f; color: #fcd34d; }
+.badge-trigger-startup  { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+/* ── Buttons ── */
+.btn {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: transparent;
+  color: #e2e8f0;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn:hover { background: #334155; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn:disabled:hover { background: transparent; }
+.btn-approve { border-color: #059669; color: #6ee7b7; }
+.btn-approve:hover:not(:disabled) { background: #064e3b; }
+.btn-block   { border-color: #dc2626; color: #fca5a5; }
+.btn-block:hover:not(:disabled)   { background: #7f1d1d; }
+.btn-danger  { border-color: #dc2626; color: #fca5a5; }
+.btn-danger:hover:not(:disabled)  { background: #7f1d1d; }
+.btn-primary { border-color: #3b82f6; color: #93c5fd; }
+.btn-primary:hover:not(:disabled) { background: #1e3a5f; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  padding: 0.75rem 1.5rem; border-radius: 8px;
+  font-size: 0.875rem; z-index: 100; transition: opacity 0.3s;
+}
+.toast-success { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+.toast-error   { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
+.toast-admin   { background: #312e81; color: #a5b4fc; border: 1px solid #4338ca; max-width: 400px; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .container { padding: 1rem; }
+  .topbar    { padding: 0.75rem 1rem; }
+}

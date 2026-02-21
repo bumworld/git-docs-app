@@ -175,7 +175,8 @@
       '.right-sidebar-container',
       'nav',
       '.content-panel:first-child',
-      '.right-sidebar'
+      '.right-sidebar',
+      '.sl-sidebar-toggle'
     ];
 
     elementsToHide.forEach(selector => {

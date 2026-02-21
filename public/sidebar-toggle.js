@@ -47,6 +47,8 @@
   }
 
   function init() {
+    // iframe(프리젠테이션 모드) 내부에서는 실행 안 함
+    if (window.top !== window.self) return;
     // 사이드바 없는 페이지 건너뜀
     if (!document.documentElement.hasAttribute('data-has-sidebar')) return;
     // 모바일 건너뜀

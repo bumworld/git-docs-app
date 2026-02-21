@@ -32,6 +32,7 @@ export const PATHS = {
   DATA: resolvePath(CUSTOM_DATA, 'sample/data', 'data'),
   DB: path.resolve(resolvePath(CUSTOM_DATA, 'sample/data', 'data'), 'wiki.db'),
   ADMIN_UI: path.resolve(ROOT, 'admin-ui'),
+  USER_UI: path.resolve(ROOT, 'user-ui'),
   CONF: resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'),
   GOOGLE_AUTH: path.resolve(resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'), 'google_auth.json'),
   SIDEBAR_JSON: path.resolve(ROOT, 'src', 'sidebar.json'),

@@ -3,12 +3,13 @@ import session from 'express-session';
 import passport from 'passport';
 import path from 'path';
 import fs from 'fs';
-import { initializeDatabase, seedAdmin, getAllSettings, findUserById } from './db.js';
+import { initializeDatabase, seedAdmin, seedDevUser, getAllSettings, findUserById } from './db.js';
 import { setupPassport, loadGoogleConfig, resolveCallbackURL } from './auth.js';
 import { createSessionStore } from './session-store.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes, { setAdminBuildRunner } from './routes/admin.js';
 import buildRoutes, { setBuildRunner } from './routes/build.js';
+import userRoutes from './routes/user.js';
 import sseRoutes, { setSSEBuildRunner } from './sse/index.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { createBuildRunner } from '../scripts/watcher.js';
@@ -23,6 +24,9 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'git-docs-secret-' + Math.r
 initializeDatabase();
 if (ADMIN_EMAIL) {
   seedAdmin(ADMIN_EMAIL);
+}
+if (DEV_MODE) {
+  seedDevUser();
 }
 
 // Setup Passport
@@ -129,6 +133,10 @@ app.get('/api/settings', (req, res) => {
   });
 });
 
+// UI assets (base.css, admin.css) - public, no auth required
+// CSS files contain no sensitive data; login/pending pages also need base.css
+app.use('/ui-assets', express.static(path.join(PATHS.ADMIN_UI, 'css')));
+
 // Static assets from dist/ - served WITHOUT auth (CSS, JS, fonts, images are not sensitive)
 // This prevents white screen on mobile when session cookie is not sent with subresource requests
 app.use('/_assets', express.static(path.join(PATHS.DIST, '_assets'), {
@@ -146,6 +154,14 @@ app.use('/pagefind', express.static(path.join(PATHS.DIST, 'pagefind')));
 
 // Build API
 app.use('/api', buildRoutes);
+
+// User personalization API (bookmark, history)
+app.use('/api/me', userRoutes);
+
+// My Page (개인화 페이지)
+app.get('/my', requireAuth, (req, res) => {
+  res.sendFile(path.join(PATHS.USER_UI, 'my.html'));
+});
 
 // SSE API
 app.use('/api/sse', sseRoutes);

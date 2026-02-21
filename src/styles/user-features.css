@@ -1,0 +1,247 @@
+/* ============================================================
+   북마크 버튼 (우측 TOC)
+   ============================================================ */
+.toc-bookmark-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0.5rem 0 0;
+  padding: 0.6rem 1rem;
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-text);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.toc-bookmark-btn:hover {
+  background: var(--sl-color-gray-6);
+  border-color: var(--sl-color-gray-4);
+  color: var(--sl-color-text);
+}
+
+.toc-bookmark-btn.bookmarked {
+  color: #f59e0b;
+  border-color: #92400e;
+  background: rgba(120, 53, 15, 0.12);
+}
+
+.toc-bookmark-btn.bookmarked:hover {
+  background: var(--sl-color-gray-6);
+  border-color: var(--sl-color-gray-4);
+  color: var(--sl-color-text);
+}
+
+.toc-bookmark-btn svg {
+  flex-shrink: 0;
+}
+
+/* 모바일 북마크 아이콘 버튼 */
+.toc-bookmark-btn-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .right-sidebar .toc-bookmark-btn {
+    display: none;
+  }
+
+  .toc-bookmark-btn-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--sl-color-text);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: 0.25rem;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .toc-bookmark-btn-mobile svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toc-bookmark-btn-mobile.bookmarked {
+    color: #f59e0b;
+  }
+}
+
+/* ============================================================
+   사이드바 패널 (좌측, PC)
+   ============================================================ */
+#uf-sidebar-panel {
+  border-top: 1px solid var(--sl-color-hairline-shade);
+  margin-top: 0.75rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.uf-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* details 섹션 */
+.uf-section {
+  overflow: hidden;
+}
+
+.uf-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sl-color-gray-3);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  border-radius: 4px;
+  transition: background-color 0.1s;
+}
+
+.uf-section-header:hover {
+  background: var(--sl-color-gray-6);
+}
+
+/* details 화살표 제거 */
+.uf-section-header::-webkit-details-marker { display: none; }
+.uf-section-header::marker { display: none; }
+
+.uf-count {
+  margin-left: auto;
+  background: var(--sl-color-gray-5);
+  color: var(--sl-color-gray-2);
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  line-height: 1.5;
+}
+
+/* 히스토리 지우기 버튼 */
+.uf-clear-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--sl-color-gray-4);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  line-height: 1;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.uf-clear-btn:hover {
+  color: var(--sl-color-text);
+  background: var(--sl-color-gray-5);
+}
+
+/* 목록 아이템 */
+.uf-section-body {
+  padding: 0.2rem 0;
+}
+
+.uf-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--sl-color-gray-2);
+  text-decoration: none;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: background-color 0.1s, color 0.1s;
+  line-height: 1.35;
+}
+
+.uf-item:hover {
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-text);
+}
+
+.uf-item-active {
+  color: var(--sl-color-text-accent);
+  font-weight: 500;
+}
+
+.uf-item-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uf-item-time {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  color: var(--sl-color-gray-4);
+  white-space: nowrap;
+}
+
+.uf-empty {
+  padding: 0.3rem 0.875rem;
+  font-size: 0.8rem;
+  color: var(--sl-color-gray-4);
+  margin: 0;
+}
+
+/* 더 보기 링크 */
+.uf-more-link {
+  display: block;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.75rem;
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.1s;
+}
+
+.uf-more-link:hover {
+  background: var(--sl-color-gray-6);
+}
+
+/* 내 페이지 전체 보기 링크 */
+.uf-my-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+  border-top: 1px solid var(--sl-color-hairline-shade);
+  transition: background-color 0.1s;
+}
+
+.uf-my-link:hover {
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-text-accent);
+}
+
+@media print {
+  #uf-sidebar-panel,
+  .toc-bookmark-btn,
+  .toc-bookmark-btn-mobile {
+    display: none !important;
+  }
+}
