@@ -1,6 +1,8 @@
 #!/bin/sh
-# Use nvm node (v22) to match the compiled better-sqlite3 native module
-export PATH="/Users/bumworld/.nvm/versions/node/v22.19.0/bin:$PATH"
+# Load nvm and use the node version specified in .nvmrc
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+nvm use --silent 2>/dev/null || true
 
 # Run prebuild first to generate src/content/docs/
 USE_SAMPLE_DIR=true npm run prebuild
