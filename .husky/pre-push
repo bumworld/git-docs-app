@@ -1,6 +1,6 @@
 #!/bin/sh
-# Use Homebrew node (v25) to match the compiled better-sqlite3 native module
-export PATH="/opt/homebrew/bin:$PATH"
+# Use nvm node (v22) to match the compiled better-sqlite3 native module
+export PATH="/Users/bumworld/.nvm/versions/node/v22.19.0/bin:$PATH"
 
 # Pre-push hook: run unit + build option tests before pushing
 # E2E tests run in CI (too slow for local hook)
