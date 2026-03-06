@@ -266,7 +266,7 @@ sidebar:
   }
 }
 
-export function processAssetFile(srcFile, relativePath, stats) {
+export function processAssetFile(srcFile, relativePath, docsSubDir, stats) {
   try {
     const filename = path.basename(srcFile);
     const title = generateTitle(filename);
@@ -276,8 +276,7 @@ export function processAssetFile(srcFile, relativePath, stats) {
 
     fs.copySync(srcFile, downloadDest, { overwrite: true });
 
-    const dirPath = path.dirname(relativePath);
-    const mdDest = path.join(PATHS.DOCS, dirPath, sanitizeSlug(filename).toLowerCase() + '.md');
+    const mdDest = path.join(docsSubDir, sanitizeSlug(filename).toLowerCase() + '.md');
     const sizeStr = formatFileSize(fs.statSync(srcFile).size);
 
     const securityWarning = getSecurityWarning(filename);
@@ -565,5 +564,5 @@ register({
 register({
   name: 'asset',
   match: () => true,  // fallback: 위 핸들러에서 매칭되지 않은 모든 파일
-  process: (srcPath, relPath, ctx) => processAssetFile(srcPath, relPath, ctx.stats),
+  process: (srcPath, relPath, ctx) => processAssetFile(srcPath, relPath, ctx.docsSubDir, ctx.stats),
 });

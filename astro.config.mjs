@@ -56,7 +56,7 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
         { tag: 'style', content: 'html[data-theme="dark"]{background:#16181c}html[data-theme="light"]{background:#fff}' },
         // FOUC 방지: 페이지 로드 전 사이드바/TOC 접힘 상태 복원 (PC only)
-        { tag: 'script', content: "(function(){try{if(localStorage.getItem('sl-sidebar-collapsed')==='1'&&window.matchMedia('(min-width:50rem)').matches){document.documentElement.classList.add('sidebar-collapsed')}if(localStorage.getItem('sl-toc-collapsed')==='1'&&window.matchMedia('(min-width:72rem)').matches){document.documentElement.classList.add('toc-collapsed')}}catch(e){}})();" },
+        { tag: 'script', content: "(function(){try{var is50=window.matchMedia('(min-width:50rem)').matches;var is72=window.matchMedia('(min-width:72rem)').matches;if(is50&&(localStorage.getItem('sl-sidebar-collapsed')==='1'||!is72)){document.documentElement.classList.add('sidebar-collapsed')}if(localStorage.getItem('sl-toc-collapsed')==='1'&&is72){document.documentElement.classList.add('toc-collapsed')}}catch(e){}})();" },
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/mermaid-init.js' } },
         { tag: 'script', attrs: { src: '/video-source.js', defer: true } },
@@ -71,6 +71,7 @@ export default defineConfig({
       ],
       components: {
         ContentPanel: './src/components/overrides/ContentPanel.astro',
+        TwoColumnContent: './src/components/overrides/TwoColumnContent.astro',
       },
       pagination: true,
       lastUpdated: false,

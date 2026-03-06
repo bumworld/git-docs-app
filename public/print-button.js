@@ -31,13 +31,14 @@
   }
 
   function initPrintButton() {
-    // 모바일 체크
-    const isMobile = window.innerWidth <= 768;
+    // Starlight의 데스크탑 TOC 기준과 동일한 미디어 쿼리 사용
+    const isDesktop = window.matchMedia('(min-width: 72rem)').matches;
 
-    if (isMobile) {
-      // 기존 모바일 버튼 제거
-      const existingMobileBtn = document.querySelector('.toc-print-btn-mobile');
-      if (existingMobileBtn) existingMobileBtn.remove();
+    if (!isDesktop) {
+      // 데스크탑 버튼 제거
+      document.querySelectorAll('.toc-print-btn').forEach(el => el.remove());
+      // 기존 모바일 버튼 제거 후 재추가
+      document.querySelectorAll('.toc-print-btn-mobile').forEach(el => el.remove());
 
       // 모바일: starlight mobile toc summary 찾기
       const mobileTocSummary = document.querySelector('#starlight__on-this-page--mobile');
@@ -47,6 +48,9 @@
         mobileTocSummary.appendChild(btn);
       }
     } else {
+      // 모바일 버튼 제거
+      document.querySelectorAll('.toc-print-btn-mobile').forEach(el => el.remove());
+
       // PC: 우측 사이드바에 버튼 추가
       const rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
       if (!rightSidebar) return;

@@ -29,6 +29,13 @@ describe('Print Button', () => {
     global.window = window;
     global.document = document;
     global.module = { exports: {} };
+    // matchMedia 모킹: 72rem+ (데스크탑) 환경 시뮬레이션
+    global.window.matchMedia = (query) => ({
+      matches: query.includes('72rem') ? true : false,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
 
     const fs = await import('fs');
     const path = await import('path');

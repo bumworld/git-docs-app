@@ -394,12 +394,12 @@ iframe {
 }
 
 @media (min-width: 72rem) {
-  /* 토글 버튼: JS가 측정한 --sl-toc-actual-right 기준으로 위치 */
+  /* 토글 버튼: TOC가 right: 0 고정이므로 버튼은 right: var(--sl-sidebar-width) */
   .sl-toc-toggle {
     display: flex;
     position: fixed;
     top: calc(var(--sl-nav-height) + 1.5rem);
-    right: var(--sl-toc-actual-right, 12rem);
+    right: var(--sl-sidebar-width);
     z-index: 200;
     width: 1.125rem;
     height: 2.25rem;
@@ -479,7 +479,8 @@ iframe {
   display: none;
 }
 
-@media (max-width: 768px) {
+/* 72rem 미만: 모바일 TOC 바에 버튼 표시 (JS 브레이크포인트와 동일) */
+@media not (min-width: 72rem) {
   /* PC용 TOC 버튼 숨김 */
   .right-sidebar .toc-print-btn {
     display: none;

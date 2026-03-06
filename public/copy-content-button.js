@@ -197,12 +197,14 @@ ${htmlContent}
       return;
     }
 
-    const isMobile = window.innerWidth <= 768;
+    // Starlight의 데스크탑 TOC 기준과 동일한 미디어 쿼리 사용
+    const isDesktop = window.matchMedia('(min-width: 72rem)').matches;
 
-    if (isMobile) {
-      // Remove existing mobile button
-      const existingMobileBtn = document.querySelector('.toc-copy-content-btn-mobile');
-      if (existingMobileBtn) existingMobileBtn.remove();
+    if (!isDesktop) {
+      // 데스크탑 버튼 제거
+      document.querySelectorAll('.toc-copy-content-btn').forEach(el => el.remove());
+      // 기존 모바일 버튼 제거 후 재추가
+      document.querySelectorAll('.toc-copy-content-btn-mobile').forEach(el => el.remove());
 
       // Mobile: add to "On this page" summary
       const mobileTocSummary = document.querySelector('#starlight__on-this-page--mobile');
@@ -212,6 +214,9 @@ ${htmlContent}
         mobileTocSummary.appendChild(btn);
       }
     } else {
+      // 모바일 버튼 제거
+      document.querySelectorAll('.toc-copy-content-btn-mobile').forEach(el => el.remove());
+
       // Desktop: add to right sidebar
       const rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
       if (!rightSidebar) return;

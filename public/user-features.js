@@ -158,11 +158,16 @@
   }
 
   function renderBookmarkButton() {
-    var isMobile = window.innerWidth <= 768;
-    if (isMobile) {
+    var isDesktop = window.matchMedia('(min-width: 72rem)').matches;
+    // 반대편 버튼 제거
+    if (!isDesktop) {
+      document.querySelectorAll('.toc-bookmark-btn').forEach(function(el) { el.remove(); });
+      document.querySelectorAll('.toc-bookmark-btn-mobile').forEach(function(el) { el.remove(); });
       var summary = document.querySelector('#starlight__on-this-page--mobile');
       if (summary) summary.appendChild(makeBookmarkBtn(true));
     } else {
+      document.querySelectorAll('.toc-bookmark-btn-mobile').forEach(function(el) { el.remove(); });
+      document.querySelectorAll('.toc-bookmark-btn').forEach(function(el) { el.remove(); });
       var rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
       if (!rightSidebar) return;
       var btn = makeBookmarkBtn(false);
@@ -187,7 +192,7 @@
   // ─── 사이드바 패널 (좌측, PC 전용) ─────────────────
 
   function renderSidebarPanel() {
-    if (window.innerWidth <= 768) return;
+    if (!window.matchMedia('(min-width: 72rem)').matches) return;
     var sidebar = document.querySelector('#starlight__sidebar');
     if (!sidebar) return;
 

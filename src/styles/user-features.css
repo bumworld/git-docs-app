@@ -47,7 +47,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media not (min-width: 72rem) {
   .right-sidebar .toc-bookmark-btn {
     display: none;
   }

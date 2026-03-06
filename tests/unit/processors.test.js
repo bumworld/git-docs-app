@@ -287,7 +287,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, '{"key": "value"}');
 
     const stats = createStats();
-    processAssetFile(srcFile, 'config.json', stats);
+    processAssetFile(srcFile, 'config.json', TEST_DOCS, stats);
 
     const destMd = path.join(TEST_DOCS, 'config.md');
     assert.ok(fs.existsSync(destMd));
@@ -303,7 +303,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, 'fake exe content');
 
     const stats = createStats();
-    processAssetFile(srcFile, 'setup.exe', stats);
+    processAssetFile(srcFile, 'setup.exe', TEST_DOCS, stats);
 
     const content = fs.readFileSync(path.join(TEST_DOCS, 'setup.md'), 'utf-8');
     assert.ok(content.includes('SECURITY WARNING') || content.includes('dangerous'));
@@ -315,7 +315,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, 'console.log("hello")');
 
     const stats = createStats();
-    processAssetFile(srcFile, 'script.js', stats);
+    processAssetFile(srcFile, 'script.js', TEST_DOCS, stats);
 
     const content = fs.readFileSync(path.join(TEST_DOCS, 'script.md'), 'utf-8');
     assert.ok(content.includes('Caution') || content.includes('caution') || content.includes('Warning'));
@@ -326,7 +326,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, 'server:\n  port: 8080\n');
 
     const stats = createStats();
-    processAssetFile(srcFile, 'config.yaml', stats);
+    processAssetFile(srcFile, 'config.yaml', TEST_DOCS, stats);
 
     const content = fs.readFileSync(path.join(TEST_DOCS, 'config.md'), 'utf-8');
     assert.ok(content.includes('```'));
@@ -339,7 +339,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, largeJson);
 
     const stats = createStats();
-    processAssetFile(srcFile, 'large.json', stats);
+    processAssetFile(srcFile, 'large.json', TEST_DOCS, stats);
 
     const content = fs.readFileSync(path.join(TEST_DOCS, 'large.md'), 'utf-8');
     // 잘렸다는 안내 메시지가 있어야 함
@@ -351,7 +351,7 @@ describe('processAssetFile', () => {
     fs.outputFileSync(srcFile, 'name,age\nAlice,30\n');
 
     const stats = createStats();
-    processAssetFile(srcFile, 'data.csv', stats);
+    processAssetFile(srcFile, 'data.csv', TEST_DOCS, stats);
 
     const content = fs.readFileSync(path.join(TEST_DOCS, 'data.md'), 'utf-8');
     assert.ok(content.includes('KB') || content.includes('MB') || content.includes('Size'));
