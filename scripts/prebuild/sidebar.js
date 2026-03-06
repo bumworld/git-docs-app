@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS } from '../../config/constants.js';
-import { sanitizeSlug, generateTitle } from './utils.js';
+import { sanitizeSlug, sanitizeDirName, generateTitle } from './utils.js';
 
 function scanDir(dir, relDir = '') {
   const items = [];
@@ -18,7 +18,7 @@ function scanDir(dir, relDir = '') {
     if (entry.name.startsWith('.')) continue;
 
     if (entry.isDirectory()) {
-      const dirSlug = entry.name.toLowerCase();
+      const dirSlug = sanitizeDirName(entry.name).toLowerCase();
       const subItems = scanDir(
         path.join(dir, entry.name),
         relDir ? `${relDir}/${dirSlug}` : dirSlug
