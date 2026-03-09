@@ -19,21 +19,18 @@
 	@media (min-width: 72rem) {
 		.right-sidebar-container {
 			order: 2;
-			position: relative;
 			width: var(--sl-sidebar-width);
 			flex-shrink: 0;
 		}
 
 		.right-sidebar {
-			position: fixed;
+			position: sticky;
 			top: 0;
-			right: 0;
-			width: var(--sl-sidebar-width);
-			border-inline-start: 1px solid var(--sl-color-hairline);
-			padding-top: var(--sl-nav-height);
 			height: 100vh;
 			overflow-y: auto;
 			scrollbar-width: none;
+			border-inline-start: 1px solid var(--sl-color-hairline);
+			padding-top: var(--sl-nav-height);
 		}
 
 		.main-pane {

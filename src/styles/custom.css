@@ -1,6 +1,6 @@
 :root {
   --sl-sidebar-width-table-of-contents: 12rem;  /* 15rem에서 20% 축소 */
-  --sl-content-width: 90ch;
+  --sl-content-width: 100ch;
 }
 
 /* Auth bar */
@@ -39,9 +39,8 @@
   background-color: var(--sl-color-gray-6);
 }
 
-main {
-  justify-self: start;
-}
+/* main은 기본 block stretch로 main-pane을 채움.
+   콘텐츠 폭 제한은 .sl-container max-width: 90ch 에서 처리 */
 
 /* Mobile viewport fix - prevent horizontal scroll */
 html, body {
@@ -430,22 +429,15 @@ iframe {
   }
 
   /* TOC 패널 transition (toc-animate 활성화 후에만) */
-  html.toc-animate .right-sidebar {
-    transition: transform 0.25s ease;
-  }
-
   html.toc-animate .right-sidebar-container {
     transition: width 0.25s ease;
   }
 
-  /* TOC 접힌 상태: 오른쪽으로 슬라이드 아웃 */
-  html.toc-collapsed .right-sidebar {
-    transform: translateX(100%);
-    border: none !important;
-  }
-
+  /* TOC 접힌 상태: 너비 0으로 본문을 밀어냄 */
   html.toc-collapsed .right-sidebar-container {
     width: 0 !important;
+    overflow: hidden;
+    border: none !important;
   }
 }
 
