@@ -11,6 +11,7 @@ import path from 'path';
  */
 function sanitize(str) {
   return str
+    .normalize('NFC')  // macOS NFD(자모 분리) → NFC 정규화
     .replace(/[\s]+/g, '-')
     .replace(/[.()[\]{}#&+%@!;,='"`~$^|?*<>:\\]/g, '')
     .replace(/-{2,}/g, '-')

@@ -411,7 +411,8 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
     }
 
     const srcPath = path.join(srcDir, entry.name);
-    const relPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+    const entryName = entry.name.normalize('NFC');  // macOS NFD(자모 분리) → NFC 정규화
+    const relPath = relativePath ? `${relativePath}/${entryName}` : entryName;
 
     // .gitdocs.json ignorePatterns 체크
     if (shouldIgnore(relPath, gitdocsConfig.ignorePatterns)) {
