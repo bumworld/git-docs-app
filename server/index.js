@@ -177,6 +177,18 @@ app.use('/admin', requireAuth, (req, res, next) => {
   next();
 }, express.static(PATHS.ADMIN_UI));
 
+// .html / .md / .mdx URL → 확장자 제거 후 리다이렉트
+// - build.format: 'file' 시 Starlight가 .html 링크를 생성하므로 URL에서 제거
+// - 마크다운 상대 링크([링크](./other.md))가 파일 경로처럼 작동하도록 지원
+app.use((req, res, next) => {
+  if (/\.(html|md|mdx)$/i.test(req.path)) {
+    const newPath = req.path.replace(/\.(html|md|mdx)$/i, '') || '/';
+    const query = req.url.slice(req.path.length);
+    return res.redirect(301, newPath + query);
+  }
+  next();
+});
+
 // Downloads (files from source/ that are not markdown/html)
 app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS));
 

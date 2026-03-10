@@ -20,8 +20,10 @@ try {
 export default defineConfig({
   site: process.env.SITE_URL || undefined,
   output: 'static',
+  trailingSlash: 'never',
   build: {
     assets: '_assets',
+    format: 'file',  // 파일.html 형태로 빌드 (기본값 'directory'는 파일/index.html)
   },
   vite: {
     ssr: {
