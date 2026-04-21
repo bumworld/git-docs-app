@@ -217,6 +217,11 @@ iframe {
   background: var(--sl-color-gray-5);
 }
 
+/* Blockquote: 소프트 줄바꿈 보존 */
+.sl-markdown-content blockquote p {
+  white-space: pre-line;
+}
+
 /* Responsive tables - mobile scroll */
 .sl-markdown-content table {
   display: block;

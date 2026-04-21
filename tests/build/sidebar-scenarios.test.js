@@ -300,3 +300,60 @@ describe('특수 케이스', () => {
     assert.ok(!slugs.some(s => s.startsWith('.')));
   });
 });
+
+// ─── 서브디렉토리 index.md ────────────────────────────────────
+describe('서브디렉토리 index.md 처리', () => {
+  it('서브디렉토리에 index.md만 있으면 디렉토리 slug 리프 아이템으로 평탄화', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, 'README.md'), '# Home');
+    fs.ensureDirSync(path.join(TEST_SOURCE, 'guide'));
+    fs.outputFileSync(
+      path.join(TEST_SOURCE, 'guide', 'index.md'),
+      '---\ntitle: Guide Overview\n---\n\nOverview.',
+    );
+    runPrebuild();
+
+    const sidebar = fs.readJsonSync(TEST_SIDEBAR);
+    const slugs = flattenSidebarSlugs(sidebar);
+    assert.ok(slugs.includes('guide'), `Expected slug "guide", got: ${JSON.stringify(slugs)}`);
+    assert.ok(!slugs.includes('guide/index'), '"guide/index" slug should not exist');
+
+    // frontmatter title이 라벨로 적용되어야 함
+    const labels = flattenSidebarLabels(sidebar);
+    assert.ok(labels.includes('Guide Overview'));
+  });
+
+  it('서브디렉토리에 index.md + 다른 파일 → 그룹 + 첫 아이템으로 디렉토리 링크', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, 'README.md'), '# Home');
+    fs.ensureDirSync(path.join(TEST_SOURCE, 'guide'));
+    fs.outputFileSync(
+      path.join(TEST_SOURCE, 'guide', 'index.md'),
+      '---\ntitle: Guide\n---\n\nOverview.',
+    );
+    fs.outputFileSync(path.join(TEST_SOURCE, 'guide', 'detail.md'), '# Detail\n\nContent.');
+    runPrebuild();
+
+    const sidebar = fs.readJsonSync(TEST_SIDEBAR);
+    const slugs = flattenSidebarSlugs(sidebar);
+    assert.ok(slugs.includes('guide'), '"guide" overview slug should exist');
+    assert.ok(slugs.includes('guide/detail'));
+    assert.ok(!slugs.includes('guide/index'), '"guide/index" slug should not exist');
+
+    // 그룹 items[0]이 디렉토리 slug 링크여야 함 (overview)
+    const group = sidebar.find(i => Array.isArray(i.items) && i.label === 'guide');
+    assert.ok(group, 'guide group should exist');
+    assert.strictEqual(group.items[0].slug, 'guide');
+  });
+
+  it('깊게 중첩된 서브디렉토리 index.md도 올바른 slug 생성', () => {
+    fs.outputFileSync(path.join(TEST_SOURCE, 'README.md'), '# Home');
+    const deep = path.join(TEST_SOURCE, 'a', 'b', 'c');
+    fs.ensureDirSync(deep);
+    fs.outputFileSync(path.join(deep, 'index.md'), '---\ntitle: C Overview\n---\n\n.');
+    runPrebuild();
+
+    const sidebar = fs.readJsonSync(TEST_SIDEBAR);
+    const slugs = flattenSidebarSlugs(sidebar);
+    assert.ok(slugs.includes('a/b/c'), `Expected slug "a/b/c", got: ${JSON.stringify(slugs)}`);
+    assert.ok(!slugs.some(s => s.endsWith('/index')));
+  });
+});

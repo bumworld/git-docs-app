@@ -4,6 +4,16 @@ import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS } from '../../config/constants.js';
 import { sanitizeSlug, sanitizeDirName, generateTitle } from './utils.js';
 
+function readIndexLabel(indexPath, fallback) {
+  try {
+    const content = fs.readFileSync(indexPath, 'utf-8');
+    const parsed = matter(content);
+    if (parsed.data.sidebar?.label) return parsed.data.sidebar.label;
+    if (parsed.data.title) return parsed.data.title;
+  } catch { /* use fallback */ }
+  return fallback;
+}
+
 function scanDir(dir, relDir = '') {
   const items = [];
   if (!fs.existsSync(dir)) return items;
@@ -19,19 +29,37 @@ function scanDir(dir, relDir = '') {
 
     if (entry.isDirectory()) {
       const dirSlug = sanitizeDirName(entry.name).toLowerCase();
-      const subItems = scanDir(
-        path.join(dir, entry.name),
-        relDir ? `${relDir}/${dirSlug}` : dirSlug
-      );
-      if (subItems.length > 0) {
+      const subRelDir = relDir ? `${relDir}/${dirSlug}` : dirSlug;
+      const subDirPath = path.join(dir, entry.name);
+      const subItems = scanDir(subDirPath, subRelDir);
+
+      const indexPath = path.join(subDirPath, 'index.md');
+      const hasIndex = fs.existsSync(indexPath);
+      const dirLabel = generateTitle(entry.name);
+
+      if (hasIndex && subItems.length === 0) {
+        // index.md만 있음 → 그룹 없이 리프 아이템으로 평탄화
+        items.push({ label: readIndexLabel(indexPath, dirLabel), slug: subRelDir });
+      } else if (hasIndex) {
+        // index.md + 다른 파일 → 그룹 + 첫 아이템으로 디렉토리 자체 링크
         items.push({
-          label: generateTitle(entry.name),
+          label: dirLabel,
+          collapsed: true,
+          items: [
+            { label: readIndexLabel(indexPath, dirLabel), slug: subRelDir },
+            ...subItems,
+          ],
+        });
+      } else if (subItems.length > 0) {
+        items.push({
+          label: dirLabel,
           collapsed: true,
           items: subItems,
         });
       }
     } else if (entry.isFile() && FILE_EXTENSIONS.MARKDOWN.includes(path.extname(entry.name).toLowerCase())) {
-      if (entry.name === 'index.md' && relDir === '') continue; // generateSidebarConfig에서 별도 처리
+      // index.md는 디렉토리 처리 분기에서 별도 처리 (루트는 generateSidebarConfig에서 처리)
+      if (entry.name === 'index.md') continue;
 
       const rawSlug = relDir
         ? `${relDir}/${sanitizeSlug(entry.name)}`
