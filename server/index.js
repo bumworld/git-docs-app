@@ -18,7 +18,15 @@ import { PATHS, SESSION } from '../config/constants.js';
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 const DEV_MODE = process.env.DEV_MODE === 'true';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'git-docs-secret-' + Math.random().toString(36).slice(2);
+let SESSION_SECRET = process.env.SESSION_SECRET?.trim();
+if (!SESSION_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('FATAL: SESSION_SECRET 환경변수가 설정되지 않았습니다 (공백 불가). 프로덕션에서는 필수입니다.');
+    process.exit(1);
+  }
+  // 개발/테스트 한정 고정 시크릿 (재시작해도 세션 유지). 프로덕션에서는 절대 사용되지 않음.
+  SESSION_SECRET = 'git-docs-dev-secret-not-for-production';
+}
 
 // Initialize database
 initializeDatabase();

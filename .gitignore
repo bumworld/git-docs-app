@@ -26,6 +26,8 @@ sample/data/*.db-journal
 sample/data/*.db-wal
 sample/data/prebuild-cache.json
 data/prebuild-cache.json
+data/last-source.json
+sample/data/last-source.json
 
 # Config (contains secrets)
 conf/google_auth.json

@@ -17,6 +17,7 @@ COPY server/ ./server/
 COPY scripts/ ./scripts/
 COPY src/ ./src/
 COPY admin-ui/ ./admin-ui/
+COPY user-ui/ ./user-ui/
 COPY public/ ./public/
 COPY config/ ./config/
 COPY astro.config.mjs ./

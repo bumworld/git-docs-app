@@ -11,7 +11,8 @@ services:
       - ./sample/data:/app/data
     environment:
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-      - SESSION_SECRET=${SESSION_SECRET:-change-me-in-production}
+      # .env 또는 셸 환경에 SESSION_SECRET 을 반드시 설정해야 한다 (미설정 시 compose 가 시작을 거부).
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET must be set (e.g. in a .env file)}
       - PORT=3000
     restart: unless-stopped
 

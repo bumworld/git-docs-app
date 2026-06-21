@@ -5,10 +5,22 @@ playwright-report/
 test-results/
 
 # 로컬 개발용 데이터 (Vercel에서는 불필요)
+data/*.db
+data/*.db-shm
+data/*.db-journal
+data/*.db-wal
+data/prebuild-cache.json
+data/last-source.json
 sample/data/*.db
 sample/data/*.db-shm
 sample/data/*.db-journal
 sample/data/*.db-wal
+sample/data/prebuild-cache.json
+sample/data/last-source.json
+
+# 시크릿 (절대 배포 번들에 포함하지 않는다)
+conf/google_auth.json
+sample/conf/google_auth.json
 
 # IDE 설정
 .vscode
