@@ -52,20 +52,23 @@
 
   var state = { bookmarks: [], history: [], isBookmarked: false };
   var currentPath = '';
+  // 북마크 버튼은 인증 + 데이터 로드가 끝난 뒤에만 표시한다 (비로그인/제외 경로에서 숨김)
+  var bookmarksEnabled = false;
 
   // ─── 정리 ───────────────────────────────────────────
 
   function cleanup() {
-    ['#uf-sidebar-panel', '.toc-bookmark-btn', '.toc-bookmark-btn-mobile']
-      .forEach(function (sel) {
-        document.querySelectorAll(sel).forEach(function (el) { el.remove(); });
-      });
+    // 북마크 버튼은 toc-button-helper 가 관리하므로 여기서는 사이드바 패널만 정리
+    document.querySelectorAll('#uf-sidebar-panel').forEach(function (el) { el.remove(); });
   }
 
   // ─── 초기화 ─────────────────────────────────────────
 
   function init() {
     currentPath = normalizePath(window.location.pathname);
+    // 내비게이션 시작 시 이전 페이지의 북마크 버튼/상태를 먼저 비활성화
+    bookmarksEnabled = false;
+    if (window.refreshTocButtons) window.refreshTocButtons();
     if (isExcluded(currentPath)) return;
     cleanup();
 
@@ -92,7 +95,9 @@
         state.isBookmarked = state.bookmarks.some(function (b) {
           return b.page_path === currentPath;
         });
-        renderBookmarkButton();
+        // 인증 + 북마크 상태 로드 완료 → 버튼 활성화 후 helper 재배치(현재 state 반영)
+        bookmarksEnabled = true;
+        if (window.refreshTocButtons) window.refreshTocButtons();
         renderSidebarPanel();
       })
       .catch(function () {});
@@ -157,31 +162,14 @@
     return btn;
   }
 
-  function renderBookmarkButton() {
-    var isDesktop = window.matchMedia('(min-width: 72rem)').matches;
-    // 반대편 버튼 제거
-    if (!isDesktop) {
-      document.querySelectorAll('.toc-bookmark-btn').forEach(function(el) { el.remove(); });
-      document.querySelectorAll('.toc-bookmark-btn-mobile').forEach(function(el) { el.remove(); });
-      var summary = document.querySelector('#starlight__on-this-page--mobile');
-      if (summary) summary.appendChild(makeBookmarkBtn(true));
-    } else {
-      document.querySelectorAll('.toc-bookmark-btn-mobile').forEach(function(el) { el.remove(); });
-      document.querySelectorAll('.toc-bookmark-btn').forEach(function(el) { el.remove(); });
-      var rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
-      if (!rightSidebar) return;
-      var btn = makeBookmarkBtn(false);
-      // print 버튼 앞에 삽입, 없으면 h2 다음에
-      var printBtn = rightSidebar.querySelector('.toc-print-btn');
-      var h2 = rightSidebar.querySelector('h2');
-      if (printBtn) {
-        printBtn.insertAdjacentElement('beforebegin', btn);
-      } else if (h2) {
-        h2.insertAdjacentElement('afterend', btn);
-      } else {
-        rightSidebar.insertBefore(btn, rightSidebar.firstChild);
-      }
-    }
+  // 북마크 버튼은 toc-button-helper.js 에 등록 (배치/순서/재초기화 위임).
+  // create 시점의 state.isBookmarked 를 반영하며, 상태 변경 시 refreshBookmarkButtons() 로 갱신한다.
+  if (typeof window !== 'undefined' && window.registerTocButton) {
+    window.registerTocButton({
+      className: 'toc-bookmark-btn',
+      order: 30,
+      create: function (isMobile) { return bookmarksEnabled ? makeBookmarkBtn(isMobile) : null; },
+    });
   }
 
   function refreshBookmarkButtons() {

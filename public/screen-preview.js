@@ -88,27 +88,18 @@
     }
   }
 
-  // ── Inject button into right sidebar ──────────────────────
-  async function initButton() {
-    if (document.querySelector('.presentation-wrapper')) return;
-    if (window.innerWidth <= 768) return;
-
-    previewData = await loadPreviewData();
-    if (!previewData) return;
-
-    const sidebar = document.querySelector('.right-sidebar-container .right-sidebar');
-    if (!sidebar) return;
-
-    // Remove old button
-    sidebar.querySelector('.toc-screen-preview-btn')?.remove();
-
-    const btn = createButton();
-    const tocHeading = sidebar.querySelector('h2');
-    if (tocHeading) {
-      tocHeading.insertAdjacentElement('afterend', btn);
-    } else {
-      sidebar.insertBefore(btn, sidebar.firstChild);
+  // ── Button factory (배치는 toc-button-helper 가 담당) ──────
+  // screen frontmatter 가 있는 페이지에서만(desktop) 버튼을 만든다.
+  // 페이지별로 한 번만 fetch (resize/재렌더 시 캐시 사용 → 중복 요청/깜빡임 방지).
+  let cachedSlug = null;
+  async function makeScreenButton(isMobile) {
+    if (isMobile) return null;
+    const slug = getSlug();
+    if (cachedSlug !== slug) {
+      previewData = await loadPreviewData();
+      cachedSlug = slug;
     }
+    return previewData ? createButton() : null;
   }
 
   // ── Modal ──────────────────────────────────────────────────
@@ -323,19 +314,16 @@
     wrap.className = `screen-preview-frame-wrap device-${currentDevice}`;
   }
 
-  // ── Init ───────────────────────────────────────────────────
-  function init() {
-    initButton();
+  // ── 등록 (배치/재초기화는 toc-button-helper.js 가 담당) ─────
+  if (typeof window !== 'undefined' && window.registerTocButton) {
+    window.registerTocButton({
+      className: 'toc-screen-preview-btn',
+      order: 50,
+      mobile: false,            // desktop 전용
+      presentationAware: true,
+      create: makeScreenButton,
+    });
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  document.addEventListener('astro:page-load', init);
-  window.addEventListener('resize', initButton);
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && modalEl?.classList.contains('screen-preview-modal-visible')) {
@@ -344,6 +332,6 @@
   });
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { init, openModal, closeModal };
+    module.exports = { openModal, closeModal };
   }
 })();

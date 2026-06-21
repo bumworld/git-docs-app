@@ -60,16 +60,6 @@ describe('Print Button', () => {
     assert.strictEqual(btn.getAttribute('title'), 'Print page as PDF');
   });
 
-  it('should insert button in TOC after heading', () => {
-    printModule.initPrintButton();
-    const rightSidebar = document.querySelector('.right-sidebar');
-    const tocHeading = rightSidebar.querySelector('h2');
-    const printBtn = rightSidebar.querySelector('.toc-print-btn');
-
-    assert.ok(printBtn);
-    assert.strictEqual(tocHeading.nextElementSibling, printBtn);
-  });
-
   it('should call window.print when button clicked', () => {
     const mockPrint = mock.fn();
     window.print = mockPrint;
@@ -80,29 +70,9 @@ describe('Print Button', () => {
     assert.strictEqual(mockPrint.mock.calls.length, 1);
   });
 
-  it('should handle missing right-sidebar gracefully', () => {
-    const rightSidebar = document.querySelector('.right-sidebar-container');
-    rightSidebar.remove();
-
-    assert.doesNotThrow(() => {
-      printModule.initPrintButton();
-    });
-  });
-
   it('should be accessible', () => {
-    // 사이드바 재생성
-    const rightSidebarContainer = document.createElement('div');
-    rightSidebarContainer.className = 'right-sidebar-container';
-    const rightSidebar = document.createElement('div');
-    rightSidebar.className = 'right-sidebar';
-    const tocHeading = document.createElement('h2');
-    tocHeading.textContent = 'On this page';
-    rightSidebar.appendChild(tocHeading);
-    rightSidebarContainer.appendChild(rightSidebar);
-    document.body.appendChild(rightSidebarContainer);
-
-    printModule.initPrintButton();
-    const btn = document.querySelector('.toc-print-btn');
+    // 배치는 toc-button-helper 가 담당하므로 여기서는 생성된 버튼의 접근성만 검증
+    const btn = printModule.createPrintButton();
     assert.ok(btn.getAttribute('aria-label'));
     assert.ok(btn.getAttribute('title'));
   });

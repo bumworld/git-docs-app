@@ -240,74 +240,15 @@
     document.body.style.overflow = '';
   }
 
-  /**
-   * Initialize View Source button in the right sidebar
-   */
-  function initViewSourceButton() {
-    // Check if we're in presentation mode - don't show button
-    if (document.querySelector('.presentation-wrapper')) {
-      return;
-    }
-
-    // Starlight의 데스크탑 TOC 기준과 동일한 미디어 쿼리 사용
-    const isDesktop = window.matchMedia('(min-width: 72rem)').matches;
-
-    if (!isDesktop) {
-      // 데스크탑 버튼 제거
-      document.querySelectorAll('.toc-view-source-btn').forEach(el => el.remove());
-      // 기존 모바일 버튼 제거 후 재추가
-      document.querySelectorAll('.toc-view-source-btn-mobile').forEach(el => el.remove());
-
-      // Mobile: add to "On this page" summary
-      const mobileTocSummary = document.querySelector('#starlight__on-this-page--mobile');
-
-      if (mobileTocSummary) {
-        const btn = createViewSourceButton(true);
-        mobileTocSummary.appendChild(btn);
-      }
-    } else {
-      // 모바일 버튼 제거
-      document.querySelectorAll('.toc-view-source-btn-mobile').forEach(el => el.remove());
-
-      // Desktop: add to right sidebar
-      const rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
-      if (!rightSidebar) return;
-
-      // Remove existing button
-      const existingBtn = rightSidebar.querySelector('.toc-view-source-btn');
-      if (existingBtn) existingBtn.remove();
-
-      // Find "On this page" header
-      const tocHeading = rightSidebar.querySelector('h2');
-      const btn = createViewSourceButton(false);
-
-      if (tocHeading) {
-        // Insert after "On this page" heading, but before Print button if it exists
-        const printBtn = rightSidebar.querySelector('.toc-print-btn');
-        if (printBtn) {
-          tocHeading.insertAdjacentElement('afterend', btn);
-          btn.insertAdjacentElement('afterend', printBtn);
-        } else {
-          tocHeading.insertAdjacentElement('afterend', btn);
-        }
-      } else {
-        rightSidebar.insertBefore(btn, rightSidebar.firstChild);
-      }
-    }
+  // TOC 버튼 등록 (배치/재초기화는 toc-button-helper.js 가 담당)
+  if (typeof window !== 'undefined' && window.registerTocButton) {
+    window.registerTocButton({
+      className: 'toc-view-source-btn',
+      order: 10,
+      presentationAware: true,
+      create: createViewSourceButton,
+    });
   }
-
-  // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initViewSourceButton);
-  } else {
-    initViewSourceButton();
-  }
-
-  // Re-initialize on Starlight navigation
-  document.addEventListener('astro:page-load', initViewSourceButton);
-
-  // Re-initialize on window resize
-  window.addEventListener('resize', initViewSourceButton);
 
   // Handle Escape key to close modal
   document.addEventListener('keydown', (e) => {
@@ -321,8 +262,7 @@
     module.exports = {
       createViewSourceButton,
       handleViewSourceClick,
-      getPageSlug,
-      initViewSourceButton
+      getPageSlug
     };
   }
 })();

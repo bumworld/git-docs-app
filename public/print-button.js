@@ -30,59 +30,16 @@
     });
   }
 
-  function initPrintButton() {
-    // Starlight의 데스크탑 TOC 기준과 동일한 미디어 쿼리 사용
-    const isDesktop = window.matchMedia('(min-width: 72rem)').matches;
-
-    if (!isDesktop) {
-      // 데스크탑 버튼 제거
-      document.querySelectorAll('.toc-print-btn').forEach(el => el.remove());
-      // 기존 모바일 버튼 제거 후 재추가
-      document.querySelectorAll('.toc-print-btn-mobile').forEach(el => el.remove());
-
-      // 모바일: starlight mobile toc summary 찾기
-      const mobileTocSummary = document.querySelector('#starlight__on-this-page--mobile');
-
-      if (mobileTocSummary) {
-        const btn = createPrintButton(true);
-        mobileTocSummary.appendChild(btn);
-      }
-    } else {
-      // 모바일 버튼 제거
-      document.querySelectorAll('.toc-print-btn-mobile').forEach(el => el.remove());
-
-      // PC: 우측 사이드바에 버튼 추가
-      const rightSidebar = document.querySelector('.right-sidebar-container .right-sidebar');
-      if (!rightSidebar) return;
-
-      // 기존 버튼 제거
-      const existingBtn = rightSidebar.querySelector('.toc-print-btn');
-      if (existingBtn) existingBtn.remove();
-
-      // "On this page" 헤더 찾기
-      const tocHeading = rightSidebar.querySelector('h2');
-      const btn = createPrintButton(false);
-
-      if (tocHeading) {
-        tocHeading.insertAdjacentElement('afterend', btn);
-      } else {
-        rightSidebar.insertBefore(btn, rightSidebar.firstChild);
-      }
-    }
+  // TOC 버튼 등록 (배치/재초기화는 toc-button-helper.js 가 담당)
+  if (typeof window !== 'undefined' && window.registerTocButton) {
+    window.registerTocButton({
+      className: 'toc-print-btn',
+      order: 40,
+      create: createPrintButton,
+    });
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPrintButton);
-  } else {
-    initPrintButton();
-  }
-
-  document.addEventListener('astro:page-load', initPrintButton);
-
-  // 리사이즈 시 재초기화
-  window.addEventListener('resize', initPrintButton);
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { createPrintButton, handlePrint, prepareForPrint, initPrintButton };
+    module.exports = { createPrintButton, handlePrint, prepareForPrint };
   }
 })();
