@@ -68,6 +68,16 @@ function copyRevealAssets() {
   console.log(`[Build] reveal.js 에셋을 public/reveal 로 복사 (v${version || 'unknown'})`);
 }
 
+// dist 디렉토리 자체는 Docker 볼륨 마운트 포인트일 수 있다.
+// 마운트 포인트는 rename/remove 시 EBUSY 가 나므로, dist inode 는 보존하고 "내용"만 옮긴다.
+// (자식 엔트리 이동은 마운트 포인트여도 안전 — 같은 FS면 즉시 rename, 교차 FS면 fs-extra 가 copy+unlink 폴백)
+export function moveDirContents(srcDir, destDir) {
+  fs.ensureDirSync(destDir);
+  for (const entry of fs.readdirSync(srcDir)) {
+    fs.moveSync(path.join(srcDir, entry), path.join(destDir, entry), { overwrite: true });
+  }
+}
+
 function extractFailedFiles(output) {
   const failed = [];
   const lines = output.split('\n');
@@ -88,6 +98,9 @@ export async function runBuild() {
   console.log('[Build] Starting full build pipeline...');
   const startTime = Date.now();
   const logParts = [];
+  // dist 내용 교체(swap)에 진입했는지 추적 — 실패 시 롤백 판단에 사용.
+  // swap 도중 실패하면 dist 가 부분 상태일 수 있어 dist-old 로 전체 복구해야 한다.
+  let syncStarted = false;
 
   // 훅에 공유되는 컨텍스트 (단계 진행에 따라 채워짐)
   const ctx = { startTime, paths: PATHS, env: {}, settings: {} };
@@ -141,21 +154,23 @@ export async function runBuild() {
       console.log('[Build] Syncing build output to dist...');
       logParts.push('[Build] Syncing build output to dist...');
 
-      // 기존 dist → dist-old 백업 (롤백 지원).
-      // 같은 파일시스템이면 move 는 rename 으로 즉시 완료된다 (전체 복사 회피).
+      // dist 디렉토리 자체(Docker 볼륨 마운트 포인트일 수 있음)는 rename/remove 하지 않고
+      // 내용만 교체한다. dist 를 rename 하면 마운트 포인트에서 EBUSY 가 발생한다.
+      // 기존 dist 내용 → dist-old 로 이동(롤백 백업). dist 는 비워지지만 디렉토리는 유지.
       if (fs.existsSync(PATHS.DIST) && fs.readdirSync(PATHS.DIST).length > 0) {
-        fs.removeSync(PATHS.DIST_OLD);
-        fs.moveSync(PATHS.DIST, PATHS.DIST_OLD, { overwrite: true });
+        fs.emptyDirSync(PATHS.DIST_OLD);
+        moveDirContents(PATHS.DIST, PATHS.DIST_OLD);
         const backupMsg = '[Build] Backed up dist/ to dist-old/';
         console.log(backupMsg);
         logParts.push(backupMsg);
-      } else if (fs.existsSync(PATHS.DIST)) {
-        // 빈 dist 디렉토리 제거 (move 대상 경로 비우기)
-        fs.removeSync(PATHS.DIST);
       }
 
-      // dist-temp → dist 원자적 교체
-      fs.moveSync(PATHS.DIST_TEMP, PATHS.DIST, { overwrite: true });
+      // dist-temp 내용 → dist 로 교체 (dist inode 보존)
+      // 이 지점부터 dist 가 부분 상태가 될 수 있으므로 실패 시 dist-old 전체 복구가 필요하다.
+      syncStarted = true;
+      fs.emptyDirSync(PATHS.DIST);
+      moveDirContents(PATHS.DIST_TEMP, PATHS.DIST);
+      fs.removeSync(PATHS.DIST_TEMP);
     }
     await runHooks('post-sync', { ...ctx, hasContent });
 
@@ -199,12 +214,16 @@ export async function runBuild() {
       fs.removeSync(PATHS.DIST_TEMP);
     }
 
-    // 롤백 시도: dist가 비어있고 dist-old가 있으면 복구
-    // (dist에 내용이 있으면 기존 배포본 유지, 건드리지 않음)
+    // 롤백 시도: dist-old 에 직전 배포본이 있고, dist 가 신뢰할 수 없는 상태일 때 복구.
+    // - dist 가 비어있음(스왑 전 초기화만 됨), 또는
+    // - 스왑 도중 실패(syncStarted) → dist 가 부분 상태일 수 있음.
+    // 스왑 전에 실패해 dist 에 기존 정상 배포본이 그대로 있으면(distIsEmpty=false && !syncStarted) 건드리지 않는다.
     const distIsEmpty = !fs.existsSync(PATHS.DIST) || fs.readdirSync(PATHS.DIST).length === 0;
-    if (distIsEmpty && fs.existsSync(PATHS.DIST_OLD) && fs.readdirSync(PATHS.DIST_OLD).length > 0) {
+    const distOldHasContent = fs.existsSync(PATHS.DIST_OLD) && fs.readdirSync(PATHS.DIST_OLD).length > 0;
+    if ((distIsEmpty || syncStarted) && distOldHasContent) {
       try {
-        fs.ensureDirSync(PATHS.DIST);
+        // dist 부분 상태를 비우고(마운트 안전) dist-old 내용으로 전체 복구
+        fs.emptyDirSync(PATHS.DIST);
         fs.copySync(PATHS.DIST_OLD, PATHS.DIST);
         const rollbackMsg = '[Build] Rolled back dist/ from dist-old/';
         console.log(rollbackMsg);

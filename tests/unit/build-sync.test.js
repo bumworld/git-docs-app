@@ -35,15 +35,17 @@ function simulateSyncSuccess({ hasContent, distHasContent }) {
 }
 
 /**
- * 실패 경로 롤백 시뮬레이션
+ * 실패 경로 롤백 시뮬레이션 (build.js catch 블록과 동일 조건)
  * @param {object} opts
  * @param {boolean} opts.distIsEmpty - dist가 비어있는지
  * @param {boolean} opts.distOldExists - dist-old가 있는지
  * @param {boolean} opts.distOldHasContent - dist-old에 파일이 있는지
+ * @param {boolean} [opts.syncStarted] - dist 내용 교체(swap)에 진입했는지 (부분 상태 가능)
  * @returns {{ rolledBack: boolean }}
  */
-function simulateRollback({ distIsEmpty, distOldExists, distOldHasContent }) {
-  if (distIsEmpty && distOldExists && distOldHasContent) {
+function simulateRollback({ distIsEmpty, distOldExists, distOldHasContent, syncStarted = false }) {
+  const distOldOk = distOldExists && distOldHasContent;
+  if ((distIsEmpty || syncStarted) && distOldOk) {
     return { rolledBack: true };
   }
   return { rolledBack: false };
@@ -92,13 +94,24 @@ describe('build sync - 실패 시 롤백 조건', () => {
     assert.equal(result.rolledBack, true);
   });
 
-  test('dist에 내용 있음 → 롤백 안 함 (기존 dist 유지)', () => {
+  test('스왑 전 실패 + dist에 기존 내용 있음 → 롤백 안 함 (정상 배포본 유지)', () => {
     const result = simulateRollback({
       distIsEmpty: false,
       distOldExists: true,
       distOldHasContent: true,
+      syncStarted: false,
     });
     assert.equal(result.rolledBack, false);
+  });
+
+  test('스왑 도중 실패 + dist 부분 상태(비어있지 않음) → dist-old로 전체 복구', () => {
+    const result = simulateRollback({
+      distIsEmpty: false,
+      distOldExists: true,
+      distOldHasContent: true,
+      syncStarted: true,
+    });
+    assert.equal(result.rolledBack, true);
   });
 
   test('dist-old 없음 → 롤백 안 함', () => {
