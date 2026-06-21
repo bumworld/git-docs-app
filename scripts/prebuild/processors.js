@@ -398,6 +398,14 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
   for (const entry of entries) {
     if (IGNORE_FILES.includes(entry.name)) continue;
     if (entry.name.startsWith('.')) continue; // 닷 프리픽스 파일/디렉토리 무시 (.gitdocs.json 등)
+    // `_` 프리픽스 파일/디렉토리는 Astro 콘텐츠 컬렉션이 라우트에서 제외하므로 docs로 복사하지 않는다.
+    // 단, __static/__raw/__ignore 등 특수 디렉토리 컨벤션은 아래에서 별도 처리하므로 예외로 둔다.
+    // (예외는 디렉토리에만 적용 — 같은 이름의 확장자 없는 파일은 일반 `_` 규칙으로 제외)
+    const isConventionDir = entry.isDirectory() && Object.values(DIR_CONVENTIONS).includes(entry.name);
+    if (entry.name.startsWith('_') && !isConventionDir) {
+      if (stats) stats.skipped++;
+      continue;
+    }
 
     if (entry.isDirectory() && entry.name.toLowerCase() === 'pwa') {
       console.log('[Prebuild] Ignoring "pwa" directory.');

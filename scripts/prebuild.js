@@ -98,7 +98,13 @@ title: "Welcome"
     } else {
       // Auto-generate index with list of top-level folders/files
       const srcEntries = fs.readdirSync(PATHS.SOURCE, { withFileTypes: true });
-      const folders = srcEntries.filter(e => e.isDirectory() && !IGNORE_FILES.includes(e.name));
+      // `.`/`_` 프리픽스 디렉토리는 라우트가 생성되지 않으므로 자동 index 링크에서 제외
+      // (sidebar/processors의 라우트 제외 규칙과 일관성 유지)
+      const folders = srcEntries.filter(e =>
+        e.isDirectory() &&
+        !IGNORE_FILES.includes(e.name) &&
+        !e.name.startsWith('.') &&
+        !e.name.startsWith('_'));
       let listItems = '';
       for (const folder of folders) {
         const label = generateTitle(folder.name);

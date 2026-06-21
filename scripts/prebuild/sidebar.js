@@ -25,7 +25,9 @@ function scanDir(dir, relDir = '') {
   });
 
   for (const entry of entries) {
-    if (entry.name.startsWith('.')) continue;
+    // `.` 또는 `_` 프리픽스 파일/디렉토리는 Astro 콘텐츠 컬렉션이 라우트에서 제외하므로
+    // 사이드바에도 포함하지 않는다 (존재하지 않는 슬러그 참조로 인한 빌드 실패 방지).
+    if (entry.name.startsWith('.') || entry.name.startsWith('_')) continue;
 
     if (entry.isDirectory()) {
       const dirSlug = sanitizeDirName(entry.name).toLowerCase();
