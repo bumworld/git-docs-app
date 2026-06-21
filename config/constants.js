@@ -33,6 +33,7 @@ export const PATHS = {
   DB: path.resolve(resolvePath(CUSTOM_DATA, 'sample/data', 'data'), 'wiki.db'),
   ADMIN_UI: path.resolve(ROOT, 'admin-ui'),
   USER_UI: path.resolve(ROOT, 'user-ui'),
+  SHARED_UI: path.resolve(ROOT, 'shared-ui'), // admin-ui/user-ui 공용 에셋 (base.css 등)
   CONF: resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'),
   GOOGLE_AUTH: path.resolve(resolvePath(CUSTOM_CONF, 'sample/conf', 'conf'), 'google_auth.json'),
   SIDEBAR_JSON: path.resolve(ROOT, 'src', 'sidebar.json'),

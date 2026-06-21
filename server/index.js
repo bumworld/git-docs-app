@@ -143,6 +143,8 @@ app.get('/api/settings', (req, res) => {
 
 // UI assets (base.css, admin.css) - public, no auth required
 // CSS files contain no sensitive data; login/pending pages also need base.css
+// 공용 base.css 는 shared-ui/, admin 전용 admin.css 는 admin-ui/css/ 에서 서빙 (같은 /ui-assets 경로에 레이어링)
+app.use('/ui-assets', express.static(PATHS.SHARED_UI));
 app.use('/ui-assets', express.static(path.join(PATHS.ADMIN_UI, 'css')));
 
 // Static assets from dist/ - served WITHOUT auth (CSS, JS, fonts, images are not sensitive)
