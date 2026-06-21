@@ -1,3 +1,8 @@
+# ⚠️ 데모 전용 설정입니다. 실서비스로 사용하지 마세요.
+#   - DEV_MODE=true 는 Google 인증을 전체 우회합니다 (누구나 접근 가능).
+#   - USE_SAMPLE_DIR=true 는 실제 콘텐츠 대신 sample/ 을 서빙합니다.
+# 실서비스 배포 시: DEV_MODE 제거(또는 false), USE_SAMPLE_DIR 제거,
+#   SOURCE_DIR/CONF_DIR/DATA_DIR 로 실제 경로를 지정하고 google_auth.json 을 주입하세요.
 services:
   - type: web
     name: git-docs-app

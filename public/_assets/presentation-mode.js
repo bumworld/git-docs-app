@@ -579,24 +579,26 @@
   }
 
   async function loadRevealJS(theme) {
-    console.log('[Presentation] Loading reveal.js from CDN');
+    console.log('[Presentation] Loading reveal.js (self-hosted /reveal)');
 
     try {
+      // reveal.js 에셋은 빌드 시 node_modules → public/reveal 로 복사되어 /reveal 로 서빙된다.
+      // (CDN 의존 제거: 오프라인/사내망 self-host 가능, 설치 버전과 일치)
       // Load reveal.js CSS
       const revealCSS = document.createElement('link');
       revealCSS.rel = 'stylesheet';
-      revealCSS.href = 'https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css';
+      revealCSS.href = '/reveal/reveal.css';
       document.head.appendChild(revealCSS);
 
       // Load theme CSS
       const themeCSS = document.createElement('link');
       themeCSS.rel = 'stylesheet';
-      themeCSS.href = `https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/${theme}.css`;
+      themeCSS.href = `/reveal/theme/${theme}.css`;
       document.head.appendChild(themeCSS);
 
       // Load reveal.js script
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js';
+      script.src = '/reveal/reveal.js';
       script.onload = () => {
         console.log('[Presentation] Reveal.js loaded');
         if (window.Reveal) {

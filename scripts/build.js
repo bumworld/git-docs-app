@@ -48,6 +48,26 @@ function loadSiteSettings() {
   }
 }
 
+// reveal.js 정적 에셋을 public/reveal 로 복사 (프레젠테이션 모드용).
+// node_modules 직접 노출 대신 dist 로 번들되도록 하여 프로덕션 404 를 방지한다.
+function copyRevealAssets() {
+  const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const pkgDir = path.join(APP_ROOT, 'node_modules', 'reveal.js');
+  const src = path.join(pkgDir, 'dist');
+  const dest = path.join(APP_ROOT, 'public', 'reveal');
+  if (!fs.existsSync(src)) return;
+  // 설치된 reveal.js 버전을 마커로 사용 — 버전 불일치(업그레이드)나 누락 시에만 재복사하여 stale 방지
+  let version = '';
+  try { version = fs.readJsonSync(path.join(pkgDir, 'package.json')).version || ''; } catch { /* ignore */ }
+  const marker = path.join(dest, '.reveal-version');
+  const current = fs.existsSync(marker) ? fs.readFileSync(marker, 'utf-8').trim() : '';
+  if (current === version && fs.existsSync(path.join(dest, 'reveal.js'))) return;
+  fs.emptyDirSync(dest);
+  fs.copySync(src, dest, { overwrite: true });
+  fs.writeFileSync(marker, version);
+  console.log(`[Build] reveal.js 에셋을 public/reveal 로 복사 (v${version || 'unknown'})`);
+}
+
 function extractFailedFiles(output) {
   const failed = [];
   const lines = output.split('\n');
@@ -98,6 +118,7 @@ export async function runBuild() {
 
     // Step 3: Run Astro build to temp directory (async - does not block event loop)
     await runHooks('pre-astro', ctx);
+    copyRevealAssets();
     console.log('[Build] Running Astro build...');
     logParts.push('[Build] Running Astro build...');
     const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -120,20 +141,21 @@ export async function runBuild() {
       console.log('[Build] Syncing build output to dist...');
       logParts.push('[Build] Syncing build output to dist...');
 
-      // 기존 dist → dist-old 백업 (롤백 지원)
+      // 기존 dist → dist-old 백업 (롤백 지원).
+      // 같은 파일시스템이면 move 는 rename 으로 즉시 완료된다 (전체 복사 회피).
       if (fs.existsSync(PATHS.DIST) && fs.readdirSync(PATHS.DIST).length > 0) {
-        fs.ensureDirSync(PATHS.DIST_OLD);
-        fs.emptyDirSync(PATHS.DIST_OLD);
-        fs.copySync(PATHS.DIST, PATHS.DIST_OLD);
+        fs.removeSync(PATHS.DIST_OLD);
+        fs.moveSync(PATHS.DIST, PATHS.DIST_OLD, { overwrite: true });
         const backupMsg = '[Build] Backed up dist/ to dist-old/';
         console.log(backupMsg);
         logParts.push(backupMsg);
+      } else if (fs.existsSync(PATHS.DIST)) {
+        // 빈 dist 디렉토리 제거 (move 대상 경로 비우기)
+        fs.removeSync(PATHS.DIST);
       }
 
-      fs.ensureDirSync(PATHS.DIST);
-      fs.emptyDirSync(PATHS.DIST);
-      fs.copySync(PATHS.DIST_TEMP, PATHS.DIST);
-      fs.removeSync(PATHS.DIST_TEMP);
+      // dist-temp → dist 원자적 교체
+      fs.moveSync(PATHS.DIST_TEMP, PATHS.DIST, { overwrite: true });
     }
     await runHooks('post-sync', { ...ctx, hasContent });
 

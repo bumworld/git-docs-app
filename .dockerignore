@@ -11,5 +11,7 @@ sample
 .claude
 src/content/docs
 conf
+public/reveal
+public/downloads
 user-ui/**/*.backup
 admin-ui/**/*.backup

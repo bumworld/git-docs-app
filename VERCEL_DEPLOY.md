@@ -2,6 +2,12 @@
 
 샘플 마크다운 문서를 Vercel에 무료로 배포하는 방법입니다.
 
+> ⚠️ **데모 전용 — 실서비스로 사용하지 마세요.**
+> `vercel.json` 의 `DEV_MODE=true` 는 Google 인증을 **전체 우회**하여 누구나 접근할 수 있고,
+> `USE_SAMPLE_DIR=true` 는 실제 콘텐츠 대신 `sample/` 을 서빙합니다.
+> 실서비스 배포 시 `DEV_MODE` 를 제거(또는 `false`)하고, `USE_SAMPLE_DIR` 제거 후
+> `SOURCE_DIR`/`CONF_DIR`/`DATA_DIR` 로 실제 경로를 지정하고 `google_auth.json` 을 주입하세요.
+
 ## 🎯 배포 특징
 
 - ✅ **인증 없이 공개 접근** (DEV_MODE 자동 활성화)

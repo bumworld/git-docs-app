@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
+import { PATHS } from '../../config/constants.js';
 
 /**
  * Astro integration to generate source JSON files after build
@@ -14,8 +15,8 @@ export function viewSourceGenerator() {
 
         const distDir = dir.pathname;
         const sourcesDir = path.join(distDir, '_sources');
-        const docsDir = path.join(process.cwd(), 'src/content/docs');
-        const sourceDir = path.join(process.cwd(), 'source');
+        const docsDir = PATHS.DOCS;
+        const sourceDir = PATHS.SOURCE;
 
         // Ensure _sources directory exists
         fs.ensureDirSync(sourcesDir);
@@ -24,7 +25,7 @@ export function viewSourceGenerator() {
         let errorCount = 0;
 
         // Load sidebar.json to get all slugs
-        const sidebarPath = path.join(process.cwd(), 'src/sidebar.json');
+        const sidebarPath = PATHS.SIDEBAR_JSON;
         const sidebar = fs.existsSync(sidebarPath)
           ? JSON.parse(fs.readFileSync(sidebarPath, 'utf-8'))
           : [];
@@ -54,14 +55,18 @@ export function viewSourceGenerator() {
             // Find original source file path
             const sourceFilePath = findSourceFile(sourceDir, slug);
 
-            // Read rendered HTML from dist
-            // Special case: index page is at dist/index.html, not dist/index/index.html
-            const htmlPath = slug === 'index'
-              ? path.join(distDir, 'index.html')
-              : path.join(distDir, slug, 'index.html');
-            const renderedHtml = fs.existsSync(htmlPath)
-              ? fs.readFileSync(htmlPath, 'utf-8')
-              : null;
+            // Read rendered HTML from dist.
+            // astro build.format 이 'file' 이므로 비루트 페이지는 dist/{slug}.html 이다.
+            // ('directory' 형식 fallback 도 함께 탐색)
+            const slugParts = slug.split('/');
+            const htmlCandidates = slug === 'index'
+              ? [path.join(distDir, 'index.html')]
+              : [
+                  path.join(distDir, ...slugParts) + '.html',
+                  path.join(distDir, ...slugParts, 'index.html'),
+                ];
+            const htmlPath = htmlCandidates.find((p) => fs.existsSync(p));
+            const renderedHtml = htmlPath ? fs.readFileSync(htmlPath, 'utf-8') : null;
 
             if (!renderedHtml) {
               console.warn(`[ViewSource] No rendered HTML found for slug: ${slug}`);
@@ -122,36 +127,31 @@ function findMarkdownFile(docsDir, slug) {
     return fs.existsSync(indexPath) ? indexPath : null;
   }
 
-  // Try exact path
-  const exactPath = path.join(docsDir, slug + '.md');
-  if (fs.existsSync(exactPath)) {
-    return exactPath;
-  }
-
-  // Try with directory structure (slug might use '/')
-  const pathWithSlashes = path.join(docsDir, ...slug.split('/')) + '.md';
-  if (fs.existsSync(pathWithSlashes)) {
-    return pathWithSlashes;
-  }
-
-  return null;
+  // 중첩 slug('a/b/c')와 디렉토리 index slug('a/b/c' → a/b/c/index.md) 모두 대응
+  const parts = slug.split('/');
+  const candidates = [
+    path.join(docsDir, ...parts) + '.md',
+    path.join(docsDir, ...parts, 'index.md'),
+  ];
+  return candidates.find((p) => fs.existsSync(p)) || null;
 }
 
 /**
  * Find original source file path
  */
 function findSourceFile(sourceDir, slug) {
-  // This is best-effort; source files may have been renamed during prebuild
-  if (slug === 'index') {
-    const readmePath = path.join(sourceDir, 'README.md');
-    return fs.existsSync(readmePath) ? 'source/README.md' : 'source/index.md';
-  }
+  // best-effort. 라벨은 실제 위치를 반영하도록 ROOT 기준 상대경로로 표기
+  // (USE_SAMPLE_DIR 시 'sample/source/...', 기본 시 'source/...')
+  const toLabel = (p) => path.relative(PATHS.ROOT, p);
 
-  // Try to reconstruct original path
-  const possiblePath = path.join(sourceDir, ...slug.split('/')) + '.md';
-  if (fs.existsSync(possiblePath)) {
-    return 'source/' + slug.split('/').join('/') + '.md';
-  }
+  const candidates =
+    slug === 'index'
+      ? [path.join(sourceDir, 'README.md'), path.join(sourceDir, 'index.md')]
+      : [
+          path.join(sourceDir, ...slug.split('/')) + '.md',
+          path.join(sourceDir, ...slug.split('/'), 'index.md'),
+        ];
 
-  return null;
+  const found = candidates.find((p) => fs.existsSync(p));
+  return found ? toLabel(found) : null;
 }
