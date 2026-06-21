@@ -148,7 +148,9 @@ app.use('/ui-assets', express.static(PATHS.SHARED_UI));
 app.use('/ui-assets', express.static(path.join(PATHS.ADMIN_UI, 'css')));
 
 // user-ui 정적 에셋 (/my 페이지 css/js) - public, no auth required (CSS/JS 비민감)
-app.use('/user-assets', express.static(PATHS.USER_UI));
+// css/js 하위만 노출 (my.html 등 마크업은 /my 라우트의 requireAuth 를 거치도록)
+app.use('/user-assets/css', express.static(path.join(PATHS.USER_UI, 'css')));
+app.use('/user-assets/js', express.static(path.join(PATHS.USER_UI, 'js')));
 
 // Static assets from dist/ - served WITHOUT auth (CSS, JS, fonts, images are not sensitive)
 // This prevents white screen on mobile when session cookie is not sent with subresource requests

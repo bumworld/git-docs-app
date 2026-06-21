@@ -18,10 +18,12 @@
   --ui-success-border: #059669;
   --ui-success-fg: #6ee7b7;
   --ui-success-solid: #22c55e;
+  --ui-success-glow: #22c55e80;
   --ui-danger-bg: #7f1d1d;
   --ui-danger-border: #dc2626;
   --ui-danger-fg: #fca5a5;
   --ui-danger-solid: #ef4444;
+  --ui-danger-glow: #ef444480;
   --ui-warning-bg: #78350f;
   --ui-warning-fg: #fcd34d;
   --ui-indigo-bg: #312e81;

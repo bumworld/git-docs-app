@@ -280,7 +280,7 @@
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--ui-success-solid); display: inline-block;
   flex-shrink: 0; margin-right: 0.25rem;
-  box-shadow: 0 0 4px var(--ui-success-solid)80;
+  box-shadow: 0 0 4px var(--ui-success-glow);
   transition: background 0.3s, box-shadow 0.3s;
 }
 .online-dot.offline { background: var(--ui-border-strong); box-shadow: none; }
@@ -289,8 +289,8 @@
   width: 8px; height: 8px; border-radius: 50%;
   display: inline-block; margin-right: 0.5rem;
 }
-.sse-status.connected    { background: var(--ui-success-solid); box-shadow: 0 0 4px var(--ui-success-solid)80; }
-.sse-status.disconnected { background: var(--ui-danger-solid); box-shadow: 0 0 4px var(--ui-danger-solid)80; }
+.sse-status.connected    { background: var(--ui-success-solid); box-shadow: 0 0 4px var(--ui-success-glow); }
+.sse-status.disconnected { background: var(--ui-danger-solid); box-shadow: 0 0 4px var(--ui-danger-glow); }
 
 /* ── Message / DM forms ── */
 .message-form { display: flex; gap: 0.75rem; align-items: center; }
