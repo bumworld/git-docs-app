@@ -1,7 +1,7 @@
 // Build management module
 
 import { BUILD_API } from '../core.js';
-import { esc, formatDate, formatDuration, showToast } from '../core.js';
+import { esc, formatDate, formatDuration, showToast, copyToClipboard } from '../core.js';
 
 function truncateLog(log, lines) {
   if (!log) return '';
@@ -92,21 +92,8 @@ export async function copyBuildJsonFromList(id) {
       failed_files: build.failed_files || [],
       log: build.log || ''
     }, null, 2);
-    try {
-      await navigator.clipboard.writeText(json);
-      showToast('JSON copied to clipboard');
-    } catch (e) {
-      // Fallback for older browsers
-      const ta = document.createElement('textarea');
-      ta.value = json;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('JSON copied to clipboard');
-    }
+    await copyToClipboard(json);
+    showToast('JSON copied to clipboard');
   } catch (e) {
     showToast('Failed to copy', 'error');
   }

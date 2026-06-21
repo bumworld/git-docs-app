@@ -10,6 +10,22 @@ export function esc(str) {
   return d.innerHTML;
 }
 
+// Copy text to clipboard with fallback for older browsers
+export async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
 // Toast notification
 export function showToast(message, type) {
   type = type || 'success';
