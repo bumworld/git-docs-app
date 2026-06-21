@@ -43,6 +43,9 @@ Thumbs.db
 .vscode
 .idea
 
+# 리팩토링 인계/작업 메모 (저장소에 포함하지 않음)
+.omc
+
 # Astro
 .astro
 

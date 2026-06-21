@@ -6,4 +6,7 @@ nvm use --silent 2>/dev/null || true
 
 # Pre-push hook: run unit + build option tests before pushing
 # E2E tests run in CI (too slow for local hook)
-npm test
+# prebuild 먼저: src/content/docs 가 e2e 픽스처 잔재 상태면 presentation.test.js 가 오탐 실패한다
+# (pre-commit 과 동일하게 sample 기준으로 재생성)
+USE_SAMPLE_DIR=true npm run prebuild
+USE_SAMPLE_DIR=true npm test
