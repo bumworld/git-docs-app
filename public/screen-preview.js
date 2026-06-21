@@ -116,12 +116,22 @@
     refreshModal();
     modalEl.classList.add('screen-preview-modal-visible');
     document.body.style.overflow = 'hidden';
+
+    // 접근성: focus trap + role=dialog + 포커스 복귀
+    if (window.modalA11y) {
+      window.modalA11y.open(
+        modalEl,
+        modalEl.querySelector('.screen-preview-modal-content'),
+        modalEl.querySelector('.screen-preview-modal-title')
+      );
+    }
   }
 
   function closeModal() {
     if (!modalEl) return;
     modalEl.classList.remove('screen-preview-modal-visible');
     document.body.style.overflow = '';
+    if (window.modalA11y) window.modalA11y.close();
   }
 
   function buildModal() {
@@ -169,7 +179,7 @@
         <div class="screen-preview-viewport">
           <div class="screen-preview-frame-wrap device-desktop">
             <div class="screen-preview-loading">로딩 중...</div>
-            <iframe class="screen-preview-iframe" title="화면 미리보기" loading="lazy"></iframe>
+            <iframe class="screen-preview-iframe" title="화면 미리보기" loading="lazy" tabindex="-1"></iframe>
           </div>
         </div>
       </div>

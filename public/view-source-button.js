@@ -82,6 +82,15 @@
     // Show modal
     modalElement.classList.add('view-source-modal-visible');
     document.body.style.overflow = 'hidden';
+
+    // 접근성: focus trap + role=dialog + 포커스 복귀
+    if (window.modalA11y) {
+      window.modalA11y.open(
+        modalElement,
+        modalElement.querySelector('.view-source-modal-content'),
+        modalElement.querySelector('.view-source-modal-header h2')
+      );
+    }
   }
 
   /**
@@ -238,6 +247,7 @@
     if (!modalElement) return;
     modalElement.classList.remove('view-source-modal-visible');
     document.body.style.overflow = '';
+    if (window.modalA11y) window.modalA11y.close();
   }
 
   // TOC 버튼 등록 (배치/재초기화는 toc-button-helper.js 가 담당)

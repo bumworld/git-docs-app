@@ -137,8 +137,10 @@ body {
 .toast-error   { background: var(--ui-danger-bg); color: var(--ui-danger-fg); border: 1px solid var(--ui-danger-border); }
 .toast-admin   { background: var(--ui-indigo-bg); color: var(--ui-indigo-fg); border: 1px solid var(--ui-indigo-border); max-width: 400px; }
 
-/* ── Mobile ── */
-@media (max-width: 640px) {
+/* ── Mobile ──
+   공용 모바일 브레이크포인트: 768px (Starlight 레이아웃 50rem/72rem 과 별개로
+   admin/user-ui 컴포넌트 전반에서 통일해 사용). */
+@media (max-width: 768px) {
   .container { padding: 1rem; }
   .topbar    { padding: 0.75rem 1rem; }
 }

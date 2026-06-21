@@ -18,16 +18,16 @@
   </div>
 
   <div class="container">
-    <div class="tabs">
-      <button class="tab active" data-tab="dashboard">Dashboard</button>
-      <button class="tab" data-tab="users">Users</button>
-      <button class="tab" data-tab="builds">Builds</button>
-      <button class="tab" data-tab="whitelist">Email Whitelist</button>
-      <button class="tab" data-tab="settings">Settings</button>
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+      <button class="tab active" data-tab="dashboard" id="tabbtn-dashboard" role="tab" aria-selected="true" aria-controls="tab-dashboard" tabindex="0">Dashboard</button>
+      <button class="tab" data-tab="users" id="tabbtn-users" role="tab" aria-selected="false" aria-controls="tab-users" tabindex="-1">Users</button>
+      <button class="tab" data-tab="builds" id="tabbtn-builds" role="tab" aria-selected="false" aria-controls="tab-builds" tabindex="-1">Builds</button>
+      <button class="tab" data-tab="whitelist" id="tabbtn-whitelist" role="tab" aria-selected="false" aria-controls="tab-whitelist" tabindex="-1">Email Whitelist</button>
+      <button class="tab" data-tab="settings" id="tabbtn-settings" role="tab" aria-selected="false" aria-controls="tab-settings" tabindex="-1">Settings</button>
     </div>
 
     <!-- Dashboard Tab -->
-    <div id="tab-dashboard" class="tab-content active">
+    <div id="tab-dashboard" class="tab-content active" role="tabpanel" aria-labelledby="tabbtn-dashboard" tabindex="0">
       <div class="stats" id="stats"></div>
 
       <div class="section-bar">
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Users Tab -->
-    <div id="tab-users" class="tab-content">
+    <div id="tab-users" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-users" tabindex="0">
       <div class="section-bar">
         <h2 class="section-title" style="margin-bottom:0;">All Users</h2>
       </div>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Builds Tab -->
-    <div id="tab-builds" class="tab-content">
+    <div id="tab-builds" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-builds" tabindex="0">
       <div class="section-bar">
         <h2 class="section-title" style="margin-bottom:0;">Build Management</h2>
         <button class="btn btn-primary" id="buildRunBtn" onclick="window.adminModules.builds.triggerBuildFromTab()">Run Build</button>
@@ -89,7 +89,7 @@
     </div>
 
     <!-- Email Whitelist Tab -->
-    <div id="tab-whitelist" class="tab-content">
+    <div id="tab-whitelist" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-whitelist" tabindex="0">
       <div class="section-bar">
         <h2 class="section-title" style="margin-bottom:0;">Pre-registered Emails</h2>
         <button class="btn btn-primary" onclick="window.adminModules.whitelist.toggleAddEmailForm()">Add Email</button>
@@ -121,7 +121,7 @@
     </div>
 
     <!-- Settings Tab -->
-    <div id="tab-settings" class="tab-content">
+    <div id="tab-settings" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-settings" tabindex="0">
       <h2 class="section-title">Site Settings</h2>
       <form id="settingsForm">
         <div class="form-group">

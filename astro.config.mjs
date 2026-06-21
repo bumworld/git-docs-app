@@ -62,6 +62,7 @@ export default defineConfig({
         { tag: 'script', attrs: { src: '/auth-bar.js', defer: true } },
         { tag: 'script', attrs: { type: 'module', src: '/mermaid-init.js' } },
         { tag: 'script', attrs: { src: '/video-source.js', defer: true } },
+        { tag: 'script', attrs: { src: '/modal-a11y.js', defer: true } },
         { tag: 'script', attrs: { src: '/toc-button-helper.js', defer: true } },
         { tag: 'script', attrs: { src: '/print-button.js', defer: true } },
         { tag: 'script', attrs: { src: '/view-source-button.js', defer: true } },

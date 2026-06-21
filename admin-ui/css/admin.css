@@ -364,8 +364,8 @@
   border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
 }
 
-/* ── Mobile ── */
-@media (max-width: 640px) {
+/* ── Mobile (공용 768px 브레이크포인트) ── */
+@media (max-width: 768px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
   .user-card-top { gap: 0.5rem; }
   .btn { font-size: 0.73rem; padding: 0.3rem 0.55rem; }

@@ -76,20 +76,47 @@ export function formatDuration(ms) {
   return (ms / 1000).toFixed(1) + 's';
 }
 
-// Tab management
+// Tab management (ARIA tablist + roving tabindex + 키보드 네비게이션)
 export function initializeTabs(onTabChange) {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-      window.location.hash = tab.dataset.tab;
+  const tabs = Array.from(document.querySelectorAll('.tab'));
 
-      // Notify callback for special tab handling
-      if (onTabChange) {
-        onTabChange(tab.dataset.tab);
-      }
+  function activate(tab, opts) {
+    opts = opts || {};
+    tabs.forEach(t => {
+      const selected = t === tab;
+      t.classList.toggle('active', selected);
+      t.setAttribute('aria-selected', selected ? 'true' : 'false');
+      t.tabIndex = selected ? 0 : -1;
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (opts.focus) tab.focus();
+
+    // 키보드 화살표 이동은 history 를 쌓지 않도록 replaceState 사용
+    // (클릭/해시 진입은 기존대로 push 해 딥링크/Back 동작 유지).
+    if (opts.replaceHash) {
+      history.replaceState(null, '', '#' + tab.dataset.tab);
+    } else {
+      window.location.hash = tab.dataset.tab;
+    }
+
+    // Notify callback for special tab handling
+    if (onTabChange) {
+      onTabChange(tab.dataset.tab);
+    }
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => activate(tab));
+    tab.addEventListener('keydown', e => {
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabs.length - 1;
+      if (next === null) return;
+      e.preventDefault();
+      activate(tabs[next], { focus: true, replaceHash: true });
     });
   });
 
@@ -97,8 +124,8 @@ export function initializeTabs(onTabChange) {
   function handleHash() {
     const hash = window.location.hash.replace('#', '');
     if (hash) {
-      const tab = document.querySelector('.tab[data-tab="' + hash + '"]');
-      if (tab) tab.click();
+      const tab = tabs.find(t => t.dataset.tab === hash);
+      if (tab) activate(tab);
     }
   }
 

@@ -198,8 +198,8 @@
 }
 .empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
 
-/* ── 모바일 ── */
-@media (max-width: 600px) {
+/* ── 모바일 (공용 768px 브레이크포인트) ── */
+@media (max-width: 768px) {
   .topbar { padding: 0.75rem 1rem; }
   .page { padding: 1.25rem 1rem 3rem; }
   .profile { padding: 1rem; }
