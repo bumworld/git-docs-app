@@ -147,6 +147,9 @@ app.get('/api/settings', (req, res) => {
 app.use('/ui-assets', express.static(PATHS.SHARED_UI));
 app.use('/ui-assets', express.static(path.join(PATHS.ADMIN_UI, 'css')));
 
+// user-ui 정적 에셋 (/my 페이지 css/js) - public, no auth required (CSS/JS 비민감)
+app.use('/user-assets', express.static(PATHS.USER_UI));
+
 // Static assets from dist/ - served WITHOUT auth (CSS, JS, fonts, images are not sensitive)
 // This prevents white screen on mobile when session cookie is not sent with subresource requests
 app.use('/_assets', express.static(path.join(PATHS.DIST, '_assets'), {

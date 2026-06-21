@@ -1,0 +1,206 @@
+/* /my 페이지 전용 스타일 (공용 base.css + shared :root 토큰 사용) */
+
+/* ── 헤더 커스텀 ── */
+.topbar { gap: 1rem; }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ui-text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.back-link:hover { color: var(--ui-text); }
+
+/* ── 레이아웃 ── */
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── 프로필 ── */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  margin-bottom: 2rem;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ui-border);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ui-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.profile-info { min-width: 0; }
+.profile-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-email {
+  font-size: 0.8125rem;
+  color: var(--ui-text-dim);
+  margin-top: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-role { margin-top: 0.4rem; }
+
+/* ── 섹션 공통 ── */
+.section { margin-bottom: 2rem; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ui-text-muted);
+}
+
+.section-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--ui-border);
+  color: var(--ui-text-muted);
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+}
+
+.section-action {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  color: var(--ui-text-dim);
+  background: none;
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.section-action:hover { background: var(--ui-border); color: var(--ui-text); }
+
+/* ── 카드 목록 ── */
+.card-list {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #1e3a5f22;
+  transition: background 0.1s;
+  text-decoration: none;
+  color: inherit;
+}
+.list-item:last-child { border-bottom: none; }
+.list-item:hover { background: #263148; }
+
+.item-icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  width: 1.25rem;
+  text-align: center;
+}
+
+.item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ui-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-path {
+  font-size: 0.75rem;
+  color: var(--ui-text-dim);
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-time {
+  font-size: 0.75rem;
+  color: var(--ui-text-dim);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.item-remove {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--ui-border-strong);
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.item-remove:hover { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+
+/* ── 빈 상태 ── */
+.empty-state {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--ui-border-strong);
+  font-size: 0.875rem;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+}
+.empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+/* ── 모바일 ── */
+@media (max-width: 600px) {
+  .topbar { padding: 0.75rem 1rem; }
+  .page { padding: 1.25rem 1rem 3rem; }
+  .profile { padding: 1rem; }
+}
