@@ -1,4 +1,5 @@
-FROM node:24-slim AS base
+# ── Builder: 네이티브 모듈(better-sqlite3 등) 컴파일용 툴체인 포함 ──
+FROM node:24-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     python3 \
@@ -8,9 +9,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN HUSKY=0 npm ci --omit=dev
+
+# ── Runtime: 툴체인 없이 컴파일된 node_modules + 앱 소스만 ──
+# builder 와 동일한 node:24-slim 베이스라 네이티브 바이너리 ABI 호환.
+FROM node:24-slim AS runtime
+
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
 
 # Copy application source
 COPY server/ ./server/

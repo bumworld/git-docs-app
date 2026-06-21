@@ -48,7 +48,7 @@ cmd_start() {
   ADMIN_EMAIL="$ADMIN_EMAIL" \
   PORT="$PORT" \
   DEV_MODE=true \
-  npm run dev:custom >> "$LOG_FILE" 2>&1 &
+  npm run dev >> "$LOG_FILE" 2>&1 &
 
   echo $! > "$PID_FILE"
   echo "시작됨 (PID: $!, http://localhost:$PORT)"

@@ -43,14 +43,14 @@ Use this to test with any external documentation directory:
 
 ```bash
 # Point to any directory with markdown files
-SOURCE_DIR=/path/to/your/docs DEV_MODE=true npm run dev:custom
+SOURCE_DIR=/path/to/your/docs DEV_MODE=true npm run dev
 
 # Customize all paths
 SOURCE_DIR=/path/to/docs \
 CONF_DIR=/path/to/conf \
 DATA_DIR=/path/to/data \
 DIST_DIR=/path/to/dist \
-npm run dev:custom
+npm run dev
 ```
 
 - Works with any directory containing markdown files
@@ -157,7 +157,7 @@ The project uses a **multi-path system** with 3 modes:
 
 3. **Custom mode** (External testing) ⭐
    - Uses any directory via environment variables
-   - Run with: `SOURCE_DIR=/path npm run dev:custom`
+   - Run with: `SOURCE_DIR=/path npm run dev`
    - Perfect for testing with real documentation
 
 **Path Resolution Priority:**
@@ -167,7 +167,7 @@ The project uses a **multi-path system** with 3 modes:
 
 **Key files:**
 - `config/constants.js` - Multi-level path resolution logic
-- `package.json` - Contains `:local` and `:custom` script variants
+- `package.json` - Contains `:local` (sample dir) script variants; custom mode uses base scripts with env vars
 - `docker-compose.yml` - Volume mounts from `./sample/*` to `/app/*`
 
 This allows:

@@ -6,13 +6,10 @@
   "scripts": {
     "dev": "node server/index.js",
     "dev:local": "USE_SAMPLE_DIR=true node server/index.js",
-    "dev:custom": "node server/index.js",
     "build": "node scripts/build.js",
     "build:local": "USE_SAMPLE_DIR=true node scripts/build.js",
-    "build:custom": "node scripts/build.js",
     "prebuild": "node scripts/prebuild.js",
     "prebuild:local": "USE_SAMPLE_DIR=true node scripts/prebuild.js",
-    "prebuild:custom": "node scripts/prebuild.js",
     "start": "NODE_ENV=production node server/index.js",
     "test": "node --test 'tests/*.test.js' 'tests/unit/*.test.js' 'tests/build/*.test.js'",
     "test:unit": "node --test tests/*.test.js tests/unit/*.test.js",
