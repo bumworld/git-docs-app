@@ -122,9 +122,11 @@ test.describe('페이지네이션 (이전/다음)', () => {
     if (await nextLink.count() === 0) { test.skip(); return; }
 
     const href = await nextLink.getAttribute('href');
+    // href 는 .html 을 포함하지만 실제 라우팅은 clean URL(.html 제거)로 정규화된다.
+    // 양쪽의 .html 을 제거한 pathname 으로 '의도한 다음 페이지'에 도착했는지 확인한다.
+    const expectedPath = new URL(href, page.url()).pathname.replace(/\.html$/, '');
     await nextLink.click();
-    await page.waitForURL(href || '**', { timeout: 10000 });
-    // 새 페이지로 이동됨
+    await page.waitForURL(url => url.pathname.replace(/\.html$/, '') === expectedPath, { timeout: 10000 });
     expect(page.url()).not.toContain('rendering-test');
   });
 });

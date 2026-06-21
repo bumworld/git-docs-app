@@ -15,7 +15,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
   });
 
   test('Document Mode: Presentation 버튼이 우측 하단에 위치', async ({ page }) => {
-    await page.goto('/example-presentation');
+    await page.goto('/presentation-test');
     await page.waitForTimeout(1000);
 
     const presentBtn = page.locator('button').filter({ hasText: /presentation mode/i }).first();
@@ -44,7 +44,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
   });
 
   test('Presentation Mode: Document Mode 버튼이 우측 상단에 위치', async ({ page }) => {
-    await page.goto('/example-presentation?mode=presentation');
+    await page.goto('/presentation-test?mode=presentation');
     await page.waitForTimeout(3000);
 
     const docBtn = page.locator('button').filter({ hasText: /document mode/i }).first();
@@ -81,7 +81,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
       }
     });
 
-    await page.goto('/example-presentation?mode=presentation');
+    await page.goto('/presentation-test?mode=presentation');
 
     // 충분한 시간 대기 (머메이드 초기화)
     await page.waitForTimeout(5000);
@@ -108,7 +108,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
   });
 
   test('Presentation Mode: Open Diagram 버튼이 머메이드 슬라이드에서만 표시', async ({ page }) => {
-    await page.goto('/example-presentation?mode=presentation');
+    await page.goto('/presentation-test?mode=presentation');
     await page.waitForTimeout(3000);
 
     // 첫 번째 슬라이드 (타이틀 슬라이드, 머메이드 없음)
@@ -118,7 +118,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
     const isInitiallyHidden = await openDiagramBtn.evaluate(el => {
       const style = window.getComputedStyle(el);
       return style.display === 'none';
-    }).catch(() => true); // 요소가 없으면 true
+    }, undefined, { timeout: 5000 }).catch(() => true); // 요소가 없으면 true
 
     console.log('Open Diagram button initially hidden:', isInitiallyHidden);
     expect(isInitiallyHidden).toBe(true);
@@ -143,7 +143,7 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
   });
 
   test('Presentation Mode: Overview 모드에서 Open Diagram 버튼 숨김', async ({ page }) => {
-    await page.goto('/example-presentation?mode=presentation');
+    await page.goto('/presentation-test?mode=presentation');
     await page.waitForTimeout(3000);
 
     // 머메이드 슬라이드로 이동
@@ -160,14 +160,14 @@ test.describe('프레젠테이션 모드 - 머메이드 및 버튼 위치', () =
     const isHiddenInOverview = await openDiagramBtn.evaluate(el => {
       const style = window.getComputedStyle(el);
       return style.display === 'none';
-    }).catch(() => true);
+    }, undefined, { timeout: 5000 }).catch(() => true);
 
     console.log('Open Diagram button hidden in overview:', isHiddenInOverview);
     expect(isHiddenInOverview).toBe(true);
   });
 
   test('Presentation Mode: reveal.js 컨트롤과 버튼이 겹치지 않음', async ({ page }) => {
-    await page.goto('/example-presentation?mode=presentation');
+    await page.goto('/presentation-test?mode=presentation');
     await page.waitForTimeout(3000);
 
     const docBtn = page.locator('button').filter({ hasText: /document mode/i }).first();
