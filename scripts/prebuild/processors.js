@@ -139,13 +139,103 @@ function readTextPreview(srcFile, ext) {
 
 // ─── File processors ──────────────────────────────────────────────────────────
 
-function rewriteLocalImagePaths(content, srcFile) {
-  const sourceDir = path.relative(PATHS.SOURCE, path.dirname(srcFile)).split(path.sep).join('/');
-  return content.replace(/(!\[[^\]]*\]\()([^\s)]+)([^)]*\))/g, (match, prefix, destination, suffix) => {
-    if (/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(destination)) return match;
-    const downloadPath = path.posix.join('/downloads', sourceDir, destination);
-    return `${prefix}${downloadPath}${suffix}`;
-  });
+function findImageClose(content, openParen) {
+  let depth = 1;
+  let quote = null;
+  for (let i = openParen + 1; i < content.length; i++) {
+    const char = content[i];
+    if (char === '\\') {
+      i++;
+      continue;
+    }
+    if (quote) {
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === '(') {
+      depth++;
+    } else if (char === ')' && --depth === 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function parseImageDestination(inner) {
+  const leadingLength = inner.length - inner.trimStart().length;
+  const start = leadingLength;
+  if (inner[start] === '<') {
+    for (let i = start + 1; i < inner.length; i++) {
+      if (inner[i] === '\\') i++;
+      else if (inner[i] === '>') {
+        return { start: start + 1, end: i, angleWrapped: true };
+      }
+    }
+    return null;
+  }
+
+  let depth = 0;
+  for (let i = start; i < inner.length; i++) {
+    const char = inner[i];
+    if (char === '\\') {
+      i++;
+    } else if (/\s/.test(char) && depth === 0) {
+      return { start, end: i, angleWrapped: false };
+    } else if (char === '(') {
+      depth++;
+    } else if (char === ')' && depth > 0) {
+      depth--;
+    }
+  }
+  return { start, end: inner.length, angleWrapped: false };
+}
+
+function rewriteImageDestination(destination, srcFile) {
+  if (!destination || /^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(destination)) return null;
+
+  const suffixIndex = destination.search(/[?#]/);
+  const pathname = suffixIndex === -1 ? destination : destination.slice(0, suffixIndex);
+  const suffix = suffixIndex === -1 ? '' : destination.slice(suffixIndex);
+  const sourceRoot = path.resolve(PATHS.SOURCE);
+  const target = path.resolve(path.dirname(srcFile), pathname);
+  if (target !== sourceRoot && !target.startsWith(sourceRoot + path.sep)) return null;
+
+  const relativeTarget = path.relative(sourceRoot, target).split(path.sep).join('/');
+  return path.posix.join('/downloads', relativeTarget) + suffix;
+}
+
+export function rewriteLocalImagePaths(content, srcFile) {
+  let result = '';
+  let cursor = 0;
+
+  while (cursor < content.length) {
+    const imageStart = content.indexOf('![', cursor);
+    if (imageStart === -1) break;
+    const destinationOpen = content.indexOf('](', imageStart + 2);
+    if (destinationOpen === -1) break;
+    const openParen = destinationOpen + 1;
+    const closeParen = findImageClose(content, openParen);
+    if (closeParen === -1) break;
+
+    const inner = content.slice(openParen + 1, closeParen);
+    const parsed = parseImageDestination(inner);
+    const rewritten = parsed
+      ? rewriteImageDestination(inner.slice(parsed.start, parsed.end), srcFile)
+      : null;
+
+    result += content.slice(cursor, openParen + 1);
+    if (rewritten) {
+      result += inner.slice(0, parsed.start) + rewritten + inner.slice(parsed.end);
+    } else {
+      result += inner;
+    }
+    result += ')';
+    cursor = closeParen + 1;
+  }
+
+  return result + content.slice(cursor);
 }
 
 export function processMarkdownFile(srcFile, destFile, stats) {

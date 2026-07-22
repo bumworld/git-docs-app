@@ -152,6 +152,12 @@ sidebar:
       '![absolute](/assets/image.png)',
       '![anchor](#diagram)',
       '![embedded](data:image/png;base64,AAAA)',
+      '![title](images/titled.png "Image title")',
+      '![space](<images/my image.png> "Spaced image")',
+      '![paren](images/diagram_(v2).png)',
+      '![parent](../images/parent.png)',
+      '![suffix](images/chart.png?raw=1#preview)',
+      '![escape](../../outside.png)',
     ].join('\n');
     fs.outputFileSync(path.join(TEST_SOURCE, 'guides', 'page.md'), mdContent);
 
@@ -163,6 +169,12 @@ sidebar:
     assert.match(content, /!\[absolute\]\(\/assets\/image\.png\)/);
     assert.match(content, /!\[anchor\]\(#diagram\)/);
     assert.match(content, /!\[embedded\]\(data:image\/png;base64,AAAA\)/);
+    assert.match(content, /!\[title\]\(\/downloads\/guides\/images\/titled\.png "Image title"\)/);
+    assert.match(content, /!\[space\]\(<\/downloads\/guides\/images\/my image\.png> "Spaced image"\)/);
+    assert.match(content, /!\[paren\]\(\/downloads\/guides\/images\/diagram_\(v2\)\.png\)/);
+    assert.match(content, /!\[parent\]\(\/downloads\/images\/parent\.png\)/);
+    assert.match(content, /!\[suffix\]\(\/downloads\/guides\/images\/chart\.png\?raw=1#preview\)/);
+    assert.match(content, /!\[escape\]\(\.\.\/\.\.\/outside\.png\)/);
   });
 });
 
