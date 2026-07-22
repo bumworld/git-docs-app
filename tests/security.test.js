@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { runPrebuild } from '../scripts/prebuild.js';
 import { PATHS } from '../config/constants.js';
+import { requireAdmin } from '../server/middleware/requireAuth.js';
 
 const TEST_SOURCE = path.join(process.cwd(), 'test-temp-security', 'source');
 const TEST_DOCS = path.join(process.cwd(), 'test-temp-security', 'src', 'content', 'docs');
@@ -12,6 +13,23 @@ const TEST_SIDEBAR = path.join(process.cwd(), 'test-temp-security', 'src', 'side
 const TEST_CACHE = path.join(process.cwd(), 'test-temp-security', 'data', 'prebuild-cache.json');
 
 const ORIGINAL_PATHS = { ...PATHS };
+
+function invokeMiddleware(middleware, user) {
+  const result = { statusCode: 200, body: null, nextCalled: false };
+  const req = { user, isAuthenticated: () => true };
+  const res = {
+    status(code) {
+      result.statusCode = code;
+      return this;
+    },
+    json(body) {
+      result.body = body;
+      return this;
+    },
+  };
+  middleware(req, res, () => { result.nextCalled = true; });
+  return result;
+}
 
 before(() => {
   PATHS.SOURCE = TEST_SOURCE;
@@ -314,5 +332,32 @@ describe('Security - Content Security Policy', () => {
     });
 
     assert.ok(true);
+  });
+});
+
+describe('Security - Authorization Boundaries', () => {
+  it('should reject pending administrators from admin APIs', () => {
+    const result = invokeMiddleware(requireAdmin, { role: 'admin', status: 'pending' });
+
+    assert.equal(result.statusCode, 403);
+    assert.deepEqual(result.body, { error: 'Account pending approval' });
+    assert.equal(result.nextCalled, false);
+  });
+
+  it('should reject blocked administrators from admin APIs', () => {
+    const result = invokeMiddleware(requireAdmin, { role: 'admin', status: 'blocked' });
+
+    assert.equal(result.statusCode, 403);
+    assert.deepEqual(result.body, { error: 'Account blocked' });
+    assert.equal(result.nextCalled, false);
+  });
+
+  it('should require authentication for the Pagefind search index', () => {
+    const serverSource = fs.readFileSync(path.join(process.cwd(), 'server', 'index.js'), 'utf-8');
+
+    assert.match(
+      serverSource,
+      /app\.use\('\/pagefind',\s*requireAuth,\s*express\.static\(/,
+    );
   });
 });

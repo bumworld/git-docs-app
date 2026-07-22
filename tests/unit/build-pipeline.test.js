@@ -11,6 +11,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import Database from 'better-sqlite3';
 import { PATHS } from '../../config/constants.js';
+import * as buildModule from '../../scripts/build.js';
 
 const TMP = path.join(process.cwd(), 'test-tmp-build-pipeline');
 const TEST_DB = path.join(TMP, 'wiki.db');
@@ -182,6 +183,24 @@ describe('extractFailedFiles (extended)', () => {
 
 // ─── Build result 구조 검증 ─────────────────────────────────────
 describe('Build result structure', () => {
+  it('reports captured child-process stderr and stdout', () => {
+    assert.strictEqual(typeof buildModule.reportCommandFailure, 'function');
+    const messages = [];
+    const originalConsoleError = console.error;
+    console.error = (...args) => messages.push(args.join(' '));
+    try {
+      buildModule.reportCommandFailure(Object.assign(new Error('Command failed with exit code 1'), {
+        stderr: 'Astro image not found',
+        stdout: 'Astro build output',
+      }));
+    } finally {
+      console.error = originalConsoleError;
+    }
+
+    assert.match(messages.join('\n'), /Astro image not found/);
+    assert.match(messages.join('\n'), /Astro build output/);
+  });
+
   it('success result must have required fields', () => {
     const result = {
       success: true,

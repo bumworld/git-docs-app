@@ -139,9 +139,18 @@ function readTextPreview(srcFile, ext) {
 
 // ─── File processors ──────────────────────────────────────────────────────────
 
+function rewriteLocalImagePaths(content, srcFile) {
+  const sourceDir = path.relative(PATHS.SOURCE, path.dirname(srcFile)).split(path.sep).join('/');
+  return content.replace(/(!\[[^\]]*\]\()([^\s)]+)([^)]*\))/g, (match, prefix, destination, suffix) => {
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(destination)) return match;
+    const downloadPath = path.posix.join('/downloads', sourceDir, destination);
+    return `${prefix}${downloadPath}${suffix}`;
+  });
+}
+
 export function processMarkdownFile(srcFile, destFile, stats) {
   try {
-    const content = fs.readFileSync(srcFile, 'utf-8');
+    const content = rewriteLocalImagePaths(fs.readFileSync(srcFile, 'utf-8'), srcFile);
     try {
       const parsed = matter(content);
       if (!parsed.data.title) {

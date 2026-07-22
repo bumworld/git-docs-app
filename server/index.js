@@ -165,7 +165,7 @@ app.use('/favicon.svg', (req, res, next) => {
   }
   next();
 });
-app.use('/pagefind', express.static(path.join(PATHS.DIST, 'pagefind')));
+app.use('/pagefind', requireAuth, express.static(path.join(PATHS.DIST, 'pagefind')));
 
 // Build API
 app.use('/api', buildRoutes);

@@ -34,6 +34,12 @@ function execAsync(command, options = {}) {
   });
 }
 
+export function reportCommandFailure(err) {
+  console.error('[Build] Build failed:', err.message);
+  if (err.stderr) console.error(err.stderr.toString().trimEnd());
+  if (err.stdout) console.error(err.stdout.toString().trimEnd());
+}
+
 function loadSiteSettings() {
   if (!fs.existsSync(PATHS.DB)) return {};
   try {
@@ -188,7 +194,7 @@ export async function runBuild() {
     };
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[Build] Build failed:', err.message);
+    reportCommandFailure(err);
 
     // Capture stderr/stdout from the error
     let errorOutput = err.message || '';
