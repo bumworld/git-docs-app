@@ -103,7 +103,7 @@ describe('Presentation Feature', () => {
 
   describe('Example Presentation File', () => {
     it('should have example presentation markdown file', () => {
-      const examplePath = path.join(process.cwd(), 'src/content/docs/example-presentation.md');
+      const examplePath = path.join(process.cwd(), 'sample/source/example-presentation.md');
       assert.ok(fs.existsSync(examplePath), 'example-presentation.md should exist');
 
       const content = fs.readFileSync(examplePath, 'utf-8');
@@ -242,7 +242,7 @@ describe('Presentation Feature', () => {
 
 describe('Integration with Existing Features', () => {
   it('should work with Mermaid diagrams in presentation', () => {
-    const examplePath = path.join(process.cwd(), 'src/content/docs/example-presentation.md');
+    const examplePath = path.join(process.cwd(), 'sample/source/example-presentation.md');
     const content = fs.readFileSync(examplePath, 'utf-8');
 
     assert.ok(

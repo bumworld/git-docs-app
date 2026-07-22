@@ -183,6 +183,18 @@ describe('extractFailedFiles (extended)', () => {
 
 // ─── Build result 구조 검증 ─────────────────────────────────────
 describe('Build result structure', () => {
+  it('passes child-process arguments without shell parsing', async () => {
+    assert.strictEqual(typeof buildModule.execAsync, 'function');
+    const value = 'path with spaces;echo not-executed';
+
+    const stdout = await buildModule.execAsync(
+      process.execPath,
+      ['-e', 'console.log(process.argv[1])', value],
+    );
+
+    assert.strictEqual(stdout.trim(), value);
+  });
+
   it('reports captured child-process stderr and stdout', () => {
     assert.strictEqual(typeof buildModule.reportCommandFailure, 'function');
     const messages = [];
