@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { runPrebuild } from '../scripts/prebuild.js';
 import { PATHS } from '../config/constants.js';
+import * as securityConfig from '../config/security.js';
 import { requireAdmin } from '../server/middleware/requireAuth.js';
 
 const TEST_SOURCE = path.join(process.cwd(), 'test-temp-security', 'source');
@@ -132,10 +133,8 @@ describe('Security - XSS in HTML', () => {
     const wrapper = fs.readFileSync(path.join(TEST_DOCS, 'xss.md'), 'utf-8');
     assert.ok(wrapper.includes('iframe'));
     assert.ok(wrapper.includes('/downloads/xss.html'));
-
-    // SECURITY NOTE: iframe provides some isolation but not complete
-    // Scripts in iframe can still access parent if same-origin
-    // RECOMMENDATION: Add sandbox attribute or CSP headers
+    assert.ok(wrapper.includes('sandbox="allow-scripts"'));
+    assert.ok(!wrapper.includes('allow-same-origin'));
   });
 
   it('should handle HTML with event handlers', () => {
@@ -164,6 +163,28 @@ describe('Security - XSS in HTML', () => {
     // Entire folder should be copied
     assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, 'evil-app', 'index.html')));
     assert.ok(fs.existsSync(path.join(TEST_DOWNLOADS, 'evil-app', 'malicious.js')));
+  });
+});
+
+describe('Security - HTML Download Headers', () => {
+  it('sandboxes HTML downloads without granting the wiki origin', () => {
+    assert.equal(typeof securityConfig.setDownloadSecurityHeaders, 'function');
+    const headers = {};
+    const res = { setHeader: (name, value) => { headers[name] = value; } };
+
+    securityConfig.setDownloadSecurityHeaders(res, '/tmp/example.html');
+
+    assert.equal(headers['Content-Security-Policy'], 'sandbox allow-scripts');
+  });
+
+  it('does not add sandbox CSP to non-HTML downloads', () => {
+    assert.equal(typeof securityConfig.setDownloadSecurityHeaders, 'function');
+    const headers = {};
+    const res = { setHeader: (name, value) => { headers[name] = value; } };
+
+    securityConfig.setDownloadSecurityHeaders(res, '/tmp/report.pdf');
+
+    assert.equal(headers['Content-Security-Policy'], undefined);
   });
 });
 

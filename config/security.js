@@ -58,10 +58,7 @@ export function getSecurityWarning(filename) {
 }
 
 // Content Security Policy for iframe sandboxing
-export const IFRAME_SANDBOX = [
-  'allow-scripts',        // Allow scripts (needed for interactive content)
-  'allow-same-origin',    // Allow same-origin (needed for some features)
-].join(' ');
+export const IFRAME_SANDBOX = 'allow-scripts';
 
 // Stricter sandbox for untrusted content
 export const IFRAME_SANDBOX_STRICT = [
@@ -90,4 +87,10 @@ export function buildCSPHeader(csp = RECOMMENDED_CSP) {
   return Object.entries(csp)
     .map(([directive, values]) => `${directive} ${values.join(' ')}`)
     .join('; ');
+}
+
+export function setDownloadSecurityHeaders(res, filePath) {
+  if (/\.html?$/i.test(filePath)) {
+    res.setHeader('Content-Security-Policy', 'sandbox allow-scripts');
+  }
 }
