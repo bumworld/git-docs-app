@@ -179,7 +179,8 @@ describe('processHtmlFolder', () => {
     const content = fs.readFileSync(destMd, 'utf-8');
     assert.ok(content.includes('iframe'));
     assert.ok(content.includes('/downloads/my-app/'));
-    assert.ok(content.includes('sandbox'));
+    assert.ok(content.includes('sandbox="allow-scripts"'));
+    assert.ok(!content.includes('allow-same-origin'));
     assert.strictEqual(stats.byType.html, 1);
   });
 
@@ -225,6 +226,8 @@ describe('processHtmlFile', () => {
     const content = fs.readFileSync(path.join(TEST_DOCS, 'page.md'), 'utf-8');
     assert.ok(content.includes('iframe'));
     assert.ok(content.includes('/downloads/page.html'));
+    assert.ok(content.includes('sandbox="allow-scripts"'));
+    assert.ok(!content.includes('allow-same-origin'));
     assert.strictEqual(stats.byType.html, 1);
   });
 

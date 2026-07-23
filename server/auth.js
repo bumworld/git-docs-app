@@ -49,6 +49,15 @@ function resolveCallbackURL(redirectURIs, req) {
 }
 
 function setupPassport() {
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser((id, done) => {
+    const user = findUserById(id);
+    done(null, user || false);
+  });
+
   const googleConfig = loadGoogleConfig();
 
   if (!googleConfig) {
@@ -77,14 +86,6 @@ function setupPassport() {
     )
   );
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser((id, done) => {
-    const user = findUserById(id);
-    done(null, user || false);
-  });
 }
 
 export { setupPassport, loadGoogleConfig, resolveCallbackURL };

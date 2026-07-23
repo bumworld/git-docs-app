@@ -14,6 +14,7 @@ import sseRoutes, { setSSEBuildRunner } from './sse/index.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import { createBuildRunner } from '../scripts/watcher.js';
 import { PATHS, SESSION } from '../config/constants.js';
+import { setDownloadSecurityHeaders } from '../config/security.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
@@ -165,7 +166,7 @@ app.use('/favicon.svg', (req, res, next) => {
   }
   next();
 });
-app.use('/pagefind', express.static(path.join(PATHS.DIST, 'pagefind')));
+app.use('/pagefind', requireAuth, express.static(path.join(PATHS.DIST, 'pagefind')));
 
 // Build API
 app.use('/api', buildRoutes);
@@ -205,7 +206,9 @@ app.use((req, res, next) => {
 });
 
 // Downloads (files from source/ that are not markdown/html)
-app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS));
+app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS, {
+  setHeaders: setDownloadSecurityHeaders,
+}));
 
 // Building page - shown when a build is in progress or dist is empty
 const BUILDING_HTML = `<!DOCTYPE html>

@@ -25,6 +25,8 @@ export default async function globalTeardown() {
     else fs.ensureDirSync(REAL_SOURCE);
     fs.copySync(sourceBackup, REAL_SOURCE, { overwrite: true });
     console.log('[E2E Teardown] source/ restored');
+  } else if (fs.existsSync(REAL_SOURCE)) {
+    fs.removeSync(REAL_SOURCE);
   }
 
   // data/ 복원
@@ -33,6 +35,8 @@ export default async function globalTeardown() {
     else fs.ensureDirSync(REAL_DATA);
     fs.copySync(dataBackup, REAL_DATA, { overwrite: true });
     console.log('[E2E Teardown] data/ restored');
+  } else if (fs.existsSync(REAL_DATA)) {
+    fs.removeSync(REAL_DATA);
   }
 
   // 백업 디렉토리 정리

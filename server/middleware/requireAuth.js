@@ -67,6 +67,14 @@ function requireAdmin(req, res, next) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
+  if (req.user.status === 'pending') {
+    return res.status(403).json({ error: 'Account pending approval' });
+  }
+
+  if (req.user.status === 'blocked') {
+    return res.status(403).json({ error: 'Account blocked' });
+  }
+
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Admin access required' });
   }

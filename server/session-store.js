@@ -2,12 +2,18 @@ import session from 'express-session';
 import { db } from './db.js';
 import { SESSION } from '../config/constants.js';
 
-export function createSessionStore() {
+export function deleteExpiredSessions(database = db) {
+  return database.prepare("DELETE FROM sessions WHERE datetime(expired) <= datetime('now')").run();
+}
+
+export function createSessionStore(database = db) {
   const store = new session.Store();
 
   store.get = function (sid, callback) {
     try {
-      const row = db.prepare('SELECT sess FROM sessions WHERE sid = ? AND expired > datetime(\'now\')').get(sid);
+      const row = database.prepare(
+        "SELECT sess FROM sessions WHERE sid = ? AND datetime(expired) > datetime('now')",
+      ).get(sid);
       callback(null, row ? JSON.parse(row.sess) : null);
     } catch (err) {
       callback(err);
@@ -19,7 +25,7 @@ export function createSessionStore() {
       const maxAge = sessData.cookie?.maxAge || 86400000;
       const expired = new Date(Date.now() + maxAge).toISOString();
       const sess = JSON.stringify(sessData);
-      db.prepare(
+      database.prepare(
         'INSERT INTO sessions (sid, sess, expired) VALUES (?, ?, ?) ON CONFLICT(sid) DO UPDATE SET sess = ?, expired = ?'
       ).run(sid, sess, expired, sess, expired);
       callback?.(null);
@@ -30,7 +36,7 @@ export function createSessionStore() {
 
   store.destroy = function (sid, callback) {
     try {
-      db.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
+      database.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
       callback?.(null);
     } catch (err) {
       callback?.(err);
@@ -41,7 +47,7 @@ export function createSessionStore() {
     try {
       const maxAge = sessData.cookie?.maxAge || 86400000;
       const expired = new Date(Date.now() + maxAge).toISOString();
-      db.prepare('UPDATE sessions SET expired = ? WHERE sid = ?').run(expired, sid);
+      database.prepare('UPDATE sessions SET expired = ? WHERE sid = ?').run(expired, sid);
       callback?.(null);
     } catch (err) {
       callback?.(err);
@@ -49,13 +55,14 @@ export function createSessionStore() {
   };
 
   // Cleanup expired sessions periodically
-  setInterval(() => {
+  const cleanupTimer = setInterval(() => {
     try {
-      db.prepare("DELETE FROM sessions WHERE expired <= datetime('now')").run();
+      deleteExpiredSessions(database);
     } catch {
       // ignore cleanup errors
     }
   }, SESSION.CLEANUP_INTERVAL);
+  cleanupTimer.unref?.();
 
   return store;
 }

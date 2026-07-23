@@ -8,10 +8,9 @@ import { PATHS } from '../config/constants.js';
 import { loadGitdocsConfig } from './prebuild/config.js';
 import { runHooks } from './build-hooks.js';
 
-function execAsync(command, options = {}) {
+export function execAsync(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
-    const [cmd, ...args] = command.split(/\s+/);
-    const child = spawn(cmd, args, { ...options, shell: true });
+    const child = spawn(command, args, { ...options, shell: false });
     let stdout = '';
     let stderr = '';
     if (child.stdout) child.stdout.on('data', (data) => { stdout += data.toString(); });
@@ -32,6 +31,12 @@ function execAsync(command, options = {}) {
       reject(err);
     });
   });
+}
+
+export function reportCommandFailure(err) {
+  console.error('[Build] Build failed:', err.message);
+  if (err.stderr) console.error(err.stderr.toString().trimEnd());
+  if (err.stdout) console.error(err.stdout.toString().trimEnd());
 }
 
 function loadSiteSettings() {
@@ -136,7 +141,7 @@ export async function runBuild() {
     logParts.push('[Build] Running Astro build...');
     const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
     const astroBin = path.join(APP_ROOT, 'node_modules', '.bin', 'astro');
-    const stdout = await execAsync(`"${astroBin}" build --outDir "${PATHS.DIST_TEMP}"`, {
+    const stdout = await execAsync(astroBin, ['build', '--outDir', PATHS.DIST_TEMP], {
       cwd: APP_ROOT,
       env: buildEnv,
     });
@@ -188,7 +193,7 @@ export async function runBuild() {
     };
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[Build] Build failed:', err.message);
+    reportCommandFailure(err);
 
     // Capture stderr/stdout from the error
     let errorOutput = err.message || '';

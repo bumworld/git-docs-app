@@ -140,6 +140,42 @@ sidebar:
     assert.ok(content.includes('title:'));
     assert.ok(content.includes('sidebar:'));
   });
+
+  it('should rewrite only relative local image paths to downloads URLs', () => {
+    fs.emptyDirSync(TEST_SOURCE);
+    fs.emptyDirSync(TEST_DOCS);
+
+    const mdContent = [
+      '# Images',
+      '![local](images/example.png)',
+      '![remote](https://example.com/image.png)',
+      '![absolute](/assets/image.png)',
+      '![anchor](#diagram)',
+      '![embedded](data:image/png;base64,AAAA)',
+      '![title](images/titled.png "Image title")',
+      '![space](<images/my image.png> "Spaced image")',
+      '![paren](images/diagram_(v2).png)',
+      '![parent](../images/parent.png)',
+      '![suffix](images/chart.png?raw=1#preview)',
+      '![escape](../../outside.png)',
+    ].join('\n');
+    fs.outputFileSync(path.join(TEST_SOURCE, 'guides', 'page.md'), mdContent);
+
+    runPrebuild();
+
+    const content = fs.readFileSync(path.join(TEST_DOCS, 'guides', 'page.md'), 'utf-8');
+    assert.match(content, /!\[local\]\(\/downloads\/guides\/images\/example\.png\)/);
+    assert.match(content, /!\[remote\]\(https:\/\/example\.com\/image\.png\)/);
+    assert.match(content, /!\[absolute\]\(\/assets\/image\.png\)/);
+    assert.match(content, /!\[anchor\]\(#diagram\)/);
+    assert.match(content, /!\[embedded\]\(data:image\/png;base64,AAAA\)/);
+    assert.match(content, /!\[title\]\(\/downloads\/guides\/images\/titled\.png "Image title"\)/);
+    assert.match(content, /!\[space\]\(<\/downloads\/guides\/images\/my image\.png> "Spaced image"\)/);
+    assert.match(content, /!\[paren\]\(\/downloads\/guides\/images\/diagram_\(v2\)\.png\)/);
+    assert.match(content, /!\[parent\]\(\/downloads\/images\/parent\.png\)/);
+    assert.match(content, /!\[suffix\]\(\/downloads\/guides\/images\/chart\.png\?raw=1#preview\)/);
+    assert.match(content, /!\[escape\]\(\.\.\/\.\.\/outside\.png\)/);
+  });
 });
 
 describe('Prebuild - Directory Structure', () => {
