@@ -186,6 +186,26 @@ describe('Security - HTML Download Headers', () => {
 
     assert.equal(headers['Content-Security-Policy'], undefined);
   });
+
+  it('sandboxes SVG downloads without allowing scripts', () => {
+    const headers = {};
+    const res = { setHeader: (name, value) => { headers[name] = value; } };
+
+    securityConfig.setDownloadSecurityHeaders(res, '/tmp/image.svg');
+
+    assert.equal(headers['Content-Security-Policy'], 'sandbox');
+    assert.equal(headers['X-Content-Type-Options'], 'nosniff');
+  });
+
+  it('registers downloads before extensionless redirects', () => {
+    const serverSource = fs.readFileSync(path.join(process.cwd(), 'server', 'index.js'), 'utf-8');
+    const downloadsRoute = serverSource.indexOf("app.use('/downloads'");
+    const extensionRedirect = serverSource.indexOf('if (/\\.(html|md|mdx)$/i.test(req.path))');
+
+    assert.ok(downloadsRoute >= 0, 'downloads route must exist');
+    assert.ok(extensionRedirect >= 0, 'extension redirect must exist');
+    assert.ok(downloadsRoute < extensionRedirect, 'downloads must be served before redirects');
+  });
 });
 
 describe('Security - XSS in Markdown', () => {

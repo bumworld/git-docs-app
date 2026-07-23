@@ -193,10 +193,17 @@ app.use('/admin', requireAuth, (req, res, next) => {
   next();
 }, express.static(PATHS.ADMIN_UI));
 
+// Downloads must be served before extension redirects so their response
+// headers are applied to the original file request.
+app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS, {
+  setHeaders: setDownloadSecurityHeaders,
+}));
+
 // .html / .md / .mdx URL → 확장자 제거 후 리다이렉트
 // - build.format: 'file' 시 Starlight가 .html 링크를 생성하므로 URL에서 제거
 // - 마크다운 상대 링크([링크](./other.md))가 파일 경로처럼 작동하도록 지원
 app.use((req, res, next) => {
+  if (req.path.startsWith('/downloads/')) return next();
   if (/\.(html|md|mdx)$/i.test(req.path)) {
     const newPath = req.path.replace(/\.(html|md|mdx)$/i, '') || '/';
     const query = req.url.slice(req.path.length);
@@ -204,11 +211,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Downloads (files from source/ that are not markdown/html)
-app.use('/downloads', requireAuth, express.static(PATHS.DOWNLOADS, {
-  setHeaders: setDownloadSecurityHeaders,
-}));
 
 // Building page - shown when a build is in progress or dist is empty
 const BUILDING_HTML = `<!DOCTYPE html>
@@ -264,6 +266,10 @@ if (process.env.NODE_ENV === 'test') {
 app.use('/', requireAuth, serveBuildingPage, express.static(PATHS.DIST, {
   extensions: ['html'],
   setHeaders: (res, filePath) => {
+    const relativePath = path.relative(PATHS.DIST, filePath);
+    if (relativePath === 'downloads' || relativePath.startsWith(`downloads${path.sep}`)) {
+      setDownloadSecurityHeaders(res, filePath);
+    }
     if (filePath.endsWith('.html')) {
       res.set('Cache-Control', 'no-store');
     }

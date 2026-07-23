@@ -90,7 +90,10 @@ export function buildCSPHeader(csp = RECOMMENDED_CSP) {
 }
 
 export function setDownloadSecurityHeaders(res, filePath) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
   if (/\.html?$/i.test(filePath)) {
     res.setHeader('Content-Security-Policy', 'sandbox allow-scripts');
+  } else if (/\.svg$/i.test(filePath)) {
+    res.setHeader('Content-Security-Policy', 'sandbox');
   }
 }
