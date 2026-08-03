@@ -1,14 +1,35 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { PATHS, IGNORE_FILES } from '../config/constants.js';
-import { generateTitle } from './prebuild/utils.js';
-import { processDirectory, createStats } from './prebuild/processors.js';
+import { generateTitle, sanitizeDirName, SlugError } from './prebuild/utils.js';
+import { processDirectory, createStats, collectSlugErrors } from './prebuild/processors.js';
 import { generateSidebarConfig } from './prebuild/sidebar.js';
-import { loadCache, saveCache } from './prebuild/cache.js';
+import { loadCache, saveCache, CACHE_SCHEMA_VERSION } from './prebuild/cache.js';
 import { loadGitdocsConfig } from './prebuild/config.js';
 
 export function runPrebuild() {
   console.log('[Prebuild] Starting content sync from source/ to src/content/docs/');
+
+  // Check if source directory exists
+  if (!fs.existsSync(PATHS.SOURCE)) {
+    fs.ensureDirSync(PATHS.SOURCE);
+    console.log('[Prebuild] source/ directory created (empty)');
+  }
+
+  // .gitdocs.json 로드 (없으면 빈 객체)
+  const gitdocsConfig = loadGitdocsConfig(PATHS.SOURCE);
+
+  // 슬러그 사전 검증 — docs/downloads 를 비우기 전에 수행해야 한다.
+  // 순회 도중 실패하면 출력 디렉토리가 부분 상태로 남기 때문.
+  const slugErrors = collectSlugErrors(PATHS.SOURCE, '', gitdocsConfig);
+  if (slugErrors.length > 0) {
+    const shown = slugErrors.slice(0, 20).map(e => `  - ${e.path}`).join('\n');
+    const more = slugErrors.length > 20 ? `\n  ... 외 ${slugErrors.length - 20}개` : '';
+    throw new SlugError(
+      `[Prebuild] URL 슬러그를 만들 수 없는 이름 ${slugErrors.length}개 — 이름을 변경한 뒤 다시 빌드하세요.\n${shown}${more}\n` +
+      `(영문/숫자/한글 등 URL 로 쓸 수 있는 문자가 하나도 없는 이름입니다)`
+    );
+  }
 
   // 마지막 빌드 소스 추적 — 소스가 바뀌면 src/content/docs 전체 초기화
   // (서로 다른 캐시 파일을 사용하는 샘플↔외부 전환도 감지)
@@ -19,6 +40,11 @@ export function runPrebuild() {
 
   // 증분 빌드: 캐시 로드 (없으면 전체 처리)
   const cache = loadCache(PATHS.PREBUILD_CACHE);
+  // 슬러그 정규화 규칙이 바뀌면(CACHE_SCHEMA_VERSION 상승) 캐시가 통째로 무효화된다.
+  // mtime/size 는 그대로여도 목적 파일명이 달라지므로 전체 재처리가 필요하다.
+  if (cache.versionMismatch) {
+    console.log(`[Prebuild] 캐시 스키마 변경 감지 (v${cache.previousVersion ?? 'none'} → v${CACHE_SCHEMA_VERSION}) — 전체 재빌드 시작`);
+  }
   // 소스 디렉토리가 바뀌면 캐시 무효화 → 전체 재빌드
   const sourceChanged = sourceSwitched || (cache.sourceDir && cache.sourceDir !== PATHS.SOURCE);
   if (sourceChanged) {
@@ -40,15 +66,6 @@ export function runPrebuild() {
     fs.ensureDirSync(PATHS.DOWNLOADS);
   }
 
-  // Check if source directory exists and has content
-  if (!fs.existsSync(PATHS.SOURCE)) {
-    fs.ensureDirSync(PATHS.SOURCE);
-    console.log('[Prebuild] source/ directory created (empty)');
-  }
-
-  // .gitdocs.json 로드 (없으면 빈 객체)
-  const gitdocsConfig = loadGitdocsConfig(PATHS.SOURCE);
-
   const entries = fs.readdirSync(PATHS.SOURCE).filter(e => !IGNORE_FILES.includes(e));
   console.log(`[Prebuild] source/ has ${entries.length} entries: ${entries.slice(0, 10).join(', ')}${entries.length > 10 ? '...' : ''}`);
   if (entries.length === 0) {
@@ -69,10 +86,17 @@ title: "Welcome"
   processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats, cacheCtx, gitdocsConfig);
 
   // 삭제된 소스 파일에 대응하는 dest 파일 제거
+  // 단, 이번 실행에서 살아있는 소스가 소유한 산출물은 지우지 않는다.
+  // (슬러그 충돌로 두 소스가 같은 출력 경로를 거쳐간 경우 남은 문서가 사라지는 것을 방지)
+  const survivingDestFiles = new Set();
+  for (const entry of Object.values(cacheCtx.newEntries)) {
+    for (const destFile of entry.destFiles || []) survivingDestFiles.add(destFile);
+  }
   let deletedCount = 0;
   for (const [relPath, entry] of Object.entries(cache.files)) {
     if (!cacheCtx.newEntries[relPath]) {
       for (const destFile of entry.destFiles || []) {
+        if (survivingDestFiles.has(destFile)) continue;
         try {
           fs.removeSync(destFile);
         } catch { /* ignore */ }
@@ -108,7 +132,9 @@ title: "Welcome"
       let listItems = '';
       for (const folder of folders) {
         const label = generateTitle(folder.name);
-        const slug = folder.name.toLowerCase();
+        // 실제 라우트는 sanitizeDirName() 규칙으로 만들어지므로 링크도 같은 규칙을 써야 한다
+        // (folder.name.toLowerCase() 만 쓰면 공백/특수문자 폴더에서 404)
+        const slug = sanitizeDirName(folder.name).toLowerCase();
         listItems += `- [${label}](/${slug}/)\n`;
       }
 

@@ -34,6 +34,7 @@
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "fs-extra": "^11.2.0",
+    "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "mermaid": "^11.12.2",
     "passport": "^0.7.0",

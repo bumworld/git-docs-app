@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import matter from 'gray-matter';
 import { PATHS, FILE_EXTENSIONS, IGNORE_FILES, IGNORE_DIRS, DIR_CONVENTIONS } from '../../config/constants.js';
-import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize } from './utils.js';
+import { sanitizeSlug, sanitizeDirName, generateTitle, formatFileSize, SlugError } from './utils.js';
 import { getSecurityWarning, IFRAME_SANDBOX } from '../../config/security.js';
 import { getFileStat } from './cache.js';
 import { shouldIgnore } from './config.js';
@@ -20,6 +20,7 @@ export function createStats() {
     longPaths: [],    // 경로 200자 이상
     collisions: [],   // 출력 경로 충돌
     usedPaths: new Set(),
+    pathOwners: new Map(),  // destPath → 먼저 등록한 원본 상대 경로
   };
 }
 
@@ -95,12 +96,57 @@ export function isLikelyMarkdown(filePath) {
 // destPath 가 이미 사용 중이면 충돌을 기록하고 false 반환, 아니면 등록 후 true 반환
 export function registerPath(destPath, relPath, label, stats) {
   if (stats?.usedPaths?.has(destPath)) {
-    console.warn(`[Prebuild] 경로 충돌 (${label} 건너뜀): ${relPath} → ${destPath} 이미 사용됨`);
-    if (stats) { stats.skipped++; stats.collisions.push({ src: relPath, dest: destPath }); }
+    const existingSrc = stats?.pathOwners?.get(destPath) || null;
+    console.warn(
+      `[Prebuild] 경로 충돌 (${label} 건너뜀): ${relPath} → ${destPath} 이미 사용됨` +
+      (existingSrc ? ` (선점: ${existingSrc})` : '')
+    );
+    if (stats) { stats.skipped++; stats.collisions.push({ src: relPath, dest: destPath, existingSrc }); }
     return false;
   }
   if (stats?.usedPaths) stats.usedPaths.add(destPath);
+  if (stats?.pathOwners) stats.pathOwners.set(destPath, relPath);
   return true;
+}
+
+// registerPath 를 호출하고 선점 결과를 ctx 에 남긴다.
+// processDirectory 가 이 값을 캐시 항목(docPath)에 기록해, 다음 증분 실행에서
+// "이 소스가 어떤 docs 경로를 소유했는지"를 알 수 있게 한다.
+export function claimDocPath(ctx, destPath, relPath, label) {
+  const registered = registerPath(destPath, relPath, label, ctx.stats);
+  if (ctx) ctx.claimedDocPath = registered ? destPath : null;
+  return registered;
+}
+
+// ─── 래퍼 마크다운 출력 경로 ──────────────────────────────────────────────────
+// 래퍼(html/image/asset)가 만드는 docs 마크다운 경로는 프로세서와 충돌 등록 지점에서
+// 동일해야 하므로 한 곳에서 계산한다.
+
+export function getWrapperDocPath(docsSubDir, filename) {
+  return path.join(docsSubDir, sanitizeSlug(filename).toLowerCase() + '.md');
+}
+
+// docsSubDir 를 모르는 직접 호출용 fallback (PATHS.DOCS + 원본 상대 디렉토리).
+// 원본 디렉토리명이 정규화되지 않으므로 순회 경로에서는 항상 ctx.docsSubDir 를 넘겨야 한다.
+export function getImageDocPath(relativePath, docsSubDir) {
+  return getWrapperDocPath(
+    docsSubDir || path.join(PATHS.DOCS, path.dirname(relativePath)),
+    path.basename(relativePath)
+  );
+}
+
+// 래퍼 마크다운을 만들지 못한 경우(출력 경로 충돌)에도 원본 다운로드는 보존한다.
+// downloads 경로는 원본 이름을 그대로 쓰므로 docs 슬러그 충돌과 무관하다.
+export function copyDownloadOnly(srcFile, downloadsSubDir, filename, relPath, stats) {
+  const downloadDest = path.join(downloadsSubDir, filename);
+  try {
+    fs.copySync(srcFile, downloadDest, { overwrite: true });
+    return [downloadDest];
+  } catch (err) {
+    if (stats) stats.errors.push({ file: relPath, message: err.message });
+    console.error(`[Prebuild] 다운로드 복사 실패: ${relPath} → ${err.message}`);
+    return [];
+  }
 }
 
 // 텍스트 파일 내용을 읽어 마크다운 코드블록 문자열로 반환 (20KB 초과 시 앞부분만 표시)
@@ -307,7 +353,7 @@ export function processHtmlFile(srcFile, docsSubDir, downloadsSubDir, relPath, s
 
     fs.copySync(srcFile, downloadDest, { overwrite: true });
 
-    const mdFile = path.join(docsSubDir, sanitizeSlug(entry).toLowerCase() + '.md');
+    const mdFile = getWrapperDocPath(docsSubDir, entry);
     const mdContent = `---
 title: "${title}"
 sidebar:
@@ -332,7 +378,7 @@ This HTML file is displayed in a sandboxed iframe. Scripts may be restricted for
   }
 }
 
-export function processImageFile(srcFile, relativePath, stats) {
+export function processImageFile(srcFile, relativePath, stats, docsSubDir) {
   try {
     const filename = path.basename(srcFile);
     const title = generateTitle(filename);
@@ -341,8 +387,7 @@ export function processImageFile(srcFile, relativePath, stats) {
 
     fs.copySync(srcFile, downloadDest, { overwrite: true });
 
-    const dirPath = path.dirname(relativePath);
-    const mdDest = path.join(PATHS.DOCS, dirPath, sanitizeSlug(filename).toLowerCase() + '.md');
+    const mdDest = getImageDocPath(relativePath, docsSubDir);
     const sizeStr = formatFileSize(fs.statSync(srcFile).size);
 
     const mdContent = `---
@@ -375,7 +420,7 @@ export function processAssetFile(srcFile, relativePath, docsSubDir, stats) {
 
     fs.copySync(srcFile, downloadDest, { overwrite: true });
 
-    const mdDest = path.join(docsSubDir, sanitizeSlug(filename).toLowerCase() + '.md');
+    const mdDest = getWrapperDocPath(docsSubDir, filename);
     const sizeStr = formatFileSize(fs.statSync(srcFile).size);
 
     const securityWarning = getSecurityWarning(filename);
@@ -484,6 +529,80 @@ export function processStaticContents(srcDir, destDir, relPath, stats, label = '
 
 // ─── Directory traversal ──────────────────────────────────────────────────────
 
+// 슬러그 정규화 실패는 사이드바/콘텐츠 slug 불일치로 이어져 Starlight 빌드가 중단되므로
+// 조용히 넘기지 않고 원본 상대 경로 컨텍스트를 붙여 prebuild 를 실패시킨다.
+function withSlugContext(relPath, fn) {
+  try {
+    return fn();
+  } catch (err) {
+    if (err instanceof SlugError) {
+      const message = `[Prebuild] 슬러그 정규화 실패: ${relPath} → ${err.message}`;
+      console.error(message);
+      throw new SlugError(message);
+    }
+    throw err;
+  }
+}
+
+/**
+ * 슬러그 정규화 사전 검증 (preflight).
+ *
+ * processDirectory 는 docs/downloads 를 비운 뒤 순회하므로, 순회 도중 SlugError 가 나면
+ * 출력 디렉토리가 부분 상태로 남는다. 파괴적 초기화 전에 소스 트리 이름만 먼저 검사해
+ * 문제가 되는 이름을 한 번에 모아 보고한다. (skip 규칙은 processDirectory 와 동일해야 한다)
+ *
+ * @returns {Array<{ path: string, message: string }>} 정규화 불가 항목 목록
+ */
+export function collectSlugErrors(srcDir, relativePath = '', gitdocsConfig = {}) {
+  const invalid = [];
+  let entries;
+  try {
+    entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  } catch {
+    return invalid;  // 읽기 실패는 processDirectory 가 오류로 기록한다
+  }
+
+  for (const entry of entries) {
+    if (IGNORE_FILES.includes(entry.name)) continue;
+    if (entry.name.startsWith('.')) continue;
+
+    const isConventionDir = entry.isDirectory() && Object.values(DIR_CONVENTIONS).includes(entry.name);
+    if (entry.name.startsWith('_') && !isConventionDir) continue;
+    if (entry.isDirectory() && entry.name.toLowerCase() === 'pwa') continue;
+    if (entry.isDirectory() && IGNORE_DIRS.includes(entry.name)) continue;
+
+    const srcPath = path.join(srcDir, entry.name);
+    const entryName = entry.name.normalize('NFC');
+    const relPath = relativePath ? `${relativePath}/${entryName}` : entryName;
+
+    if (shouldIgnore(relPath, gitdocsConfig.ignorePatterns)) continue;
+
+    if (entry.isDirectory()) {
+      // __ignore/__static/__raw 하위는 슬러그를 만들지 않으므로 검사 대상이 아니다
+      if (Object.values(DIR_CONVENTIONS).includes(entry.name)) continue;
+      try {
+        sanitizeDirName(entry.name);
+      } catch (err) {
+        if (err instanceof SlugError) { invalid.push({ path: relPath, message: err.message }); continue; }
+        throw err;
+      }
+      // HTML 폴더는 내부를 순회하지 않는다 (processDirectory 와 동일)
+      if (!isHtmlFolder(srcPath)) {
+        invalid.push(...collectSlugErrors(srcPath, relPath, gitdocsConfig));
+      }
+    } else if (entry.isFile()) {
+      try {
+        sanitizeSlug(entry.name);
+      } catch (err) {
+        if (err instanceof SlugError) invalid.push({ path: relPath, message: err.message });
+        else throw err;
+      }
+    }
+  }
+
+  return invalid;
+}
+
 export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePath = '', stats = null, cacheCtx = null, gitdocsConfig = {}) {
   let entries;
   try {
@@ -555,7 +674,7 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
         continue;
       }
 
-      const safeDirName = sanitizeDirName(entry.name).toLowerCase();
+      const safeDirName = withSlugContext(relPath, () => sanitizeDirName(entry.name).toLowerCase());
       if (isHtmlFolder(srcPath)) {
         const mdFile = path.join(docsSubDir, safeDirName + '.md');
         if (registerPath(mdFile, relPath, '폴더', stats)) {
@@ -578,19 +697,28 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
       }
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name).toLowerCase();
-      const safeFileName = sanitizeSlug(entry.name).toLowerCase() + ext;
+      const safeFileName = withSlugContext(relPath, () => sanitizeSlug(entry.name).toLowerCase() + ext);
 
       // 증분 빌드: mtime + size 기반 캐시 체크 (일반 파일만)
       const fileStat = cacheCtx ? getFileStat(srcPath) : null;
       if (cacheCtx && fileStat) {
         const cached = cacheCtx.cache[relPath];
-        if (
+        const reusable =
           cached &&
           cached.mtime === fileStat.mtime &&
           cached.size === fileStat.size &&
           (cached.destFiles || []).length > 0 &&
-          (cached.destFiles || []).every(f => fs.existsSync(f))
-        ) {
+          (cached.destFiles || []).every(f => fs.existsSync(f)) &&
+          // 이전 실행에서 docs 출력 경로를 소유했던 항목만 재사용한다.
+          // 충돌 패자(docPath=null)는 승자가 사라졌을 수 있으므로 매번 다시 평가해야
+          // 증분 결과가 전체 재빌드 결과와 같아진다.
+          !!cached.docPath;
+
+        // 캐시 hit 파일도 docs 출력 경로를 선점해야 한다. 등록하지 않으면 나중에 같은
+        // 슬러그로 수렴하는 새 파일이 캐시 산출물을 덮어써 충돌 정책이 증분 빌드에서만 뒤집힌다.
+        // 반대로 이번 순회에서 다른 소스가 그 경로를 먼저 가져갔다면 역할이 바뀐 것이므로 재처리한다.
+        if (reusable && !stats?.usedPaths?.has(cached.docPath)) {
+          registerPath(cached.docPath, relPath, '캐시', stats);
           cacheCtx.newEntries[relPath] = cached;
           if (stats) stats.skipped++;
           continue;
@@ -608,13 +736,16 @@ export function processDirectory(srcDir, docsSubDir, downloadsSubDir, relativePa
 
       try {
         let destFiles = [];
+        let docPath = null;
         {
-          const ctx = { docsSubDir, downloadsSubDir, stats, safeFileName, entry };
+          const ctx = { docsSubDir, downloadsSubDir, stats, safeFileName, entry, claimedDocPath: null };
           destFiles = dispatch(ext, srcPath, relPath, ctx);
+          docPath = ctx.claimedDocPath;
         }
 
         if (cacheCtx && fileStat) {
-          cacheCtx.newEntries[relPath] = { ...fileStat, destFiles };
+          // docPath: 이 소스가 소유한 docs 출력 경로 (충돌 패자는 null)
+          cacheCtx.newEntries[relPath] = { ...fileStat, destFiles, docPath };
         }
       } catch (err) {
         if (stats) stats.errors.push({ file: relPath, message: err.message });
@@ -634,7 +765,7 @@ register({
   match: (ext) => FILE_EXTENSIONS.MARKDOWN.includes(ext),
   process: (srcPath, relPath, ctx) => {
     const destPath = path.join(ctx.docsSubDir, ctx.safeFileName);
-    if (registerPath(destPath, relPath, '파일', ctx.stats)) {
+    if (claimDocPath(ctx, destPath, relPath, '파일')) {
       return processMarkdownFile(srcPath, destPath, ctx.stats);
     }
     return [];
@@ -644,14 +775,25 @@ register({
 register({
   name: 'image',
   match: (ext) => FILE_EXTENSIONS.IMAGE.includes(ext),
-  process: (srcPath, relPath, ctx) => processImageFile(srcPath, relPath, ctx.stats),
+  process: (srcPath, relPath, ctx) => {
+    // 래퍼 마크다운도 markdown 과 동일한 충돌 정책(선점 우선, 이후 건너뜀)을 적용.
+    // 단, 충돌해도 원본 다운로드는 그대로 복사해 /downloads 링크가 깨지지 않게 한다.
+    if (claimDocPath(ctx, getImageDocPath(relPath, ctx.docsSubDir), relPath, '이미지')) {
+      return processImageFile(srcPath, relPath, ctx.stats, ctx.docsSubDir);
+    }
+    return copyDownloadOnly(srcPath, ctx.downloadsSubDir, ctx.entry.name, relPath, ctx.stats);
+  },
 });
 
 register({
   name: 'html',
   match: (ext) => FILE_EXTENSIONS.HTML.includes(ext),
-  process: (srcPath, relPath, ctx) =>
-    processHtmlFile(srcPath, ctx.docsSubDir, ctx.downloadsSubDir, relPath, ctx.stats),
+  process: (srcPath, relPath, ctx) => {
+    if (claimDocPath(ctx, getWrapperDocPath(ctx.docsSubDir, ctx.entry.name), relPath, 'HTML')) {
+      return processHtmlFile(srcPath, ctx.docsSubDir, ctx.downloadsSubDir, relPath, ctx.stats);
+    }
+    return copyDownloadOnly(srcPath, ctx.downloadsSubDir, ctx.entry.name, relPath, ctx.stats);
+  },
 });
 
 register({
@@ -660,7 +802,7 @@ register({
   process: (srcPath, relPath, ctx) => {
     const destPath = path.join(ctx.docsSubDir, sanitizeSlug(ctx.entry.name).toLowerCase() + '.md');
     if (ctx.stats) ctx.stats.byType.textNoExt++;
-    if (registerPath(destPath, relPath, '파일', ctx.stats)) {
+    if (claimDocPath(ctx, destPath, relPath, '파일')) {
       return isLikelyMarkdown(srcPath)
         ? processMarkdownFile(srcPath, destPath, ctx.stats)
         : processTextNoExtFile(srcPath, destPath, ctx.stats);
@@ -672,5 +814,10 @@ register({
 register({
   name: 'asset',
   match: () => true,  // fallback: 위 핸들러에서 매칭되지 않은 모든 파일
-  process: (srcPath, relPath, ctx) => processAssetFile(srcPath, relPath, ctx.docsSubDir, ctx.stats),
+  process: (srcPath, relPath, ctx) => {
+    if (claimDocPath(ctx, getWrapperDocPath(ctx.docsSubDir, ctx.entry.name), relPath, '첨부')) {
+      return processAssetFile(srcPath, relPath, ctx.docsSubDir, ctx.stats);
+    }
+    return copyDownloadOnly(srcPath, ctx.downloadsSubDir, ctx.entry.name, relPath, ctx.stats);
+  },
 });
