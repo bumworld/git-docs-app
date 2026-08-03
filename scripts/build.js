@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import Database from 'better-sqlite3';
 import { runPrebuild } from './prebuild.js';
+import { PrebuildError } from './prebuild/utils.js';
 import { PATHS } from '../config/constants.js';
 import { loadGitdocsConfig } from './prebuild/config.js';
 import { runHooks } from './build-hooks.js';
@@ -202,7 +203,10 @@ export async function runBuild() {
     logParts.push('[Build] Build FAILED:');
     logParts.push(errorOutput.trim());
 
-    const failedFiles = extractFailedFiles(errorOutput);
+    // prebuild 는 실패한 파일 목록을 구조화해 전달하므로 로그 정규식 추출보다 정확하다
+    const failedFiles = err instanceof PrebuildError
+      ? [...new Set(err.errors.map(e => e.file).filter(Boolean))].slice(0, 100)
+      : extractFailedFiles(errorOutput);
     if (failedFiles.length > 0) {
       logParts.push(`\n[Build] Failed files (${failedFiles.length}${failedFiles.length >= 100 ? '+' : ''}):`);
       failedFiles.forEach(f => logParts.push(`  - ${f}`));

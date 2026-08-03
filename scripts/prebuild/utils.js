@@ -13,6 +13,27 @@ export class SlugError extends Error {
 }
 
 /**
+ * 파일 처리(I/O) 오류로 prebuild 를 중단시키는 오류.
+ *
+ * processor 들은 개별 파일 오류를 stats.errors 에 모으고 계속 진행한다. 그대로 두면
+ * 일부 문서가 누락된 채 빌드가 "성공"으로 기록되므로, 순회가 끝난 뒤 오류가 하나라도
+ * 있으면 이 오류를 던져 빌드를 실패시킨다.
+ *
+ * @param {Array<{ file: string, message: string }>} errors 처리 실패 목록
+ */
+export class PrebuildError extends Error {
+  constructor(errors = []) {
+    super(
+      `[Prebuild] 파일 처리 오류 ${errors.length}개로 빌드를 중단합니다.\n` +
+      errors.map(e => `  - ${e.file} → ${e.message}`).join('\n')
+    );
+    this.name = 'PrebuildError';
+    this.count = errors.length;
+    this.errors = errors;
+  }
+}
+
+/**
  * Sanitize a string for use in URL slugs.
  * Keeps: alphanumeric, Korean/CJK/Unicode letters, hyphens, underscores
  * Removes: dots, ()[]{}#&+%@!;,='"`~$^|?*<>:\

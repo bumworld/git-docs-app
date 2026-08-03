@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { PATHS, IGNORE_FILES } from '../config/constants.js';
-import { generateTitle, sanitizeDirName, SlugError } from './prebuild/utils.js';
+import { generateTitle, sanitizeDirName, SlugError, PrebuildError } from './prebuild/utils.js';
 import { processDirectory, createStats, collectSlugErrors } from './prebuild/processors.js';
 import { generateSidebarConfig } from './prebuild/sidebar.js';
-import { loadCache, saveCache, CACHE_SCHEMA_VERSION } from './prebuild/cache.js';
+import { loadCache, saveCache, invalidateCache, CACHE_SCHEMA_VERSION } from './prebuild/cache.js';
 import { loadGitdocsConfig } from './prebuild/config.js';
 
 export function runPrebuild() {
@@ -85,6 +85,32 @@ title: "Welcome"
   const stats = createStats();
   processDirectory(PATHS.SOURCE, PATHS.DOCS, PATHS.DOWNLOADS, '', stats, cacheCtx, gitdocsConfig);
 
+  // 파일 처리(I/O) 오류는 문서 누락으로 이어지므로 빌드 실패로 승격한다.
+  // 반드시 "삭제 정리 · 캐시 저장 · last-source 기록 · index/sidebar 생성" 이전에 중단해야 한다.
+  //  - 읽기 실패한 기존 파일이 newEntries 에 없어 "삭제된 소스"로 오인, 산출물이 지워지는 것 방지
+  //  - 실패 상태가 증분 캐시에 굳어 다음 실행에서 재처리되지 않는 것 방지
+  //  - 부분 상태의 sidebar/index 가 커밋되는 것 방지
+  // (충돌 스킵 경고와 slug 오류는 기존 정책 그대로 — 여기서 다루는 건 stats.errors 뿐)
+  if (stats.errors.length > 0) {
+    console.error(`[Prebuild] 오류 ${stats.errors.length}개:`);
+    stats.errors.forEach(e => console.error(`[Prebuild]   - ${e.file} → ${e.message}`));
+
+    // 실패한 실행의 캐시를 저장하지 않는 것만으로는 부족하다. 증분 판정은 소스의 mtime/size 와
+    // 목적 파일의 "존재 여부"만 보므로, 쓰다 만 산출물이 남아 있으면 다음 실행이 cache hit 를
+    // 내어 손상된 파일이 그대로 굳는다. 기존 캐시를 무효화해 다음 실행이 첫 실행처럼
+    // 전체 재처리하도록 만들어 복구를 보장한다. (실패는 드물고, 대가는 전체 재빌드 1회)
+    if (invalidateCache(PATHS.PREBUILD_CACHE)) {
+      console.error('[Prebuild] 증분 캐시를 무효화했습니다 — 다음 빌드는 전체 재처리됩니다.');
+    } else {
+      console.error(
+        `[Prebuild] 증분 캐시를 무효화하지 못했습니다: ${PATHS.PREBUILD_CACHE}\n` +
+        '[Prebuild] 다음 빌드가 손상된 산출물을 재사용할 수 있습니다. 이 파일을 수동으로 삭제한 뒤 다시 빌드하세요.'
+      );
+    }
+
+    throw new PrebuildError(stats.errors);
+  }
+
   // 삭제된 소스 파일에 대응하는 dest 파일 제거
   // 단, 이번 실행에서 살아있는 소스가 소유한 산출물은 지우지 않는다.
   // (슬러그 충돌로 두 소스가 같은 출력 경로를 거쳐간 경우 남은 문서가 사라지는 것을 방지)
@@ -153,8 +179,8 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
 
   generateSidebarConfig(gitdocsConfig);
 
-  // 처리 결과 요약 로그
-  const { byType, largeFiles, longPaths, errors, collisions } = stats;
+  // 처리 결과 요약 로그 (오류가 있으면 위에서 이미 중단되었으므로 여기선 경고만 남는다)
+  const { byType, largeFiles, longPaths, collisions } = stats;
   console.log(`[Prebuild] 처리 완료 — 처리:${stats.processed} 스킵:${stats.skipped} 삭제:${deletedCount} (md:${byType.markdown} html:${byType.html} img:${byType.image} asset:${byType.asset} txt-noext:${byType.textNoExt} static:${byType.static})`);
 
   if (collisions.length > 0) {
@@ -170,11 +196,6 @@ ${listItems ? '## Contents\n\n' + listItems : 'Navigate using the sidebar.'}
   if (longPaths.length > 0) {
     console.warn(`[Prebuild] 경로가 긴 파일 ${longPaths.length}개:`);
     longPaths.forEach(f => console.warn(`[Prebuild]   - ${f} (${f.length}자)`));
-  }
-
-  if (errors.length > 0) {
-    console.error(`[Prebuild] 오류 ${errors.length}개:`);
-    errors.forEach(e => console.error(`[Prebuild]   - ${e.file} → ${e.message}`));
   }
 
   return true;

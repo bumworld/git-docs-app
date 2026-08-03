@@ -37,6 +37,34 @@ export function saveCache(cachePath, files, sourceDir) {
   }
 }
 
+/**
+ * 증분 캐시를 무효화한다 (실패한 prebuild 의 부분 산출물이 다음 실행에서 cache hit 로
+ * 재사용되는 것을 막기 위함).
+ *
+ * 삭제가 막히는 환경(권한, 파일 락 등)을 대비해 2단계로 시도한다.
+ *   1) 파일 삭제 → 다음 loadCache 가 빈 캐시를 반환
+ *   2) 내용 파괴 → 다음 loadCache 의 JSON 파싱이 실패해 빈 캐시로 폴백
+ * 둘 다 실패하면 false 를 반환한다 (호출부가 운영자에게 알린다).
+ *
+ * @returns {boolean} 무효화 성공 여부
+ */
+export function invalidateCache(cachePath) {
+  if (!fs.existsSync(cachePath)) return true;
+  try {
+    fs.removeSync(cachePath);
+    return true;
+  } catch (err) {
+    console.warn(`[Prebuild] 캐시 삭제 실패, 내용 파괴로 재시도: ${err.message}`);
+  }
+  try {
+    fs.writeFileSync(cachePath, '');
+    return true;
+  } catch (err) {
+    console.error(`[Prebuild] 캐시 무효화 실패: ${err.message}`);
+    return false;
+  }
+}
+
 export function getFileStat(filePath) {
   try {
     const s = fs.statSync(filePath);
