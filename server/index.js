@@ -12,6 +12,7 @@ import buildRoutes, { setBuildRunner } from './routes/build.js';
 import userRoutes from './routes/user.js';
 import sseRoutes, { setSSEBuildRunner } from './sse/index.js';
 import { requireAuth } from './middleware/requireAuth.js';
+import { buildStatusPage, sendBuildStatus, resolveBuildState, isDistReady } from './middleware/buildStatus.js';
 import { createBuildRunner } from '../scripts/watcher.js';
 import { PATHS, SESSION } from '../config/constants.js';
 import { setDownloadSecurityHeaders } from '../config/security.js';
@@ -212,34 +213,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Building page - shown when a build is in progress or dist is empty
-const BUILDING_HTML = `<!DOCTYPE html>
-<html style="background:#0f172a"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>Building...</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;min-height:100dvh}
-.spinner{width:48px;height:48px;border:4px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-h1{font-size:1.5rem;margin-bottom:0.5rem}
-p{color:#94a3b8;font-size:0.9rem}
-</style>
-<script>setTimeout(()=>location.reload(),3000)</script>
-</head><body style="background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center"><div class="card" style="text-align:center;padding:3rem"><div class="spinner"></div><h1>Building wiki...</h1><p>Page will refresh automatically.</p></div></body></html>`;
-
-function serveBuildingPage(req, res, next) {
-  // Skip API and static asset requests
-  if (req.path.startsWith('/api/') || req.path.startsWith('/_assets/') || req.path.startsWith('/admin')) {
-    return next();
-  }
-  const distEmpty = !fs.existsSync(PATHS.DIST) || fs.readdirSync(PATHS.DIST).length === 0;
-  if (distEmpty) {
-    return res.send(BUILDING_HTML);
-  }
-  next();
-}
-
 // Test-only login bypass - must be BEFORE the requireAuth middleware
 if (process.env.NODE_ENV === 'test') {
   app.get('/test-login', (req, res) => {
@@ -263,7 +236,7 @@ if (process.env.NODE_ENV === 'test') {
 
 // Wiki content (dist/) - requires authentication
 // Set no-cache for HTML so browsers always revalidate after new builds
-app.use('/', requireAuth, serveBuildingPage, express.static(PATHS.DIST, {
+app.use('/', requireAuth, buildStatusPage, express.static(PATHS.DIST, {
   extensions: ['html'],
   setHeaders: (res, filePath) => {
     const relativePath = path.relative(PATHS.DIST, filePath);
@@ -277,13 +250,14 @@ app.use('/', requireAuth, serveBuildingPage, express.static(PATHS.DIST, {
 }));
 
 // Fallback for SPA-like routes within dist
-app.use('/', requireAuth, serveBuildingPage, (req, res) => {
+app.use('/', requireAuth, buildStatusPage, (req, res) => {
   const indexPath = path.join(PATHS.DIST, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.set('Cache-Control', 'no-store');
     res.sendFile(indexPath);
   } else {
-    res.send(BUILDING_HTML);
+    // buildStatusPage 가 통과시킨 경로(/admin 등) 또는 판정 직후 dist 가 사라진 경우
+    sendBuildStatus(res, resolveBuildState({ distPath: PATHS.DIST, buildRunner: app.locals.buildRunner }));
   }
 });
 
@@ -303,10 +277,10 @@ app.listen(PORT, () => {
   setSSEBuildRunner(buildRunner);
   buildRunner.startWatching();
 
-  // Run initial build if dist is empty
-  const distFiles = fs.existsSync(PATHS.DIST) ? fs.readdirSync(PATHS.DIST) : [];
-  if (distFiles.length === 0) {
-    console.log('[Server] dist/ is empty, triggering initial build...');
+  // Run initial build if dist has no servable entry point
+  // (파일 개수가 아니라 index.html 존재로 판정 — .DS_Store 등 잔재 파일 오인 방지)
+  if (!isDistReady(PATHS.DIST)) {
+    console.log('[Server] dist/index.html not found, triggering initial build...');
     buildRunner.triggerBuild('startup', 'system');
   }
 });

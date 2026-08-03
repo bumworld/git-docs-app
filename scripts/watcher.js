@@ -10,10 +10,18 @@ import {
 } from '../server/db.js';
 import { emitBuildStart, emitBuildComplete } from '../server/sse/channels/build.js';
 
-export function createBuildRunner() {
+/**
+ * @param {object} [deps] 테스트용 의존성 주입
+ * @param {function} [deps.runBuild] 빌드 실행 함수 (기본: scripts/build.js 의 runBuild)
+ */
+export function createBuildRunner(deps = {}) {
+  const runBuildFn = deps.runBuild || runBuild;
   let building = false;
   let pendingBuild = null;
   let debounceTimer = null;
+  // 마지막 빌드 결과 { success, finishedAt } — dist 가 없을 때 서버가
+  // "빌드 중"과 "빌드 실패"를 구분(무한 리로드 방지)하는 데 사용한다.
+  let lastResult = null;
 
   async function executeBuild(triggerType = 'manual', triggeredBy = 'system') {
     if (building) {
@@ -39,7 +47,7 @@ export function createBuildRunner() {
     let buildDurationMs = 0;
 
     try {
-      const result = await runBuild();
+      const result = await runBuildFn();
       buildSuccess = result.success;
       buildDurationMs = result.durationMs;
       if (buildId) {
@@ -57,6 +65,9 @@ export function createBuildRunner() {
         try { updateBuildFailed(buildId, err.message, 0, []); } catch (e) { /* ignore */ }
       }
     } finally {
+      // 결과 기록 → building 해제 순서 유지:
+      // 소비자가 isBuilding()===false 를 본 시점에는 반드시 결과가 존재해야 한다.
+      lastResult = { success: buildSuccess, finishedAt: Date.now() };
       building = false;
 
       // SSE: 빌드 완료 이벤트
@@ -132,5 +143,6 @@ export function createBuildRunner() {
     triggerBuild: (triggerType, triggeredBy) => executeBuild(triggerType || 'manual', triggeredBy || 'system'),
     startWatching,
     isBuilding: () => building,
+    getLastResult: () => lastResult,
   };
 }
