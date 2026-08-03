@@ -12,6 +12,7 @@ import buildRoutes, { setBuildRunner } from './routes/build.js';
 import userRoutes from './routes/user.js';
 import sseRoutes, { setSSEBuildRunner } from './sse/index.js';
 import { requireAuth } from './middleware/requireAuth.js';
+import sameOrigin from './middleware/sameOrigin.js';
 import { buildStatusPage, sendBuildStatus, resolveBuildState, isDistReady } from './middleware/buildStatus.js';
 import { createBuildRunner } from '../scripts/watcher.js';
 import { PATHS, SESSION } from '../config/constants.js';
@@ -131,6 +132,10 @@ app.get('/pending', (req, res) => {
     res.send('<h1>Access Pending</h1><p>Your account is awaiting admin approval.</p><a href="/auth/logout">Logout</a>');
   }
 });
+
+// /api 변경 요청 Origin 검사 (CSRF 심층 방어) — 모든 /api 라우터보다 먼저 설치한다.
+// build/user/sse/admin API 의 POST/PUT/PATCH/DELETE 를 한 곳에서 덮는다.
+app.use('/api', sameOrigin);
 
 // API: site settings (public, for header/footer rendering)
 app.get('/api/settings', (req, res) => {

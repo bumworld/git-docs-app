@@ -540,6 +540,7 @@ DEV_MODE=true npm run dev
 | `SESSION_SECRET` | `change-me-in-production` | Yes (production) | Session encryption key |
 | `PORT` | `8080` | No | Host port mapping (Docker) |
 | `DEV_MODE` | `false` | No | Bypass auth (dev only) |
+| `ALLOWED_ORIGINS` | *(none)* | No | Comma-separated origins (`scheme://host[:port]`) allowed to send state-changing `/api` requests. Defaults to the request's own origin. |
 
 ### Security Notes
 
@@ -547,6 +548,7 @@ DEV_MODE=true npm run dev
 - Never commit secrets to git
 - Rotate `SESSION_SECRET` periodically
 - Use `DEV_MODE=true` only for local development
+- `/api` POST/PUT/PATCH/DELETE requests are rejected (403) when the `Origin` header does not match the site origin. Requests without an `Origin` header (curl, server-to-server) are still allowed. Behind a reverse proxy that rewrites the `Host` header, set `ALLOWED_ORIGINS` to the public origin.
 
 ---
 

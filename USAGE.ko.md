@@ -540,6 +540,7 @@ DEV_MODE=true npm run dev
 | `SESSION_SECRET` | `change-me-in-production` | 예 (프로덕션) | 세션 암호화 키 |
 | `PORT` | `8080` | 아니오 | 호스트 포트 매핑 (Docker) |
 | `DEV_MODE` | `false` | 아니오 | 인증 우회 (개발 전용) |
+| `ALLOWED_ORIGINS` | *(없음)* | 아니오 | `/api` 변경 요청을 허용할 origin 목록 (`scheme://host[:port]`, 콤마 구분). 미설정 시 요청 자신의 origin 을 사용 |
 
 ### 보안 참고사항
 
@@ -547,6 +548,7 @@ DEV_MODE=true npm run dev
 - 비밀 정보를 git에 커밋하지 마세요
 - `SESSION_SECRET`를 주기적으로 교체
 - 로컬 개발에만 `DEV_MODE=true` 사용
+- `/api` 의 POST/PUT/PATCH/DELETE 는 `Origin` 헤더가 사이트 origin 과 다르면 403 으로 차단됩니다. `Origin` 이 없는 요청(curl, 서버간 호출)은 통과합니다. `Host` 헤더를 바꾸는 리버스 프록시 뒤에서는 `ALLOWED_ORIGINS` 에 공개 origin 을 설정하세요.
 
 ---
 

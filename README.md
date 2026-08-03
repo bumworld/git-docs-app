@@ -128,6 +128,7 @@ The wiki rebuilds automatically when files change. Sidebar navigation is generat
 | `PORT` | `8080` | Host-side port mapping (docker compose) |
 | `SESSION_SECRET` | `change-me-in-production` | Session encryption key |
 | `DEV_MODE` | `false` | Set `true` to bypass authentication (for local dev) |
+| `ALLOWED_ORIGINS` | *(empty)* | Comma-separated origins allowed to send `/api` state-changing requests. Leave empty to use the request's own origin (protocol + `Host` header). Set it when a reverse proxy rewrites `Host`. |
 
 ## Content Types
 
