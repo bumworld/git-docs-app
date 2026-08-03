@@ -15,7 +15,7 @@
   color: var(--ui-text-muted);
   border-bottom: 2px solid transparent;
   font-size: 0.9rem;
-  transition: all 0.2s;
+  transition: color var(--ui-transition-fast), border-color var(--ui-transition-fast);
   background: none;
   border-top: none; border-left: none; border-right: none;
 }
@@ -95,7 +95,7 @@
   color: var(--ui-text); font-size: 0.9rem; font-family: inherit;
 }
 .form-group input:focus, .form-group textarea:focus {
-  outline: none; border-color: var(--ui-accent);
+  border-color: var(--ui-accent);
 }
 .form-actions { margin-top: 1.5rem; }
 
@@ -161,7 +161,7 @@
   font-size: 0.8rem;
   cursor: pointer;
 }
-.build-filters select:focus { outline: none; border-color: var(--ui-accent); }
+.build-filters select:focus { border-color: var(--ui-accent); }
 
 /* ── Build cards ── */
 .build-list { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -304,7 +304,7 @@
   font-size: 0.9rem;
   font-family: inherit;
 }
-.message-form input:focus { outline: none; border-color: var(--ui-accent); }
+.message-form input:focus { border-color: var(--ui-accent); }
 
 .dm-form {
   display: flex;
@@ -324,7 +324,7 @@
   font-size: 0.8rem;
   font-family: inherit;
 }
-.dm-input:focus { outline: none; border-color: var(--ui-accent); }
+.dm-input:focus { border-color: var(--ui-accent); }
 
 /* ── Whitelist ── */
 .add-email-form {
@@ -363,6 +363,10 @@
   background: var(--ui-surface); border: 1px solid var(--ui-border);
   border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
 }
+.whitelist-info p { color: var(--ui-text-muted); font-size: 0.875rem; line-height: 1.6; }
+.section-bar .section-title { margin-bottom: 0; }
+.dashboard-online-list { margin-bottom: 2rem; }
+.section-title-spaced { margin-top: 2rem; }
 
 /* ── Mobile (공용 768px 브레이크포인트) ── */
 @media (max-width: 768px) {

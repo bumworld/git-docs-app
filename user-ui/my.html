@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" style="background:#0f172a">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
       위키로 돌아가기
     </a>
     <span class="topbar-title">내 페이지</span>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem">
+    <div class="topbar-actions">
       <a href="/auth/logout" class="btn">로그아웃</a>
     </div>
   </div>
@@ -39,7 +39,7 @@
     <!-- 북마크 -->
     <div class="section">
       <div class="section-header">
-        <span style="font-size:1rem">⭐</span>
+        <span class="section-icon">⭐</span>
         <span class="section-title">북마크</span>
         <span class="section-count" id="bm-count">0</span>
       </div>
@@ -49,7 +49,7 @@
     <!-- 최근 본 페이지 -->
     <div class="section">
       <div class="section-header">
-        <span style="font-size:1rem">🕐</span>
+        <span class="section-icon">🕐</span>
         <span class="section-title">최근 본 페이지</span>
         <span class="section-count" id="his-count">0</span>
         <button class="section-action" id="clear-history-btn">전체 삭제</button>

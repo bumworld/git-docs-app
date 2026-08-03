@@ -4,12 +4,13 @@
    ============================================================ */
 
 :root {
+  color-scheme: dark;
   --ui-bg: #0f172a;
   --ui-surface: #1e293b;
   --ui-surface-alt: #252f3f;
   --ui-border: #334155;
   --ui-border-strong: #475569;
-  --ui-text-dim: #64748b;
+  --ui-text-dim: #94a3b8;
   --ui-text-muted: #94a3b8;
   --ui-text-bright: #cbd5e1;
   --ui-text: #e2e8f0;
@@ -35,6 +36,16 @@
   --ui-blue-fg: #93c5fd;
   --ui-accent: #3b82f6;
   --ui-accent-bright: #60a5fa;
+  --ui-focus: #93c5fd;
+  --ui-radius-sm: 4px;
+  --ui-radius-md: 6px;
+  --ui-radius-lg: 8px;
+  --ui-space-1: 0.25rem;
+  --ui-space-2: 0.5rem;
+  --ui-space-3: 0.75rem;
+  --ui-space-4: 1rem;
+  --ui-shadow-sm: 0 2px 8px rgb(0 0 0 / 20%);
+  --ui-transition-fast: 150ms ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,6 +56,13 @@ body {
   color: var(--ui-text);
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+a, button, input, textarea, select { font: inherit; }
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
 }
 
 /* ── Top bar ── */
@@ -69,7 +87,7 @@ body {
   color: var(--ui-text-muted);
   text-decoration: none;
   font-size: 0.875rem;
-  transition: color 0.2s;
+  transition: color var(--ui-transition-fast);
 }
 .topbar-links a:hover { color: var(--ui-text); }
 
@@ -80,7 +98,7 @@ body {
 .badge {
   display: inline-block;
   padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
+  border-radius: var(--ui-radius-lg);
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -104,13 +122,13 @@ body {
 .btn {
   padding: 0.35rem 0.7rem;
   border: 1px solid var(--ui-border-strong);
-  border-radius: 6px;
+  border-radius: var(--ui-radius-md);
   background: transparent;
   color: var(--ui-text);
   cursor: pointer;
   font-size: 0.78rem;
   font-family: inherit;
-  transition: all 0.15s;
+  transition: background-color var(--ui-transition-fast), border-color var(--ui-transition-fast), color var(--ui-transition-fast);
   white-space: nowrap;
   text-decoration: none;
   display: inline-block;
@@ -130,7 +148,7 @@ body {
 /* ── Toast ── */
 .toast {
   position: fixed; bottom: 1.5rem; right: 1.5rem;
-  padding: 0.75rem 1.5rem; border-radius: 8px;
+  padding: 0.75rem 1.5rem; border-radius: var(--ui-radius-lg);
   font-size: 0.875rem; z-index: 100; transition: opacity 0.3s;
 }
 .toast-success { background: var(--ui-success-bg); color: var(--ui-success-fg); border: 1px solid var(--ui-success-border); }
@@ -143,4 +161,13 @@ body {
 @media (max-width: 768px) {
   .container { padding: 1rem; }
   .topbar    { padding: 0.75rem 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

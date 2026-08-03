@@ -1,5 +1,10 @@
 /* ===== Print Styles - 본문 스타일 완전 보존 ===== */
 @media print {
+  :root {
+    --print-text-muted: #595959;
+    --print-border: #d6d6d6;
+    --print-surface: #f7f7f7;
+  }
   /* 페이지 설정 */
   @page {
     margin: 1.5cm;
@@ -61,7 +66,7 @@
   .sl-markdown-content a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 0.85em;
-    color: #666 !important;
+    color: var(--print-text-muted) !important;
     word-break: break-all;
   }
 
@@ -80,8 +85,8 @@
     content: "[Video: " attr(data-src) "]";
     display: block;
     padding: 1rem;
-    border: 1px solid #ddd;
-    background: #f8f8f8;
+    border: 1px solid var(--print-border);
+    background: var(--print-surface);
     font-style: italic;
   }
 }

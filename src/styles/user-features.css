@@ -27,9 +27,9 @@
 }
 
 .toc-bookmark-btn.bookmarked {
-  color: #f59e0b;
-  border-color: #92400e;
-  background: rgba(120, 53, 15, 0.12);
+  color: var(--sl-color-orange-high);
+  border-color: var(--sl-color-orange);
+  background: var(--sl-color-orange-low);
 }
 
 .toc-bookmark-btn.bookmarked:hover {
@@ -74,7 +74,7 @@
   }
 
   .toc-bookmark-btn-mobile.bookmarked {
-    color: #f59e0b;
+    color: var(--sl-color-orange-high);
   }
 }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#0f172a">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,30 +31,30 @@
       <div class="stats" id="stats"></div>
 
       <div class="section-bar">
-        <h2 class="section-title" style="margin-bottom:0;">Online Users</h2>
+        <h2 class="section-title">Online Users</h2>
         <div class="online-badges">
           <span class="badge badge-active" id="onlineUserCount" title="Users">0 users</span>
           <span class="badge badge-running" id="onlineConnCount" title="Total connections">0 connections</span>
         </div>
       </div>
-      <div id="onlineUsers" class="user-list" style="margin-bottom:2rem;"></div>
+      <div id="onlineUsers" class="user-list dashboard-online-list"></div>
 
       <div class="section-bar">
-        <h2 class="section-title" style="margin-bottom:0;">Send Message</h2>
+        <h2 class="section-title">Send Message</h2>
       </div>
       <div class="message-form">
         <input type="text" id="adminMessage" placeholder="Enter message to broadcast to all users..." maxlength="500">
         <button class="btn btn-primary" id="sendMsgBtn" onclick="window.adminModules.sse.sendAdminMessage()">Send</button>
       </div>
 
-      <h2 class="section-title" style="margin-top:2rem;">Pending Requests</h2>
+      <h2 class="section-title section-title-spaced">Pending Requests</h2>
       <div id="pendingList" class="user-list"></div>
     </div>
 
     <!-- Users Tab -->
     <div id="tab-users" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-users" tabindex="0">
       <div class="section-bar">
-        <h2 class="section-title" style="margin-bottom:0;">All Users</h2>
+        <h2 class="section-title">All Users</h2>
       </div>
       <div id="usersList" class="user-list"></div>
     </div>
@@ -62,7 +62,7 @@
     <!-- Builds Tab -->
     <div id="tab-builds" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-builds" tabindex="0">
       <div class="section-bar">
-        <h2 class="section-title" style="margin-bottom:0;">Build Management</h2>
+        <h2 class="section-title">Build Management</h2>
         <button class="btn btn-primary" id="buildRunBtn" onclick="window.adminModules.builds.triggerBuildFromTab()">Run Build</button>
       </div>
       <div id="buildProgress" class="build-progress" style="display:none">
@@ -91,7 +91,7 @@
     <!-- Email Whitelist Tab -->
     <div id="tab-whitelist" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-whitelist" tabindex="0">
       <div class="section-bar">
-        <h2 class="section-title" style="margin-bottom:0;">Pre-registered Emails</h2>
+        <h2 class="section-title">Pre-registered Emails</h2>
         <button class="btn btn-primary" onclick="window.adminModules.whitelist.toggleAddEmailForm()">Add Email</button>
       </div>
 
@@ -110,8 +110,8 @@
         </div>
       </div>
 
-      <div class="whitelist-info" style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:1rem;margin-bottom:1.5rem">
-        <p style="color:#94a3b8;font-size:0.875rem;line-height:1.6;margin:0">
+      <div class="whitelist-info">
+        <p>
           Users who register with whitelisted email addresses will be automatically approved with 'user' role.
           This bypasses the manual approval process.
         </p>

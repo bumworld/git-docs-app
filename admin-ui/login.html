@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#0f172a">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +8,21 @@
   <link rel="stylesheet" href="/ui-assets/base.css">
   <style>
     .login-card {
-      border-radius: 12px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      background: var(--ui-surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--ui-radius-lg);
       max-width: 400px;
       width: 90%;
     }
     .login-card h1 {
       font-size: 1.75rem;
       margin-bottom: 0.5rem;
-      color: #f8fafc;
+      color: var(--ui-text-strong);
     }
     .login-card .subtitle {
-      color: #94a3b8;
+      color: var(--ui-text-muted);
       margin-bottom: 2rem;
       font-size: 0.9rem;
     }
@@ -27,35 +31,37 @@
       align-items: center;
       gap: 0.75rem;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--ui-radius-lg);
       padding: 0.875rem 2rem;
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.2s;
+      transition: background-color var(--ui-transition-fast);
       width: 100%;
       justify-content: center;
     }
+    .google-btn { background: #4285f4; color: #fff; }
     .google-btn:hover { background: #3367d6; }
     .google-btn svg { width: 20px; height: 20px; }
     .error {
-      background: #7f1d1d;
-      border: 1px solid #991b1b;
-      border-radius: 8px;
+      background: var(--ui-danger-bg);
+      border: 1px solid var(--ui-danger-border);
+      border-radius: var(--ui-radius-lg);
       padding: 0.75rem;
       margin-bottom: 1.5rem;
       font-size: 0.875rem;
-      color: #fecaca;
+      color: var(--ui-danger-fg);
     }
+    body { display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
-<body style="display:flex;align-items:center;justify-content:center">
-  <div class="login-card" style="background:#1e293b;border:1px solid #334155;padding:3rem 2.5rem;text-align:center">
+<body>
+  <div class="login-card">
     <h1 id="siteTitle">Git Docs</h1>
     <p class="subtitle">Sign in to access documentation</p>
     <div id="error" class="error" style="display:none;"></div>
-    <a href="/auth/google" class="google-btn" style="background:#4285f4;color:white">
+    <a href="/auth/google" class="google-btn">
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

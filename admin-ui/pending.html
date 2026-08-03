@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#0f172a">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,11 @@
   <link rel="stylesheet" href="/ui-assets/base.css">
   <style>
     .pending-card {
-      border-radius: 12px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      background: var(--ui-surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--ui-radius-lg);
       max-width: 440px;
       width: 90%;
     }
@@ -19,10 +23,10 @@
     h1 {
       font-size: 1.5rem;
       margin-bottom: 0.75rem;
-      color: #f8fafc;
+      color: var(--ui-text-strong);
     }
     p {
-      color: #94a3b8;
+      color: var(--ui-text-muted);
       line-height: 1.6;
       margin-bottom: 1.5rem;
     }
@@ -30,22 +34,25 @@
       display: inline-block;
       text-decoration: none;
       padding: 0.5rem 1.5rem;
-      border-radius: 8px;
-      transition: all 0.2s;
+      color: var(--ui-text-muted);
+      border: 1px solid var(--ui-border-strong);
+      border-radius: var(--ui-radius-lg);
+      transition: background-color var(--ui-transition-fast), color var(--ui-transition-fast);
       font-size: 0.9rem;
     }
     .logout-btn:hover {
-      background: #334155;
-      color: #e2e8f0;
+      background: var(--ui-border);
+      color: var(--ui-text);
     }
+    body { display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
-<body style="display:flex;align-items:center;justify-content:center">
-  <div class="pending-card" style="background:#1e293b;border:1px solid #334155;padding:3rem 2.5rem;text-align:center">
+<body>
+  <div class="pending-card">
     <div class="icon">&#9203;</div>
     <h1>Access Pending</h1>
     <p>Your account is awaiting administrator approval.<br>You will be able to access the documentation once an admin approves your request.</p>
-    <a href="/auth/logout" class="logout-btn" style="color:#94a3b8;border:1px solid #475569">Sign out</a>
+    <a href="/auth/logout" class="logout-btn">Sign out</a>
   </div>
 </body>
 </html>
