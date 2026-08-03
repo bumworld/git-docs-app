@@ -567,7 +567,7 @@ Require authentication (active user).
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/rebuild` | Trigger manual wiki rebuild |
+| `GET` | `/api/status` | Current build status |
 
 ### Admin Endpoints
 
@@ -575,6 +575,7 @@ Require admin role.
 
 | Method | Path | Description |
 |--------|------|-------------|
+| `POST` | `/api/rebuild` | Trigger manual wiki rebuild |
 | `GET` | `/api/admin/users` | List all users |
 | `PUT` | `/api/admin/users/:id/status` | Update user status |
 | `PUT` | `/api/admin/users/:id/role` | Update user role |
@@ -597,7 +598,7 @@ curl -X PUT http://localhost:8080/api/admin/users/123/status \
 ### Wiki not rebuilding
 
 1. Check file watcher logs: `docker logs wiki`
-2. Manually trigger rebuild: `POST /api/rebuild`
+2. Manually trigger rebuild: `POST /api/rebuild` (admin only)
 3. Restart container: `docker restart wiki`
 
 ### OAuth errors

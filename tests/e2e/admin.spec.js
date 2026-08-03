@@ -142,7 +142,7 @@ test.describe('어드민 - Builds 탭', () => {
     const status = await statusRes.json();
 
     // 빌드 중이 아닐 때만 트리거
-    if (!status.isBuilding) {
+    if (!status.building) {
       const buildRes = await page.request.post('/api/rebuild', {
         headers: { Cookie: await getSessionCookie(page) },
       });

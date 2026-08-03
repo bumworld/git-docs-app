@@ -567,7 +567,7 @@ DEV_MODE=true npm run dev
 
 | 메서드 | 경로 | 설명 |
 |--------|------|------|
-| `POST` | `/api/rebuild` | 수동 위키 재빌드 트리거 |
+| `GET` | `/api/status` | 현재 빌드 상태 |
 
 ### 관리자 엔드포인트
 
@@ -575,6 +575,7 @@ DEV_MODE=true npm run dev
 
 | 메서드 | 경로 | 설명 |
 |--------|------|------|
+| `POST` | `/api/rebuild` | 수동 위키 재빌드 트리거 (관리자 전용) |
 | `GET` | `/api/admin/users` | 모든 사용자 목록 |
 | `PUT` | `/api/admin/users/:id/status` | 사용자 상태 업데이트 |
 | `PUT` | `/api/admin/users/:id/role` | 사용자 역할 업데이트 |
@@ -597,7 +598,7 @@ curl -X PUT http://localhost:8080/api/admin/users/123/status \
 ### 위키가 재빌드되지 않음
 
 1. 파일 감시자 로그 확인: `docker logs wiki`
-2. 수동으로 재빌드 트리거: `POST /api/rebuild`
+2. 수동으로 재빌드 트리거: `POST /api/rebuild` (관리자 전용)
 3. 컨테이너 재시작: `docker restart wiki`
 
 ### OAuth 오류

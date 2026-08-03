@@ -10,7 +10,9 @@ function setBuildRunner(runner) {
   buildRunner = runner;
 }
 
-router.post('/rebuild', requireAuth, (req, res) => {
+// 수동 빌드는 서버 자원을 크게 쓰고 배포 산출물을 교체하므로 관리자만 트리거할 수 있다.
+// (호출 UI 는 admin-ui 뿐이므로 일반 사용자 화면에는 영향이 없다)
+router.post('/rebuild', requireAdmin, (req, res) => {
   if (!buildRunner) {
     return res.status(500).json({ error: 'Build runner not initialized' });
   }

@@ -268,7 +268,7 @@ Access the admin panel at `/admin` (admin users only):
 | `GET` | `/auth/google` | Public | Start Google login |
 | `GET` | `/auth/me` | Public | Current user info |
 | `GET` | `/auth/logout` | Public | Logout |
-| `POST` | `/api/rebuild` | User | Trigger wiki rebuild |
+| `POST` | `/api/rebuild` | Admin | Trigger wiki rebuild |
 | `GET` | `/api/admin/users` | Admin | List all users |
 | `PUT` | `/api/admin/users/:id/status` | Admin | Update user status |
 | `PUT` | `/api/admin/users/:id/role` | Admin | Update user role |
